@@ -4,8 +4,6 @@
 [![Project Status](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/dwc.wells)]()
 
-# dwc.wells
-
 This package allows to predict the condition
 of a drinking water well based on ML models. The models are trained
 with results from pump tests and a large set of input variables e.g.
@@ -30,9 +28,3 @@ if (! require("remotes")) {
 # Install KWB package 'dwc.wells' from GitHub
 remotes::install_github("KWB-R/dwc.wells")
 ```
-
-## Documentation
-
-Release: [https://kwb-r.github.io/dwc.wells](https://kwb-r.github.io/dwc.wells)
-
-Development: [https://kwb-r.github.io/dwc.wells/dev](https://kwb-r.github.io/dwc.wells/dev)
