@@ -24,8 +24,11 @@ Imports:
     readxl,
     rlang,
     tidyr
+<<<<<<< HEAD
 Remotes:
     github::vh-d/odbc32
+=======
+>>>>>>> 1d150ed48e2fef44804ef34f93aa3113906ca88f
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
