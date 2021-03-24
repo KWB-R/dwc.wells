@@ -1,0 +1,32 @@
+Package: dwc.wells
+Title: A Package for Condition Predictions for Drinking Water
+    Wells
+Version: 0.0.0.9000
+Authors@R: 
+    c(person(given = "Mathias",
+             family = "Riechel",
+             role = c("aut", "cre"),
+             email = "mathias.riechel@kompetenz-wasser.de",
+             comment = c(ORCID = "0000-0002-1191-5877")),
+      person(given = "Kompetenzzentrum Wasser Berlin gGmbH (KWB)",
+             role = "cph"))
+Description: This package allows to predict the condition
+    of a drinking water well based on ML models. The models are trained
+    with results from pump tests and a large set of input variables e.g.
+    the well material, the age and the number of regenerations.
+License: MIT + file LICENSE
+URL: https://github.com/KWB-R/dwc.wells
+BugReports: https://github.com/KWB-R/dwc.wells/issues
+Imports:
+    dplyr,
+    magrittr,
+    odbc32,
+    readxl,
+    rlang,
+    tidyr
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Suggests: 
+    covr
