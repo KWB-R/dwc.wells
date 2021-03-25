@@ -8,6 +8,8 @@ Authors@R:
              role = c("aut", "cre"),
              email = "mathias.riechel@kompetenz-wasser.de",
              comment = c(ORCID = "0000-0002-1191-5877")),
+      person(given = "DWC",
+             role = "fnd"),
       person(given = "Kompetenzzentrum Wasser Berlin gGmbH (KWB)",
              role = "cph"))
 Description: This package allows to predict the condition
@@ -31,4 +33,8 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Suggests: 
-    covr
+    covr,
+    ggplot2,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

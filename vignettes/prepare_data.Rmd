@@ -1,3 +1,21 @@
+---
+title: "Prepare Data"
+author: "Mathias Riechel"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Prepare Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, eval = FALSE}
 # source("C:/Users/mriech/Desktop/R_Development/RScripts/SEMA/UseCase_Berlin/1_DataPreparation/SEMA_PrepareData_Berlin.R")
 
 # links:
@@ -7,7 +25,6 @@
 # https://www.r-bloggers.com/2021/02/getting-started-with-k-means-and-tidytuesday-employment-status/
 # https://www.r-bloggers.com/2021/03/k-means-101-an-introductory-guide-to-k-means-clustering-in-r/
 
-library(dplyr)
 library(dwc.wells)
 
 
@@ -105,7 +122,7 @@ path_renamings <- file.path(kwb.utils::desktop(), "tmp/DWC/wells/renamings")
     tidyr::drop_na()
 
   # Kommentar: Es gibt Messungen zu 929 Brunnen, im Durchschnitt 40 Messwerte
-  # pro Brunnen, im Median 80 m³/h momentane Förderleistung
+  # pro Brunnen, im Median 80 m3/h momentane Foerderleistung
 
 
   # 4. drilling and surface water body information
@@ -158,7 +175,7 @@ path_renamings <- file.path(kwb.utils::desktop(), "tmp/DWC/wells/renamings")
       sema.berlin.utils::my_theme() +
       ggplot2::scale_y_continuous(breaks = scales::pretty_breaks()) +
       ggplot2::scale_x_continuous(breaks = scales::pretty_breaks()) +
-      ggplot2::labs(x = "Q_obs_median [m³/h]", y = "Frequency [-]")
+      ggplot2::labs(x = "Q_obs_median [m\u00B3/h]", y = "Frequency [-]")
     summary(df_Q_agg)
 
     ggplot2::ggsave("histogram_Ergiebigkeit_Q_obs.png", width = 4, height = 2.5, dpi = 600)
@@ -174,3 +191,5 @@ path_renamings <- file.path(kwb.utils::desktop(), "tmp/DWC/wells/renamings")
   df <- read_ms_access(path_db, "WV_GMS_TBL_GWBR")
   str(df)
   sort(colnames(df))
+
+```
