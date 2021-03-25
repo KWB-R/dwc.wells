@@ -1,6 +1,8 @@
 pandoc: 2.7.3
 pkgdown: 1.6.1
 pkgdown_sha: ~
-articles: {}
-last_built: 2021-03-24T12:10Z
+articles:
+  prepare_data: prepare_data.html
+  read_data: read_data.html
+last_built: 2021-03-25T10:08Z
 
