@@ -33,4 +33,8 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Suggests: 
-    covr
+    covr,
+    ggplot2,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
