@@ -19,14 +19,12 @@ path_renamings <- file.path(kwb.utils::desktop(), "tmp/DWC/wells/renamings")
 
 # MAIN 1: Read data ------------------------------------------------------------
 
-if (FALSE) {
-
   # 0. load renamings
-  renamings <- load_renamings_excel(file.path(path_renamings, "Parameterliste.xlsx"))
-  renamings_quality <- load_renamings_csv(file.path(path_renamings, "quality.csv"))
+  renamings <- dwc.wells::load_renamings_excel(file.path(path_renamings, "Parameterliste.xlsx"))
+  renamings_quality <- dwc.wells::load_renamings_csv(file.path(path_renamings, "quality.csv"))
 
   # 1. general well characteristics
-  df_main <- read_select_rename(path_db, "WV_GMS_TBL_GWBR", renamings)
+  df_main <- dwc.wells::read_select_rename(path_db, "WV_GMS_TBL_GWBR", renamings)
 
   # 2.  pump test data
   df_pump_tests <- read_select_rename(path_db, "WV_BRU_TBL_PUMPENTECHNDATEN", renamings)
@@ -41,11 +39,8 @@ if (FALSE) {
   #df_quality <- read_select_rename(path_db, "DB2LABOR_Daten_Kreuztabelle", renamings)
   df_quality <- read_select_rename(path_db, "DB2LABOR_Daten", renamings)
 
-}
 
 # MAIN 2: prepare data ---------------------------------------------------------
-
-if (FALSE) {
 
   # 1. general well characteristics
   str(df_main)
@@ -132,12 +127,7 @@ if (FALSE) {
                         id_cols = "id_Brunnen") %>%
     data.frame()
 
-}
-
-
 # MAIN 3: join data ------------------------------------------------------------
-
-if (FALSE) {
 
   # verknuepfen
 
@@ -148,12 +138,9 @@ if (FALSE) {
 
   str(df)
   data.frame(table(df$fil_Brunnenfunktion))
-}
 
 
 # MAIN 4: very first data analysis ---------------------------------------------
-
-if (FALSE) {
 
   # export material lists
 
@@ -187,68 +174,3 @@ if (FALSE) {
   df <- read_ms_access(path_db, "WV_GMS_TBL_GWBR")
   str(df)
   sort(colnames(df))
-
-}
-
-
-
-# Functions --------------------------------------------------------------------
-
-# load_renamings_excel
-load_renamings_excel <- function(infile,
-                                 sheet = "DATEN",
-                                 old_name_col = "Feld",
-                                 new_name_col = "Parametername-R") {
-
-  readxl::read_excel(path = infile, sheet = sheet) %>%
-    select(old_name_col, new_name_col) %>%
-    rename(old_name = old_name_col, new_name = new_name_col) %>%
-    tidyr::drop_na()
-}
-
-# load_renamings_csv
-load_renamings_csv <- function(infile) {
-  read.csv(file = infile, sep = ";", stringsAsFactors = FALSE)
-}
-
-
-# read_ms_access
-read_ms_access <- function(path_db, tbl_name) {
-
-  # start server
-  odbc32::start_server(invisible = TRUE)
-
-  # open connection
-  con <- odbc32::odbcConnectAccess2007(path_db)
-
-  # show table names
-  #odbc32::sqlTables(con, tableType = "TABLE")$TABLE_NAME
-
-  # read data from table, "as.is = TRUE" is required to adopt data formats from ms access
-  df <- odbc32::sqlFetch(con, tbl_name,  as.is = TRUE)
-
-  odbc32::stop_server()
-
-  df
-
-}
-
-
-# read_select_rename
-read_select_rename <- function(path_db, table_name, renamings) {
-
-  # read data
-  df <- read_ms_access(path_db, table_name)
-
-  # make all column names upper case
-  colnames(df) <- toupper(colnames(df))
-
-  # select defined columns in df and renamings
-  df <- df[, colnames(df) %in% renamings$old_name]
-  renamings <- renamings[renamings$old_name %in% colnames(df),]
-
-  # rename columns
-  df %>% dplyr::rename(setNames(renamings$old_name, renamings$new_name))
-
-}
-
