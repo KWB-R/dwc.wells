@@ -25,7 +25,6 @@ knitr::opts_chunk$set(
 # https://www.r-bloggers.com/2021/02/getting-started-with-k-means-and-tidytuesday-employment-status/
 # https://www.r-bloggers.com/2021/03/k-means-101-an-introductory-guide-to-k-means-clustering-in-r/
 
-library(dplyr)
 library(dwc.wells)
 
 
