@@ -59,6 +59,8 @@ read_ms_access <- function(path_db, tbl_name) {
 
   odbc32::stop_server()
 
+  stopifnot(is.data.frame(df))
+
   df
 
 }
@@ -88,7 +90,26 @@ read_select_rename <- function(path_db, tbl_name, renamings) {
   renamings <- renamings[renamings$old_name %in% colnames(df),]
 
   # rename columns
-  df %>% dplyr::rename(setNames(renamings$old_name, renamings$new_name))
+  colnames(df) <- rename_values(colnames(df), renamings)
+
+  df
+
+  # alternative version
+  # df %>% dplyr::rename(setNames(renamings$old_name, renamings$new_name))
 
 }
 
+
+# rename_values ----------------------------------------------------------------
+
+#' rename values of a character vector according to renamings table
+#'
+#' @param x character vector
+#' @param renamings data frame consisting of columns old_name' and 'new_name'
+#' @export
+#'
+rename_values <- function(x, renamings) {
+
+  renamings$new_name[match(x, renamings$old_name)]
+
+}
