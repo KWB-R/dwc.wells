@@ -6,8 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>read table from MS Access data base; select and rename columns as defined in
-renamings table ('old_name' -&gt; 'new_name') — read_select_rename • dwc.wells</title>
+<title>rename values of a character vector according to renamings table — rename_values • dwc.wells</title>
 
 
 <!-- jquery -->
@@ -40,10 +39,8 @@ renamings table ('old_name' -&gt; 'new_name') — read_select_rename • dwc.wel
 
 
 
-<meta property="og:title" content="read table from MS Access data base; select and rename columns as defined in
-renamings table ('old_name' -&gt; 'new_name') — read_select_rename" />
-<meta property="og:description" content="read table from MS Access data base; select and rename columns as defined in
-renamings table ('old_name' -&amp;gt; 'new_name')" />
+<meta property="og:title" content="rename values of a character vector according to renamings table — rename_values" />
+<meta property="og:description" content="rename values of a character vector according to renamings table" />
 
 
 
@@ -129,20 +126,17 @@ renamings table ('old_name' -&amp;gt; 'new_name')" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>read table from MS Access data base; select and rename columns as defined in
-renamings table ('old_name' -&gt; 'new_name')</h1>
+    <h1>rename values of a character vector according to renamings table</h1>
     <small class="dont-index">Source: <a href='https://github.com/KWB-R/dwc.wells/blob/master/R/functions.R'><code>R/functions.R</code></a></small>
-    <div class="hidden name"><code>read_select_rename.Rd</code></div>
+    <div class="hidden name"><code>rename_values.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>read table from MS Access data base; select and rename columns as defined in
-renamings table ('old_name' -&gt; 'new_name')</p>
+    <p>rename values of a character vector according to renamings table</p>
     </div>
 
-    <pre class="usage"><span class='fu'>read_select_rename</span><span class='op'>(</span>
-  <span class='va'>path_db</span>,
-  <span class='va'>tbl_name</span>,
+    <pre class="usage"><span class='fu'>rename_values</span><span class='op'>(</span>
+  <span class='va'>x</span>,
   <span class='va'>renamings</span>,
   old_name_col <span class='op'>=</span> <span class='st'>"old_name"</span>,
   new_name_col <span class='op'>=</span> <span class='st'>"new_name"</span>
@@ -152,16 +146,12 @@ renamings table ('old_name' -&gt; 'new_name')</p>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>path_db</th>
-      <td><p>full path to database</p></td>
-    </tr>
-    <tr>
-      <th>tbl_name</th>
-      <td><p>name of database table to be read</p></td>
+      <th>x</th>
+      <td><p>character vector</p></td>
     </tr>
     <tr>
       <th>renamings</th>
-      <td><p>name of data frame with renamings</p></td>
+      <td><p>data frame consisting of old and new names</p></td>
     </tr>
     <tr>
       <th>old_name_col</th>
