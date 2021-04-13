@@ -5,7 +5,13 @@
 \title{read table from MS Access data base; select and rename columns as defined in
 renamings table ('old_name' -> 'new_name')}
 \usage{
-read_select_rename(path_db, tbl_name, renamings)
+read_select_rename(
+  path_db,
+  tbl_name,
+  renamings,
+  old_name_col = "old_name",
+  new_name_col = "new_name"
+)
 }
 \arguments{
 \item{path_db}{full path to database}
@@ -13,6 +19,10 @@ read_select_rename(path_db, tbl_name, renamings)
 \item{tbl_name}{name of database table to be read}
 
 \item{renamings}{name of data frame with renamings}
+
+\item{old_name_col}{name of column with original variable names}
+
+\item{new_name_col}{name of column with new variable names}
 }
 \description{
 read table from MS Access data base; select and rename columns as defined in

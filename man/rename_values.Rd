@@ -4,12 +4,21 @@
 \alias{rename_values}
 \title{rename values of a character vector according to renamings table}
 \usage{
-rename_values(x, renamings)
+rename_values(
+  x,
+  renamings,
+  old_name_col = "old_name",
+  new_name_col = "new_name"
+)
 }
 \arguments{
 \item{x}{character vector}
 
-\item{renamings}{data frame consisting of columns old_name' and 'new_name'}
+\item{renamings}{data frame consisting of old and new names}
+
+\item{old_name_col}{name of column with original variable names}
+
+\item{new_name_col}{name of column with new variable names}
 }
 \description{
 rename values of a character vector according to renamings table

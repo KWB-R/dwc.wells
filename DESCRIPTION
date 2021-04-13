@@ -27,7 +27,8 @@ Imports:
     rlang,
     tidyr
 Remotes:
-    github::vh-d/odbc32
+    github::vh-d/odbc32,
+    github::kwb-r/kwb.utils
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

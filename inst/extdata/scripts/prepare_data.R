@@ -7,158 +7,183 @@
 # https://www.r-bloggers.com/2021/02/getting-started-with-k-means-and-tidytuesday-employment-status/
 # https://www.r-bloggers.com/2021/03/k-means-101-an-introductory-guide-to-k-means-clustering-in-r/
 
+
+
+# Paths and packages -----------------------------------------------------------
+
 library(dwc.wells)
 
-# MAIN 0: load paths and variables ---------------------------------------------
+path_list <- list(
+  db = file.path(kwb.utils::desktop(), "tmp/DWC/wells/BWB_WV_Brunnenexport_2017.mdb"),
+  renamings = extdata_file("renamings"),
+  #renamings_main = "<renamings>/Parameterliste.xlsx",
+  renamings_main = "<renamings>/main.csv",
+  renamings_material_filter = "<renamings>/material_filter.csv",
+  renamings_material_vollrohr = "<renamings>/material_vollrohr.csv",
+  lookup_actions = "<renamings>/actions.csv",
+  renamings_quality = "<renamings>/quality.csv"
+)
 
-path_db <- file.path(kwb.utils::desktop(), "tmp/DWC/wells/BWB_WV_Brunnenexport_2017.mdb")
-path_renamings <- extdata_file("renamings")
-#path_renamings <- file.path(kwb.utils::desktop(), "tmp/DWC/wells/renamings")
+paths <- kwb.utils::resolve(path_list)
 
 
 # MAIN 0: Read renamings -------------------------------------------------------
 
-if (FALSE) {
-
+if (TRUE) {
 
   # load renamings
-  renamings <- load_renamings_excel(
-    file.path(path_renamings, "Parameterliste.xlsx")
-    )
-
-  renamings_quality <- load_renamings_csv(
-    file.path(path_renamings, "quality.csv")
-    )
-
-  renamings_material_filter <- load_renamings_csv(
-    file.path(path_renamings, "material_filter.csv")
-    )
-
-  renamings_material_vollrohr <- load_renamings_csv(
-    file.path(path_renamings, "material_vollrohr.csv")
+  renamings <- list(
+    #main = load_renamings_excel(paths$renamings_main),
+    main = load_renamings_csv(paths$renamings_main),
+    quality = load_renamings_csv(paths$renamings_quality),
+    material_filter = load_renamings_csv(paths$renamings_material_filter),
+    material_vollrohr = load_renamings_csv(paths$renamings_material_vollrohr)
   )
+
+  lookup <- list(actions = load_renamings_csv(paths$lookup_actions))
 
 }
 
-# MAIN 1: general well characteristics -----------------------------------------
+# MAIN 1: general well characteristics and water body information --------------
 
 if (FALSE) {
 
-  # read data
-  df_main <- read_select_rename(path_db, "WV_GMS_TBL_GWBR", renamings$main)
+  # read main data
+  df_main <- read_select_rename(paths$db,
+                                "WV_GMS_TBL_GWBR",
+                                renamings$main,
+                                old_name_col = "old_name",
+                                new_name_col = "new_name_de")
+
+  # read data with water body information
+  df_drilling <- read_select_rename(paths$db,
+                                    "WV_GMS_TBL_BOHRUNGEN",
+                                    renamings$main,
+                                    old_name_col = "old_name",
+                                    new_name_col = "new_name_de")
+
+  # append water body data
+  df_main <- dplyr::left_join(df_main, df_drilling)
 
   # filter Vertikalfilterbrunnen
-  df_main <- df_main %>% dplyr::filter(grepl("V$", name_Brunnen))
+  df_main <- df_main %>% dplyr::filter(grepl("V$", Name_Brunnen))
 
   # group filter material
-  df_main$mw_Filtermaterial <- rename_values(df_main$mw_Filtermaterial,
-                                             renamings_material_filter)
+  df_main$Filtermaterial <- rename_values(df_main$Filtermaterial,
+                                             renamings$material_filter)
 
   # group vollrohr material
-  df_main$mw_Vollrohrmaterial <- rename_values(df_main$mw_Vollrohrmaterial,
-                                             renamings_material_vollrohr)
+  df_main$Vollrohrmaterial <- rename_values(df_main$Vollrohrmaterial,
+                                             renamings$material_vollrohr)
 
 
   # correct false date imports in case of NA
   df_main <- df_main %>%
-    dplyr::mutate(dat_Inbetriebnahme = dplyr::na_if(dat_Inbetriebnahme,
+    dplyr::mutate(Datum_Inbetriebnahme = dplyr::na_if(Datum_Inbetriebnahme,
                                                     "1899-12-30 00:00:00"))
 
   # modify data types
   df_main <- df_main %>%
     dplyr::mutate(Baujahr = as.Date(Baujahr, format = "%Y-%m-%d"),
-                  dat_Inbetriebnahme = as.Date(dat_Inbetriebnahme,
+                  Datum_Inbetriebnahme = as.Date(Datum_Inbetriebnahme,
                                                format = "%Y-%m-%d"),
-                  Jahr_Inbetriebnahme = lubridate::year(dat_Inbetriebnahme),
-                  dat_RWS = as.Date(dat_RWS, format = "%d.%m.%Y"),
-                  fil_Brunnenfunktion = as.factor(fil_Brunnenfunktion),
-                  fil_Brunnenzustand = as.factor(fil_Brunnenzustand),
-                  mw_Aquifer = as.factor(mw_Aquifer),
-                  mw_Spannung = as.factor(mw_Spannung),
-                  mw_Vollrohrmaterial = as.factor(mw_Vollrohrmaterial),
-                  mw_Filtermaterial = as.factor(mw_Filtermaterial),
-                  Gebiet = as.factor(Gebiet))
+                  Jahr_Inbetriebnahme = lubridate::year(Datum_Inbetriebnahme),
+                  Datum_RWS = as.Date(Datum_RWS, format = "%d.%m.%Y"),
+                  Funktion_Brunnen = as.factor(Funktion_Brunnen),
+                  Zustand_Brunnen = as.factor(Zustand_Brunnen),
+                  Aquifer = as.factor(Aquifer),
+                  Spannung = as.factor(Spannung),
+                  Vollrohrmaterial = as.factor(Vollrohrmaterial),
+                  Filtermaterial = as.factor(Filtermaterial),
+                  Gebiet = as.factor(Gebiet),
+                  Gewaesser = as.factor(Gewaesser))
 
 
   # turn any NAs in factor variables to "Unbekannt"
-  factor_vars <- names(df_main)[sapply(df_main, is.factor)]
+  df_main <- replace_NAs_in_factor_vars(df_main)
 
-  for (factor_var in factor_vars) {
 
-    # turn NA into "Unbekannt"
-    df_main[, factor_var] <- forcats::fct_explicit_na(
-      df_main[, factor_var], na_level = "Unbekannt"
-    )
+  # summarise marginal factor levels
+  df_main$Gewaesser <- df_main$Gewaesser %>%
+    summarise_marginal_factor_levels(perc_threshold = 3,
+                                     marginal_name = "Andere")
 
-    # turn empty fields into "Unbekannt"
-    df_main[df_main[, factor_var] == "", factor_var] <- "Unbekannt"
-
-    # remove empty factor levels and arrange factor levels
-    df_main[, factor_var] <- df_main[, factor_var] %>%
-      droplevels() %>%
-      forcats::fct_infreq()
-
-  }
 
   # Gebiet short name
-  df_main$Gebiet_short <- substr(df_main$name_Brunnen, 1, 3)
+  df_main$Gebiet_short <- substr(df_main$Name_Brunnen, 1, 3)
   table(df_main$Gebiet, df_main$Gebiet_short)
 
+
   # first plot
-  variables_cat <- c("fil_Brunnenzustand",
-                     "mw_Filtermaterial",
+
+  variables_cat <- c("Zustand_Brunnen",
+                     "Filtermaterial",
                      "Gebiet",
-                     "mw_Spannung")
-
-  plots_cat <- lapply(variables_cat, function(x) { plot_frequencies(df_main, x, x) })
-  cowplot::plot_grid(plotlist = plots_cat, ncol = 2, align = "hv")
-
-  variables_num <- c("Jahr_Inbetriebnahme",
-                     "Qs_neu",
-                     "mw_Durchmesser",
-                     "mw_Filteranzahl")
-
-  variables_num_1 <- c("Jahr_Inbetriebnahme",
-                     "Qs_neu")
+                     "Spannung",
+                     "Gewaesser")
 
 
-  variables_num_2 <- c("mw_Durchmesser",
-                     "mw_Filteranzahl")
-
-
-  plot_distribution(Data = df_main,
-                    variable = "mw_Filteranzahl",
-                    binwidth = 1,
-                    title = "Filteranzahl",
-                    vertical_x_axis_labels = FALSE,
-                    col = "white")
-
-  plots_num <- lapply(variables_num_1, function(x) {
-    plot_distribution(Data = df_main, variable = x, title = x)
+  plots_cat <- lapply(variables_cat, function(x) {
+    plot_frequencies(df_main, x, gsub("_", " ", x), 0.05)
     })
 
-  plot_distribution(Data = df_main,
-                    variable = "mw_Filteranzahl",
-                    binwidth = 1,
-                    title = "Filteranzahl",
-                    vertical_x_axis_labels = FALSE)
 
-  plot_distribution(Data = df_main,
-                    variable = "mw_Durchmesser",
+
+
+  plot_frequencies(df_main, "Gewaesser")
+
+  ggplot2::ggsave("frequency_plot_Gewaesser_v2.png", width = 5,
+                  height = 6, dpi = 600)
+
+
+  plot_num_1 <- plot_distribution(Data = df_main,
+                                   variable = "Jahr_Inbetriebnahme",
+                                   title = "Jahr Inbetriebnahme",
+                                   vertical_x_axis_labels = FALSE) +
+    ggplot2::scale_x_continuous(limits = c(1920, 2020),
+                                breaks = scales::pretty_breaks())
+
+  plot_num_2 <- plot_distribution(Data = df_main,
+                                   variable = "Qs_neu",
+                                   title = "Qs (neu)",
+                                   vertical_x_axis_labels = FALSE)
+
+  plot_num_3 <- plot_frequencies(Data = df_main,
+                                variable = "Filteranzahl",
+                                title = "Filteranzahl",
+                                vertical_x_axis_labels = FALSE)
+
+
+  plot_num_4 <- plot_distribution(Data = df_main,
+                    variable = "Durchmesser",
                     binwidth = 50,
                     title = "Durchmesser",
                     vertical_x_axis_labels = FALSE)
 
-  plots_num <- lapply(variables_num_2, function(x) {
-    plot_distribution(Data = df_main, variable = x, title = x)
-  })
+  plots <- cowplot::plot_grid(plotlist = c(plots_cat,
+                                  list(plot_num_1, plot_num_2,
+                                       plot_num_3, plot_num_4)),
+                     nrow = 3, align = "hv", scale = 0.9)
+
+  ggplot2::ggsave("frequency_plots_v3.png", plot = plots, width = 20,
+                  height = 20, dpi = 600)
 
 
-  cowplot::plot_grid(plotlist = plots_num, ncol = 2, align = "hv")
-  data.frame(table(df_main$mw_Durchmesser, useNA = "ifany"))
-  ggplot2::ggsave("frequency_plot_v2.png", width = 10, height = 7, dpi = 600)
+  table(df_main$Zustand_Brunnen, df_main$Spannung)
+  table(df_main$Zustand_Brunnen, df_main$Gewaesser)
 
-  str(df_main)
+
+  htmlwidgets::saveWidget(widget = plotly::ggplotly(plot_num_1),
+                          file = "frequency_plot_Inbetriebnahme.html",
+                          selfcontained = TRUE)
+
+  htmlwidgets::saveWidget(widget = plotly::ggplotly(plot_num_2),
+                          file = "frequency_plot_Qs_neu.html",
+                          selfcontained = TRUE)
+
+  htmlwidgets::saveWidget(widget = plotly::ggplotly(plot_num_4),
+                          file = "frequency_plot_Durchmesser.html",
+                          selfcontained = TRUE)
 }
 
 
@@ -168,26 +193,44 @@ if (FALSE) {
 if (FALSE) {
 
   # read data
-  df_pump_tests <- read_select_rename(path_db, "WV_BRU_TBL_PUMPENTECHNDATEN",
-                                      renamings$main)
+  df_pump_tests <- read_select_rename(paths$db,
+                                      "WV_BRU_TBL_PUMPENTECHNDATEN",
+                                      renamings$main,
+                                      old_name_col = "old_name",
+                                      new_name_col = "new_name_de")
+
 
   # clean data
   df_pump_tests <- df_pump_tests %>%
-    dplyr::mutate(dat_KPVvor = as.Date(dat_KPVvor, format = "%Y-%m-%d"),
-                  dat_KPVnach = as.Date(dat_KPVnach, format = "%Y-%m-%d")) %>%
-    filter(!(is.na(df_pump_tests$dat_KPVvor) & is.na(df_pump_tests$dat_KPVnach))) %>% # delete row if both values are NA
-    # tidyr::drop_na(dat_KPVvor, dat_KPVnach) %>% # delete row if one of the two values is NA
-    dplyr::left_join(df_main[, c("id_Brunnen", "dat_Inbetriebnahme", "Qs_neu")], by = "id_Brunnen") %>%
-    dplyr::mutate(Qs_KPVvor = mw_Q_KPVvor / (mw_BWS_KPVvor - mw_RWS_KPVvor),
+    # assign date format to dates
+    dplyr::mutate(Datum_KPVvor = as.Date(Datum_KPVvor, format = "%Y-%m-%d"),
+                  Datum_KPVnach = as.Date(Datum_KPVnach, format = "%Y-%m-%d")) %>%
+    #filter(!(is.na(df_pump_tests$Datum_KPVvor) & is.na(df_pump_tests$Datum_KPVnach))) %>% # delete row if both values are NA
+    # tidyr::drop_na(Datum_KPVvor, Datum_KPVnach) %>% # delete row if one of the two values is NA
+    # get well characteristics to calculate Qs_rel
+    dplyr::left_join(df_main[, c("id_Brunnen", "Datum_Inbetriebnahme", "Qs_neu")], by = "id_Brunnen") %>%
+    # calculate Qs and Qs_rel before and after pump tests
+    dplyr::mutate(Qs_KPVvor = Q_KPVvor / (BWS_KPVvor - RWS_KPVvor),
                   Qs_KPVvor_rel =  Qs_KPVvor / Qs_neu,
-                  Qs_KPVnach = mw_Q_KPVnach / (mw_BWS_KPVnach - mw_RWS_KPVnach),
+                  Qs_KPVnach = Q_KPVnach / (BWS_KPVnach - RWS_KPVnach),
                   Qs_KPVnach_rel =  Qs_KPVnach / Qs_neu) %>%
-    dplyr::arrange(id_Brunnen, ifelse(!is.na(dat_KPVvor), dat_KPVvor, dat_KPVnach)) %>%
-    dplyr::select(c("id_Brunnen", "dat_Inbetriebnahme", "Qs_neu",
-                    "dat_KPVvor", "Qs_KPVvor", "Qs_KPVvor_rel",
-                    "dat_KPVnach", "Qs_KPVnach", "Qs_KPVnach_rel"))
+    dplyr::arrange(id_Brunnen, ifelse(!is.na(Datum_KPVvor), Datum_KPVvor, Datum_KPVnach)) %>%
+    # check if pump test is associated with "Regenerierung"
+    dplyr::mutate(Regenerierung = REG_Mechanisch + REG_Sprengschock +
+                    REG_Hydropuls != 0,
+                  Pumpenwechsel = Pumpenwechsel != 0,
+                  Manschette = Manschette != 0) %>%
+    dplyr::mutate(Bemerkung_Liner = ifelse(
+      grepl("Liner|liner|Inliner|inliner|Lining|lining", Bemerkung),
+      "Ja",
+      "Nein")
+      ) %>%
+    dplyr::select(c("id_Brunnen", "Datum_Inbetriebnahme", "Qs_neu",
+                    "Datum_KPVvor", "Qs_KPVvor", "Qs_KPVvor_rel",
+                    "Datum_KPVnach", "Qs_KPVnach", "Qs_KPVnach_rel",
+                    "Regenerierung", "Pumpenwechsel", "Manschette"))
 
- # write.table(df_pump_tests, file = "Q_s_Berechnungen_v2.csv", dec = ".", sep = ";", row.names = FALSE)
+  # write.table(df_pump_tests, file = "Q_s_Berechnungen_v2.csv", dec = ".", sep = ";", row.names = FALSE)
 
 }
 
@@ -197,7 +240,55 @@ if (FALSE) {
   if (FALSE) {
 
   # read data
-  df_Q <- read_select_rename(path_db, "WV_BRU_TBL_ERG", renamings$main)
+  df_Q <- read_select_rename(paths$db,
+                             "WV_BRU_TBL_ERG",
+                             renamings$main,
+                             old_name_col = "old_name",
+                             new_name_col = "new_name_de")
+
+  df_Q <- df_Q %>% dplyr::left_join(df_main[, c("id_Brunnen", "Qzul")]) %>%
+    dplyr::mutate(Ratio_Qmom_Qzul = Qmom / Qzul) %>%
+    dplyr::arrange(-Ratio_Qmom_Qzul)
+
+  write.table(df_Q, file = "Qmom_Qzul_ratio.csv", dec = ".", sep = ";", row.names = FALSE)
+
+  prop.table(table(df_Q$Ratio > 1.3))
+
+  p1 <- ggplot2::ggplot(df_Q, ggplot2::aes(x = Qmom/Qzul, y = stat(count) / sum(stat(count)))) +
+    ggplot2::geom_histogram(binwidth = 0.1, fill = "grey", col = "white", boundary = 1) +
+    ggplot2::scale_x_continuous(limits = c(0, 2)) +
+    ggplot2::scale_y_continuous(name = "Percentage",
+                                breaks = scales::pretty_breaks(),
+                                labels = scales::percent_format(accuracy = 1)) +
+    sema.berlin.utils::my_theme()
+  plotly::ggplotly(p1)
+
+
+  l <- lapply(seq(0, 2, 0.1), function(x) table(df_Q$Ratio > x))
+  names(l) <- sprintf("%3.1f", seq(0, 2, 0.1))
+  df <- data.frame(do.call("rbind", l))
+  colnames(df) <- c("valid", "invalid")
+  df$threshold <- rownames(df)
+  df <- tidyr::pivot_longer(data = df, cols = c("valid", "invalid"))
+  #df$name <- factor(df$name, levels = c("valid", "invalid"))
+  df$name <- factor(df$name, levels = c("invalid", "valid"))
+
+  p2 <- ggplot2::ggplot(df, ggplot2::aes(x = threshold, y = value, fill = name)) +
+    ggplot2::geom_bar(stat = "identity", position = "fill") +
+    sema.berlin.utils::my_theme(legend.position = "top",
+                                axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+    ggplot2::scale_fill_manual(values = c("coral", "darkseagreen3")) +
+    ggplot2::scale_x_discrete(expand = c(0.05, 0.05)) +
+    ggplot2::scale_y_continuous(labels = scales::percent_format(),
+                                breaks = scales::pretty_breaks()) +
+    ggplot2::labs(x = 'Threshold "Qmom/Qzul"', y = "Percentage", fill = "")
+
+  p2
+
+  ggplot2::ggsave("Qmom_Qzul_threshold.png", p2, dpi = 600, height = 4, width = 6)
+ p2
+
+  cowplot::plot_grid(p1, p2)
 
   # aggregate data
   df_Q_agg <- dplyr::filter(df_Q, Qmom < 1000) %>%
@@ -214,16 +305,7 @@ if (FALSE) {
   }
 
 
-# MAIN 4: drilling and surface water body information --------------------------
-
-if (FALSE) {
-
-  # read data
-  df_drilling <- read_select_rename(path_db, "WV_GMS_TBL_BOHRUNGEN", renamings$main)
-
-}
-
-# MAIN 5: water quality data ---------------------------------------------------
+# MAIN 4: water quality data ---------------------------------------------------
 
 if (FALSE) {
 
@@ -234,7 +316,7 @@ if (FALSE) {
   df_quality_agg <- df_quality %>%
     dplyr::filter(Parameter %in% renamings_quality$old_name) %>%
     dplyr::mutate(Parameter = renamings_quality$new_name[match(Parameter, renamings_quality$old_name)]) %>%
-    dplyr::mutate(dat_Wasserchemie = as.Date(dat_Wasserchemie, format = "%Y-%m-%d")) %>%
+    dplyr::mutate(Datum_Wasserchemie = as.Date(Datum_Wasserchemie, format = "%Y-%m-%d")) %>%
     dplyr::group_by(id_Brunnen, Parameter) %>%
     dplyr::summarise(median = median(Wert, na.rm = TRUE),
                      std_dev = sd(Wert, na.rm = TRUE),

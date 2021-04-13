@@ -18,7 +18,8 @@ load_renamings_excel <- function(infile,
   readxl::read_excel(path = infile, sheet = sheet) %>%
     dplyr::select(.data[[old_name_col]], .data[[new_name_col]]) %>%
     dplyr::rename(old_name = .data[[old_name_col]], new_name = .data[[new_name_col]]) %>%
-    tidyr::drop_na()
+    tidyr::drop_na() %>%
+    as.data.frame()
 }
 
 
@@ -31,7 +32,7 @@ load_renamings_excel <- function(infile,
 #' @export
 #'
 load_renamings_csv <- function(infile) {
-  read.csv(file = infile, sep = ";", stringsAsFactors = FALSE)
+  read.csv(file = infile, sep = ";", stringsAsFactors = FALSE, na.strings=c(""))
 }
 
 
@@ -59,7 +60,10 @@ read_ms_access <- function(path_db, tbl_name) {
 
   odbc32::stop_server()
 
-  stopifnot(is.data.frame(df))
+
+  if(!is.data.frame(df)) {
+    stop("Table cannot be read. Is it already open and locked?")
+  }
 
   df
 
@@ -74,10 +78,15 @@ read_ms_access <- function(path_db, tbl_name) {
 #' @param path_db full path to database
 #' @param tbl_name name of database table to be read
 #' @param renamings name of data frame with renamings
+#' @param old_name_col name of column with original variable names
+#' @param new_name_col name of column with new variable names
 #' @importFrom stats setNames
 #' @export
 #'
-read_select_rename <- function(path_db, tbl_name, renamings) {
+read_select_rename <- function(path_db, tbl_name, renamings,
+                               old_name_col = "old_name",
+                               new_name_col = "new_name") {
+
 
   # read data
   df <- read_ms_access(path_db, tbl_name)
@@ -86,11 +95,13 @@ read_select_rename <- function(path_db, tbl_name, renamings) {
   colnames(df) <- toupper(colnames(df))
 
   # select defined columns in df and renamings
-  df <- df[, colnames(df) %in% renamings$old_name]
-  renamings <- renamings[renamings$old_name %in% colnames(df),]
+  df <- df[, colnames(df) %in% renamings[!is.na(renamings[, new_name_col]),
+                                         old_name_col]]
+  renamings <- renamings[renamings[, old_name_col] %in% colnames(df),]
 
   # rename columns
-  colnames(df) <- rename_values(colnames(df), renamings)
+  colnames(df) <- rename_values(colnames(df), renamings,
+                                old_name_col, new_name_col)
 
   df
 
@@ -105,11 +116,77 @@ read_select_rename <- function(path_db, tbl_name, renamings) {
 #' rename values of a character vector according to renamings table
 #'
 #' @param x character vector
-#' @param renamings data frame consisting of columns old_name' and 'new_name'
+#' @param renamings data frame consisting of old and new names
+#' @param old_name_col name of column with original variable names
+#' @param new_name_col name of column with new variable names
 #' @export
 #'
-rename_values <- function(x, renamings) {
+rename_values <- function(x,
+                          renamings,
+                          old_name_col = "old_name",
+                          new_name_col = "new_name") {
 
-  renamings$new_name[match(x, renamings$old_name)]
+
+    old_names <- renamings[, old_name_col]
+    new_names <- renamings[, new_name_col]
+
+    new_names[match(x, old_names)]
 
 }
+
+
+# replace_NAs_in_factor_var ----------------------------------------------------
+
+#' rename values of a character vector according to renamings table
+#'
+#' @param x factor with NAs or gaps ("")
+#' @export
+#'
+replace_NAs_in_factor_var <- function(x) {
+
+  # turn NA into "Unbekannt"
+  x %>%
+    forcats::fct_explicit_na(na_level = "Unbekannt") %>%
+    forcats::fct_recode("Unbekannt" = "") %>%
+    droplevels() %>%
+    forcats::fct_infreq()
+
+}
+
+
+# summarise_marginal_factor_levels ---------------------------------------------
+
+#' summarise factor levels with relative frequency below a threshold
+#'
+#' @param x factor variable
+#' @param perc_threshold percentage threshold under which levels will be summarised
+#' @param marginal_name for new summary factor level
+#' @export
+#'
+summarise_marginal_factor_levels <- function(x, perc_threshold, marginal_name) {
+
+  forcats::fct_lump_prop(x,
+                         prop = perc_threshold * 0.01,
+                         other_level = marginal_name)
+
+}
+
+# replace_NAs_in_factor_vars ---------------------------------------------------
+
+#' rename values of a character vector according to renamings table
+#'
+#' @param df data frame, with factors to be checked for NAs
+#' @export
+#'
+replace_NAs_in_factor_vars <- function(df) {
+
+  factor_vars <- names(df)[sapply(df, is.factor)]
+
+  for (factor_var in factor_vars) {
+    df[, factor_var] <- replace_NAs_in_factor_var(df[, factor_var])
+  }
+
+  df
+
+}
+

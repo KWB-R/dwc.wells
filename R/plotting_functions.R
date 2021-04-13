@@ -1,10 +1,10 @@
-plot_frequencies <- function(Data, variable, title, vertical_x_axis_labels = TRUE) {
+plot_frequencies <- function(Data, variable, title = variable, offset_perc_labels = 0.1, vertical_x_axis_labels = TRUE) {
 
   # count frequencies
   df <- data.frame(table(Data[, variable], useNA = "ifany")) %>%
     dplyr::arrange(-Freq) %>%
     dplyr::mutate(share = Freq / sum(Freq)) %>%
-    dplyr::mutate(pos = Freq + max(Freq) * 0.1) %>%
+    dplyr::mutate(pos = Freq + max(Freq) * offset_perc_labels) %>%
     dplyr::mutate(factor(Var1, levels = unique(Var1)))
 
   # plot
@@ -30,13 +30,15 @@ plot_frequencies <- function(Data, variable, title, vertical_x_axis_labels = TRU
 
 
 plot_distribution <- function(Data, variable, binwidth = NULL, title,
-                             vertical_x_axis_labels = TRUE) {
+                             vertical_x_axis_labels = TRUE, boundary = 0) {
 
   # plot
-  p <- ggplot2::ggplot(Data, ggplot2::aes(x = .data[[variable]], y = stat(count) / sum(stat(count)))) +
-    ggplot2::geom_histogram(fill = "lightblue", boundary = 0, binwidth = binwidth) +
-    ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 1),
-                       breaks = scales::pretty_breaks(n = 6)) +
+  #p <- ggplot2::ggplot(Data, ggplot2::aes(x = .data[[variable]], y = stat(count) / sum(stat(count)))) +
+  p <- ggplot2::ggplot(Data, ggplot2::aes(x = .data[[variable]])) +
+    ggplot2::geom_histogram(fill = "lightblue", boundary = boundary, binwidth = binwidth) +
+    ggplot2::scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
+    # ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 1),
+    #                    breaks = scales::pretty_breaks(n = 6)) +
     ggplot2::labs(y = "Frequency", x = "", subtitle = title) +
     sema.berlin.utils::my_theme(
       plot.subtitle = ggplot2::element_text(face = "italic", size = 13)
