@@ -1,3 +1,14 @@
+# plot_frequencies -------------------------------------------------------------
+#'  plot frequency distribution of factor variable
+#'
+#' @param Data Data to be plotted
+#' @param variable variable
+#' @param title plot title
+#' @param offset_perc_labels distance of labels from bars
+#' @param vertical_x_axis_labels should x-axis labels be ploted vertically (TRUE / FALSE)
+#'
+#' @export
+#'
 plot_frequencies <- function(Data, variable, title = variable, offset_perc_labels = 0.1, vertical_x_axis_labels = TRUE) {
 
   # count frequencies
@@ -28,7 +39,19 @@ plot_frequencies <- function(Data, variable, title = variable, offset_perc_label
   p
 }
 
+# plot_distribution ------------------------------------------------------------
 
+#' plot frequency distribution of numerical variable
+#'
+#' @param Data Data to be plotted
+#' @param variable variable
+#' @param binwidth binwidrh
+#' @param title plot title
+#' @param vertical_x_axis_labels should x-axis labels be ploted vertically (TRUE / FALSE)
+#' @param boundary left boundary of bars, default: 0
+#'
+#' @export
+#'
 plot_distribution <- function(Data, variable, binwidth = NULL, title,
                              vertical_x_axis_labels = TRUE, boundary = 0) {
 

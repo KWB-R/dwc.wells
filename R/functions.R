@@ -190,3 +190,21 @@ replace_NAs_in_factor_vars <- function(df) {
 
 }
 
+
+# frequency_table --------------------------------------------------------------
+
+#' calculate absolute and relative frequencies of categorical varables
+#'
+#' @param x vector with categorical variable
+#' @param perc_digits number of decimal digits for percentages, default = 1
+#'
+#' @export
+#'
+frequency_table <- function(x, perc_digits = 1) {
+
+  data.frame(table(x, useNA = "ifany", deparse.level = 0)) %>%
+    dplyr::arrange(-Freq) %>%
+    dplyr::mutate(perc = round(Freq / sum(Freq) * 100, perc_digits)) %>%
+    dplyr::rename(value = Var1, n = Freq)
+
+}

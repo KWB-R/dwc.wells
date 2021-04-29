@@ -21,14 +21,17 @@ URL: https://github.com/KWB-R/dwc.wells
 BugReports: https://github.com/KWB-R/dwc.wells/issues
 Imports:
     dplyr,
+    forcats,
     magrittr,
     odbc32,
     readxl,
     rlang,
+    scales,
     tidyr
 Remotes:
     github::vh-d/odbc32,
-    github::kwb-r/kwb.utils
+    github::kwb-r/kwb.utils,
+    github::kwb-r/sema.berlin.utils
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
