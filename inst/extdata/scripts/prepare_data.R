@@ -5,7 +5,7 @@ library(dwc.wells)
 
 path_list <- list(
   db = file.path(kwb.utils::desktop(), "tmp/DWC/wells/BWB_WV_Brunnenexport_2017.mdb"),
-  renamings = extdata_file("renamings"),
+  renamings = dwc.wells::extdata_file("renamings"),
   renamings_main = "<renamings>/main.csv",
   renamings_material_filter = "<renamings>/material_filter.csv",
   renamings_material_vollrohr = "<renamings>/material_vollrohr.csv",
@@ -28,7 +28,7 @@ if (TRUE) {
 
   renamings <- lapply(paste("renamings", elements, sep = "_"), function(x) {
     load_renamings_csv(paths[[x]])
-    })
+  })
 
   names(renamings) <- elements
 
@@ -48,12 +48,14 @@ if (FALSE) {
                                 old_name_col = "old_name",
                                 new_name_col = "new_name_de")
 
+
   # read data with water body information
   df_drilling <- read_select_rename(paths$db,
                                     "WV_GMS_TBL_BOHRUNGEN",
                                     renamings$main,
                                     old_name_col = "old_name",
                                     new_name_col = "new_name_de")
+
 
   # append water body data
   df_main <- dplyr::left_join(df_main, df_drilling)
@@ -70,18 +72,18 @@ if (FALSE) {
                   Vollrohrmaterial = rename_values(Vollrohrmaterial,
                                                    renamings$material_vollrohr),
                   Gewaesser = rename_values(Gewaesser, renamings$surface_water)
-                  )
+    )
 
   # correct false date imports in case of NA
   df_main <- df_main %>%
     dplyr::mutate(Datum_Inbetriebnahme = dplyr::na_if(Datum_Inbetriebnahme,
-                                                    "1899-12-30 00:00:00"))
+                                                      "1899-12-30 00:00:00"))
 
   # modify data types
   df_main <- df_main %>%
     dplyr::mutate(Baujahr = as.Date(Baujahr, format = "%Y-%m-%d"),
                   Datum_Inbetriebnahme = as.Date(Datum_Inbetriebnahme,
-                                               format = "%Y-%m-%d"),
+                                                 format = "%Y-%m-%d"),
                   Jahr_Inbetriebnahme = lubridate::year(Datum_Inbetriebnahme),
                   Datum_RWS = as.Date(Datum_RWS, format = "%d.%m.%Y"),
                   Funktion_Brunnen = as.factor(Funktion_Brunnen),
@@ -98,7 +100,7 @@ if (FALSE) {
   df_main <- replace_NAs_in_factor_vars(df_main)
 
 
-    # Gebiet short name
+  # Gebiet short name
   df_main$Gebiet_short <- substr(df_main$Name_Brunnen, 1, 3)
   table(df_main$Gebiet, df_main$Gebiet_short)
 
@@ -115,38 +117,41 @@ if (FALSE) {
                                       "WV_BRU_TBL_PUMPENTECHNDATEN",
                                       renamings$main,
                                       old_name_col = "old_name",
-                                      new_name_col = "new_name_de")
+                                      new_name_col = "new_name_en")
 
 
-  # clean data
+
+   # clean data
   df_pump_tests <- df_pump_tests %>%
     # assign date format to dates
-    dplyr::mutate(Datum_KPVvor = as.Date(Datum_KPVvor, format = "%Y-%m-%d"),
-                  Datum_KPVnach = as.Date(Datum_KPVnach, format = "%Y-%m-%d")) %>%
-    #filter(!(is.na(df_pump_tests$Datum_KPVvor) & is.na(df_pump_tests$Datum_KPVnach))) %>% # delete row if both values are NA
-    # tidyr::drop_na(Datum_KPVvor, Datum_KPVnach) %>% # delete row if one of the two values is NA
+    dplyr::mutate(pump_test_1.date = as.Date(pump_test_1.date, format = "%Y-%m-%d"),
+                  pump_test_2.date = as.Date(pump_test_2.date, format = "%Y-%m-%d")) %>%
+    #filter(!(is.na(df_pump_tests$pump_test_1.date) & is.na(df_pump_tests$pump_test_2.date))) %>% # delete row if both values are NA
     # get well characteristics to calculate Qs_rel
-    dplyr::left_join(df_main[, c("id_Brunnen", "Datum_Inbetriebnahme", "Qs_neu")], by = "id_Brunnen") %>%
+    dplyr::left_join(df_main[, c("id_Brunnen", "Datum_Inbetriebnahme", "Qs_neu")], by = c("well_id" = "id_Brunnen")) %>%
     # filter data with pump tests before operational start (data refers to rehabilitated well)
     # dplyr::filter(Datum_KPVvor > Datum_Inbetriebnahme) %>%should be done later
     # calculate Qs and Qs_rel before and after pump tests
-    dplyr::mutate(Qs_KPVvor = Q_KPVvor / (BWS_KPVvor - RWS_KPVvor),
-                  Qs_KPVvor_rel =  Qs_KPVvor / Qs_neu,
-                  Qs_KPVnach = Q_KPVnach / (BWS_KPVnach - RWS_KPVnach),
-                  Qs_KPVnach_rel =  Qs_KPVnach / Qs_neu) %>%
-    dplyr::arrange(id_Brunnen, ifelse(!is.na(Datum_KPVvor), Datum_KPVvor, Datum_KPVnach)) %>%
+    dplyr::mutate(pump_test_1.Qs = pump_test_1.Q /
+                    (pump_test_1.W_dynamic - pump_test_1.W_static),
+                  pump_test_1.Qs_rel =  pump_test_1.Qs / Qs_neu,
+                  pump_test_2.Qs = pump_test_2.Q /
+                    (pump_test_2.W_dynamic - pump_test_2.W_static),
+                  pump_test_2.Qs_rel =  pump_test_2.Qs / Qs_neu) %>%
+    dplyr::arrange(well_id, ifelse(!is.na(pump_test_1.date),
+                                      pump_test_1.date, pump_test_2.date)) %>%
     # check if pump test is associated with "Regenerierung"
-    dplyr::mutate(Regenerierung = REG_Mechanisch + REG_Sprengschock +
-                    REG_Hydropuls != 0,
-                  Pumpenwechsel = Pumpenwechsel != 0,
-                  Manschette = Manschette != 0) %>%
-    dplyr::mutate(Bemerkung_Liner = ifelse(
-      grepl("Liner|liner|Inliner|inliner|Lining|lining", Bemerkung), "Ja", "Nein"
-      )) %>%
-    dplyr::select(c("id_Brunnen", "Datum_Inbetriebnahme", "Qs_neu",
-                    "Datum_KPVvor", "Qs_KPVvor", "Qs_KPVvor_rel",
-                    "Datum_KPVnach", "Qs_KPVnach", "Qs_KPVnach_rel",
-                    "Regenerierung", "Pumpenwechsel", "Manschette"))
+    dplyr::mutate(well_rehab = (well_rehab.general + well_rehab.shock +
+                                     well_rehab.hydropulse) != 0,
+                  substitute_pump = substitute_pump != 0,
+                  pressure_sleeve =  pressure_sleeve != 0) %>%
+    dplyr::mutate(comment_Liner = ifelse(
+      grepl("Liner|liner|Inliner|inliner|Lining|lining", well_rehab.comment), "Yes", "No"
+    )) %>%
+    dplyr::select(c("well_id", "Datum_Inbetriebnahme", "Qs_neu",
+                    "pump_test_1.date", "pump_test_1.Qs", "pump_test_1.Qs_rel",
+                    "pump_test_2.date", "pump_test_2.Qs", "pump_test_2.Qs_rel",
+                    "well_rehab", "substitute_pump", "pressure_sleeve"))
 
 
   if (FALSE) {
@@ -158,7 +163,7 @@ if (FALSE) {
 
 # MAIN 3: Q measurement data ---------------------------------------------------
 
-  if (FALSE) {
+if (FALSE) {
 
   # read data
   df_Q <- read_select_rename(paths$db,
@@ -167,20 +172,28 @@ if (FALSE) {
                              old_name_col = "old_name",
                              new_name_col = "new_name_de")
 
+
+  # turn date to date format
+  df_Q <- df_Q %>%
+    dplyr::mutate(Datum_Qmom = as.Date(Datum_Qmom, format = "%Y-%m-%d"))
+
+
   # check ratio Qmom / Qzul
-  df_Q <- df_Q %>% dplyr::left_join(df_main[, c("id_Brunnen", "Qzul")]) %>%
+  df_Q <- df_Q %>%
+    dplyr::left_join(df_main[, c("id_Brunnen", "Qzul")]) %>%
     dplyr::mutate(Ratio_Qmom_Qzul = Qmom / Qzul) %>%
     dplyr::arrange(-Ratio_Qmom_Qzul)
+
 
   if (FALSE) {
     write_csv(df_Q, "Qmom_Qzul_ratio.csv")
   }
 
   # Kommentar: Es gibt Messungen zu 929 Brunnen, im Durchschnitt 40 Messwerte
-  # pro Brunnen, im Median 80 m³/h momentane Förderleistung
+  # pro Brunnen, im Median 80 m?/h momentane F?rderleistung
 
 
-  }
+}
 
 
 # MAIN 4: water quality data ---------------------------------------------------
@@ -199,13 +212,17 @@ if (FALSE) {
   df_quality <- df_quality %>%
     dplyr::filter(Parameter %in% renamings$quality$old_name) %>%
     dplyr::mutate(Parameter = rename_values(Parameter,
-                                     renamings$quality,
-                                     old_name_col = "old_name",
-                                     new_name_col = "new_name_de"))
+                                            renamings$quality,
+                                            old_name_col = "old_name",
+                                            new_name_col = "new_name_de"))
 
 
-  # transform concentration units from "µg/l" to "mg/l"
-  indices <- df_quality$Einheit == "µg/l"
+  df_quality <- df_quality %>%
+    dplyr::mutate(Datum = as.Date(Datum, format = "%Y-%m-%d"))
+
+
+  # transform concentration units from "Âµg/l" to "mg/l"
+  indices <- df_quality$Einheit == "Âµg/l"
   df_quality[indices, "Wert"] <- df_quality[indices, "Wert"] * 10^-3
   df_quality[indices, "Einheit"] <- "mg/l"
 
@@ -242,7 +259,12 @@ if (FALSE) {
                        id_cols = "id_Brunnen") %>%
     data.frame()
 
-  str(df_quality_agg)
+  lookup_par_unit <- aggregate(Einheit~Parameter, df_quality, FUN = unique)
+
+  df_quality_agg_long <- df_quality_agg %>%
+    tidyr::pivot_longer(cols = -1, names_to = "Parameter", values_to = "Wert") %>%
+    dplyr::left_join(lookup_par_unit)
+
 
 }
 

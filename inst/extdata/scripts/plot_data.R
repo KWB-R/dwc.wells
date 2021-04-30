@@ -136,3 +136,28 @@ summary(df_Q_agg)
 
 ggplot2::ggsave("histogram_Ergiebigkeit_Q_obs.png", width = 4, height = 2.5, dpi = 600)
 
+
+# plots of quality measurements ------------------------------------------------
+
+# requires df_quality_agg_long
+
+ggplot2::ggplot(df_quality_agg_long, ggplot2::aes(x = "", y = Wert)) +
+  ggplot2::geom_boxplot(width = 0.3) +
+  ggplot2::facet_wrap(~paste0(Parameter, "\n", "[", Einheit, "]"),
+                      scales = "free_y", nrow = 1) +
+  ggplot2::labs(x = "", y = "Werte") +
+  sema.berlin.utils::my_theme() +
+  ggplot2::theme(strip.text.x = ggplot2::element_text(size = 11, hjust = 0.5),
+                 axis.ticks.x = ggplot2::element_blank())
+
+ggplot2::ggplot(df_quality, ggplot2::aes(x = "", y = Wert)) +
+  ggplot2::geom_boxplot(width = 0.3) +
+  ggplot2::facet_wrap(id_Brunnen~paste0(Parameter, "\n", "[", Einheit, "]"),
+                      scales = "free_y", nrow = 1) +
+  ggplot2::labs(x = "", y = "Werte") +
+  sema.berlin.utils::my_theme() +
+  ggplot2::theme(strip.text.x = ggplot2::element_text(size = 11, hjust = 0.5),
+                 axis.ticks.x = ggplot2::element_blank())
+
+ggplot2::ggsave("plot_quality_all_wells.png", width = 15, height = 5000, dpi = 600)
+getwd()

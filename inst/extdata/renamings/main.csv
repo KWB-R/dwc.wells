@@ -17,7 +17,7 @@ RUHEWASSERSPIEGEL_GEMESSEN_AM;Datum Ruhewasserspiegel;WV_GMS_TBL_GWBR;dat_RWS;Da
 RUHEWASSERSPIEGEL_GEMESSEN_BEI;Ruhewasserspiegel in m u OKS;WV_GMS_TBL_GWBR;mw_RWS;RWS;static_water_level;num;
 GW_DRUCK;Aquiferverhältnisse (frei, gespannt, artesisch);WV_GMS_TBL_GWBR;mw_Aquifer;Aquifer;./.;cat;Hella fragt nach
 GWSPANNUNG;Grundwasserleiter (gespannt/ ungespannt);WV_GMS_TBL_GWBR;mw_Spannung;Spannung;aquifer_confinement;cat;Hella fragt nach
-;Gewichteter kf-Wert;;mw_kf;kf;permeability_coefficient_weighted;num;Hella fragt nach
+;Gewichteter kf-Wert;;mw_kf;kf;hydraulic conductivity;num;"Hella fragt nach; geändert Mathias 30.4.2021"
 BRU_FART;Material des Filterrohrs;WV_GMS_TBL_GWBR;mw_Filtermaterial;Filtermaterial;screen_material;cat;
 BRU_VART;Material des Vollrohrs;WV_GMS_TBL_GWBR;mw_Vollrohrmaterial;Vollrohrmaterial;casing_material;cat;
 BRU_FART_falsch;Material des Filterrohrs // Vorhandensein Inliner?;;mw_Inliner_falsch;;;cat;Spalte gibt es nicht, Info wird aus Filtermaterial entnommen
@@ -32,27 +32,27 @@ NAME_GEWAESSER;Nächstgelegenes Oberflächengewässer;WV_GMS_TBL_BOHRUNGEN;;Gewaess
 ENTFERNUNG_GEWAESSER;kürzeste horizontale Entfernung zum nächstgelegenen Oberflächengewässer in m;WV_GMS_TBL_BOHRUNGEN;;Entfernung_Gewaesser;surface_water_distance;num;muss noch ergänzt werden -> Hella
 BOHRVERFAHREN;Bohrverfahren (trocken, Lufthebe, Spül usw.);WV_GMS_TBL_BOHRTECHNIK;mw_Bohrverfahren;Bohrverfahren;drilling_method;cat;
 Q_N_M3_H;Nennleistung der installierten Pumpe in m³/h;WV_BRU_TBL_PUMPENTECHNDATEN;Qnenn;Qnenn;nominal_discharge_pump;num;
-KPV1_BDAT;Datum Pumpversuch vor Instandhaltung;WV_BRU_TBL_PUMPENTECHNDATEN;dat_KPVvor;Datum_KPVvor;date_pump_test_before;date;
-KPV1_RWS;Ruhewasserspiegel Pumpversuch vor Instandhaltung in m u OKS;WV_BRU_TBL_PUMPENTECHNDATEN;mw_RWS_KPVvor;RWS_KPVvor;static_water_level_pump_test_before;num;
-KPV1_WSPI;Betriebswasserspiegel Pumpversuch vor Instandhaltung in m u OKS;WV_BRU_TBL_PUMPENTECHNDATEN;mw_BWS_KPVvor;BWS_KPVvor;dynamic_water_level_pump_test_before;num;
-KPV1_Q;Förderleistung Pumpversuch vor Instandhaltung in m³/h;WV_BRU_TBL_PUMPENTECHNDATEN;mw_Q_KPVvor;Q_KPVvor;discharge_pump_test_before;num;
-KPV2_BDAT;Datum Pumpversuch nach Instandhaltung;WV_BRU_TBL_PUMPENTECHNDATEN;dat_KPVnach;Datum_KPVnach;date_pump_test_after;date;
-KPV2_RWS;Ruhewasserspiegel Pumpversuch nach Instandhaltung in m u OKS;WV_BRU_TBL_PUMPENTECHNDATEN;mw_RWS_KPVnach;RWS_KPVnach;static_water_level_pump_test_after;num;
-KPV2_WSPI;Betriebswasserspiegel Pumpversuch nach Instandhaltung in m u OKS;WV_BRU_TBL_PUMPENTECHNDATEN;mw_BWS_KPVnach;BWS_KPVnach;dynamic_water_level_pump_test_after;num;
-KPV2_Q;Förderleistung Pumpversuch nach Instandhaltung in m³/h;WV_BRU_TBL_PUMPENTECHNDATEN;mw_Q_KPVnach;Q_KPVnach;discharge_pump_test_after;num;
+KPV1_BDAT;Datum Pumpversuch vor Instandhaltung;WV_BRU_TBL_PUMPENTECHNDATEN;dat_KPVvor;KPV1.Datum;pump_test_1.date;date;
+KPV1_RWS;Ruhewasserspiegel Pumpversuch vor Instandhaltung in m u OKS;WV_BRU_TBL_PUMPENTECHNDATEN;mw_RWS_KPVvor;KPV1.RWS;pump_test_1.W_static;num;
+KPV1_WSPI;Betriebswasserspiegel Pumpversuch vor Instandhaltung in m u OKS;WV_BRU_TBL_PUMPENTECHNDATEN;mw_BWS_KPVvor;KPV1.BWS;pump_test_1.W_dynamic;num;
+KPV1_Q;Förderleistung Pumpversuch vor Instandhaltung in m³/h;WV_BRU_TBL_PUMPENTECHNDATEN;mw_Q_KPVvor;KPV1.Q;pump_test_1.Q;num;
+KPV2_BDAT;Datum Pumpversuch nach Instandhaltung;WV_BRU_TBL_PUMPENTECHNDATEN;dat_KPVnach;KPV2.Datum;pump_test_2.date;date;
+KPV2_RWS;Ruhewasserspiegel Pumpversuch nach Instandhaltung in m u OKS;WV_BRU_TBL_PUMPENTECHNDATEN;mw_RWS_KPVnach;KPV2.RWS;pump_test_2.W_static;num;
+KPV2_WSPI;Betriebswasserspiegel Pumpversuch nach Instandhaltung in m u OKS;WV_BRU_TBL_PUMPENTECHNDATEN;mw_BWS_KPVnach;KPV2.BWS;pump_test_2.W_dynamic;num;
+KPV2_Q;Förderleistung Pumpversuch nach Instandhaltung in m³/h;WV_BRU_TBL_PUMPENTECHNDATEN;mw_Q_KPVnach;KPV2.Q;pump_test_2.Q;num;
 ART_PW;;WV_BRU_TBL_PUMPENTECHNDATEN;;Pumpenwechsel;substitute_pump;cat_temp;ergänzt von Mathias
-ART_REG;;WV_BRU_TBL_PUMPENTECHNDATEN;;REG_Mechanisch;well_rehab_general;cat_temp;ergänzt von Mathias
-ART_REG_SS;;WV_BRU_TBL_PUMPENTECHNDATEN;;REG_Sprengschock;well_rehab_shock;cat_temp;ergänzt von Mathias
-ART_HYDRO_MS;;WV_BRU_TBL_PUMPENTECHNDATEN;;REG_Hydropuls;well_rehab_hydropulse;cat_temp;ergänzt von Mathias
-ART_REG_SAN;;WV_BRU_TBL_PUMPENTECHNDATEN;;Sanierung;well_rehab_inliner;cat_temp;ergänzt von Mathias
+ART_REG;;WV_BRU_TBL_PUMPENTECHNDATEN;;REG_Mechanisch;well_rehab.general;cat_temp;ergänzt von Mathias
+ART_REG_SS;;WV_BRU_TBL_PUMPENTECHNDATEN;;REG_Sprengschock;well_rehab.shock;cat_temp;ergänzt von Mathias
+ART_HYDRO_MS;;WV_BRU_TBL_PUMPENTECHNDATEN;;REG_Hydropuls;well_rehab.hydropulse;cat_temp;ergänzt von Mathias
+ART_REG_SAN;;WV_BRU_TBL_PUMPENTECHNDATEN;;Sanierung;well_rehab.inliner;cat_temp;ergänzt von Mathias
 ART_MAN;;WV_BRU_TBL_PUMPENTECHNDATEN;;Manschette;pressure_sleeve;cat_temp;ergänzt von Mathias
-ART_BEM;;WV_BRU_TBL_PUMPENTECHNDATEN;;Bemerkung;well_rehab_remarks;txt;ergänzt von Mathias
+ART_BEM;;WV_BRU_TBL_PUMPENTECHNDATEN;;Bemerkung;well_rehab.comment;txt;ergänzt von Mathias
 Bhg_GWBR_Nr;;WV_BRU_TBL_ERG;id_Brunnen;id_Brunnen;well_id;id;hier klein geschrieben, aber selbe ID wie in in Stammdaten (WV_GMS_TBL_GWBR)
 MESS_DAT;Datum der Messung;WV_BRU_TBL_ERG;dat_Qmom;Datum_Qmom;curent_discharge_date;date;
 Q_MOM;momentane gemessene Förderleistung in m³/h;WV_BRU_TBL_ERG;Qmom;Qmom;current_discharge;num;
 WSP_I;Betriebswasserspiegel in M u OKS;WV_BRU_TBL_ERG;;BWS;dynamic_water_level;num;ergänzt von Mathias
 PRUEFAUFTRAG;Veranlassung der Analyse;DB2LABOR_Daten;fil_lab-Veranlassung;Veranlassung;sampling_goal;cat;
-PN_DATUMO;Probenahme-Datum;DB2LABOR_Daten;dat_Wasserchemie;Datum;date;date;
-PARAM_KURZNAME;Parameter;DB2LABOR_Daten;;Parameter;parameter;cat;ergänzt von Mathias
-MESSWERT_MW;;DB2LABOR_Daten;;Wert;value;num;ergänzt von Mathias
+PN_DATUMO;Probenahme-Datum;DB2LABOR_Daten;dat_Wasserchemie;Datum;date;date;geändert Mathias 29.4.2021
+PARAM_KURZNAME;Parameter;DB2LABOR_Daten;;Parameter;parameter;cat;geändert Mathias 29.4.2021
+MESSWERT_MW;;DB2LABOR_Daten;;Wert;value;num;geändert Mathias 29.4.2021
 EINHEIT;Maßeinheit zum Messwert;DB2LABOR_Daten;unit_Wasserchemie;Einheit;unit;cat;
