@@ -28,7 +28,8 @@ Imports:
     readxl,
     rlang,
     scales,
-    tidyr
+    tidyr,
+    tidyselect
 Remotes:
     github::kwb-r/kwb.db@dev,
     github::kwb-r/kwb.utils,

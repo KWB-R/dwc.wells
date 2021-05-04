@@ -4,12 +4,12 @@ BHG_GWBR_NR;Auto-ID nach Ausbau zum Brunnen;WV_GMS_TBL_GWBR, WV_BRU_TBL_PUMPENTE
 MESS_ID;Auto-ID Link Labordaten;WV_GMS_TBL_GWBR;id_Messstelle;id_Messstelle;well_id_laboratory;id;
 NAME_MESSSTELLE;Klarname des Brunnens nach BWB-Schema;WV_GMS_TBL_GWBR;name_Brunnen;Name_Brunnen;well_name;id;
 BRU_BAUJAHR;Baujahr des Brunnens;WV_GMS_TBL_GWBR;Baujahr;Baujahr;construction_year;num;
-BRU_DATUM_INBETRIEB;Inbetriebnahmedatum des Brunnens;WV_GMS_TBL_GWBR;dat_Inbetriebnahme;Datum_Inbetriebnahme;operational_start;date;
+BRU_DATUM_INBETRIEB;Inbetriebnahmedatum des Brunnens;WV_GMS_TBL_GWBR;dat_Inbetriebnahme;Inbetriebnahme.Datum;operational_start.date;date;
 BRU_FUNKTION;Funktion des Brunnens/ Zweck;WV_GMS_TBL_GWBR;fil_Brunnenfunktion;Funktion_Brunnen;well_function;cat;
 BRU_BETRIEBSZUST;Betriebszustand;WV_GMS_TBL_GWBR;fil_Brunnenzustand;Zustand_Brunnen;operational_state;cat;
 ADMINISTRATIVESMESSGEBIET;;WV_GMS_TBL_GWBR;;Gebiet;site;cat;ergänzt von Mathias
 BRU_ZUL_BRN_LEIST;Zulässige Förderleistung in m³/h;WV_GMS_TBL_GWBR;Qzul;Qzul;admissible_discharge;num;geändert durch Mathias, vorher BRU_ZUL_BRN_LEISTUNG
-BRU_Q_SPEZ_NEU;Spezifische Ergiebigkeit bei Neubau in m³/(h*m);WV_GMS_TBL_GWBR;Qs_neu;Qs_neu;specific_capacity_new;num;
+BRU_Q_SPEZ_NEU;Spezifische Ergiebigkeit bei Neubau in m³/(h*m);WV_GMS_TBL_GWBR;Qs_neu;Inbetriebnahme.Qs;operational_start.Qs;num;
 BRU_PV_Q;Neubau-Pumpversuch: Förderleistung [m³/h];WV_GMS_TBL_GWBR;mw_Q_neu;Q_neu;current_discharge_new;num;
 BRU_PV_RWS;Neubau-Pumpversuch: Ruhewasserspiege [m u OKS];WV_GMS_TBL_GWBR;mw_RWS_neu;RWS_neu;static_water_level_new;num;
 BRU_PV_WSPI;Neubau-Pumpversuch: Betriebswasserspiegel Innenpegel [m u OKS];WV_GMS_TBL_GWBR;mw_BWS_neu;BWS_neu;dynamic_water_level_new;num;
