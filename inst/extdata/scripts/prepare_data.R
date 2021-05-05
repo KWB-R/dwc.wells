@@ -131,24 +131,32 @@ if (FALSE) {
     # assign date format to dates
     dplyr::mutate(pump_test_1.date = as.Date(pump_test_1.date, format = "%Y-%m-%d"),
                   pump_test_2.date = as.Date(pump_test_2.date, format = "%Y-%m-%d")) %>%
-    # remove entries without dates (before or after pumping test)
-    dplyr::filter(!(is.na(df_pump_tests$pump_test_1.date) & is.na(df_pump_tests$pump_test_2.date))) %>% # delete row if both values are NA
+    ### fix wrong date entry for well_id = 6405
+    dplyr::mutate(pump_test_1.date = dplyr::if_else(pump_test_1.date == as.Date("0205-04-28"),
+                                            as.Date("2005-04-28"),
+                                            pump_test_1.date)) %>%
+    # delete row if both values are NA
+    dplyr::filter(!(is.na(pump_test_1.date) & is.na(pump_test_2.date))) %>%
+    # add date column not containing NAs (required for creating an "action_id")
+    dplyr::mutate(pump_test.date = dplyr::if_else(!is.na(pump_test_1.date),
+                                          as.Date(pump_test_1.date),
+                                          as.Date(pump_test_2.date))) %>%
     # get well characteristics to calculate Qs_rel
     dplyr::left_join(df_main_en, by = "well_id") %>%
     # filter data with pump tests before operational start (data refers to rehabilitated well)
     # dplyr::filter(Datum_KPVvor > Datum_Inbetriebnahme) %>%should be done later
     # calculate Qs and Qs_rel before and after pump tests
-    dplyr::mutate(pump_test_date = ifelse(!is.na(pump_test_1.date),
-                                          pump_test_1.date, pump_test_2.date),
-                  pump_test_1.Qs = pump_test_1.Q /
+    dplyr::mutate(pump_test_1.Qs = pump_test_1.Q /
                     (pump_test_1.W_dynamic - pump_test_1.W_static),
                  # pump_test_1.Qs_rel =  pump_test_1.Qs / Qs_neu,
                   pump_test_2.Qs = pump_test_2.Q /
                     (pump_test_2.W_dynamic - pump_test_2.W_static),
                  # pump_test_2.Qs_rel =  pump_test_2.Qs / Qs_neu
                  ) %>%
-    dplyr::arrange(well_id, pump_test_date) %>%
-    dplyr::group_by(well_id, pump_test_date)
+    #dplyr::mutate(dplyr::across(tidyselect::everything(), as.character)) %>%
+    dplyr::arrange(well_id, pump_test.date) %>%
+    dplyr::group_by(well_id) %>%
+    dplyr::mutate(action_id = dplyr::row_number()) %>%
     # check if pump test is associated with "Regenerierung"
     dplyr::mutate(pump_test_2.well_rehab = (well_rehab.general + well_rehab.shock +
                                      well_rehab.hydropulse) != 0,
@@ -158,32 +166,26 @@ if (FALSE) {
       grepl("Liner|liner|Inliner|inliner|Lining|lining", well_rehab.comment), TRUE, FALSE
     )) %>%
     dplyr::select("well_id",
+                  "action_id",
                   tidyselect::starts_with("operational_start"),
                   tidyselect::starts_with("pump_test"),
                   "pump_test_2.comment_liner",
                   "pump_test_2.well_rehab",
                   "pump_test_2.substitute_pump",
-                  "pump_test_2.pressure_sleeve") %>%
-    ### fix wrong date entry for well_id = 6405
-    dplyr::mutate(pump_test_1.date = ifelse(pump_test_1.date == "0205-04-28",
-                                            "2005-04-28",
-                                            pump_test_1.date))
+                  "pump_test_2.pressure_sleeve")
 
 
   df_pump_tests %>% dplyr::count(well_id) %>%  head()
 
   to_longer_columns <- df_pump_tests %>%
     dplyr::select(
-    tidyselect::starts_with("pump_test"),
-    "pump_test_2.comment_liner",
-    "pump_test_2.well_rehab",
-    "pump_test_2.substitute_pump",
-    "pump_test_2.pressure_sleeve") %>%
+    tidyselect::starts_with("operational_start"),
+    tidyselect::starts_with("pump_test")
+    ) %>%
     names(.)
 
 
   df_pump_tests_tidy <- df_pump_tests %>%
-    #dplyr::group_by("well_id", "operational_start.date")
     dplyr::mutate(dplyr::across(tidyselect::everything(), as.character)) %>%
     tidyr::pivot_longer(cols = to_longer_columns,
                         names_to = c("key", "parameter"),
