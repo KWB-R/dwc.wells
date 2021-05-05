@@ -148,10 +148,10 @@ if (FALSE) {
     # calculate Qs and Qs_rel before and after pump tests
     dplyr::mutate(pump_test_1.Qs = pump_test_1.Q /
                     (pump_test_1.W_dynamic - pump_test_1.W_static),
-                 # pump_test_1.Qs_rel =  pump_test_1.Qs / Qs_neu,
+                  pump_test_1.Qs_rel =  pump_test_1.Qs / operational_start.Qs,
                   pump_test_2.Qs = pump_test_2.Q /
                     (pump_test_2.W_dynamic - pump_test_2.W_static),
-                 # pump_test_2.Qs_rel =  pump_test_2.Qs / Qs_neu
+                  pump_test_2.Qs_rel =  pump_test_2.Qs / operational_start.Qs
                  ) %>%
     #dplyr::mutate(dplyr::across(tidyselect::everything(), as.character)) %>%
     dplyr::arrange(well_id, pump_test.date) %>%
@@ -172,12 +172,12 @@ if (FALSE) {
                   "pump_test_2.comment_liner",
                   "pump_test_2.well_rehab",
                   "pump_test_2.substitute_pump",
-                  "pump_test_2.pressure_sleeve")
+                  "pump_test_2.pressure_sleeve") %>%
+    dplyr::select(- "pump_test.date")
 
-
-  df_pump_tests %>% dplyr::count(well_id) %>%  head()
 
   to_longer_columns <- df_pump_tests %>%
+    dplyr::ungroup() %>%
     dplyr::select(
     tidyselect::starts_with("operational_start"),
     tidyselect::starts_with("pump_test")
@@ -186,19 +186,31 @@ if (FALSE) {
 
 
   df_pump_tests_tidy <- df_pump_tests %>%
+    dplyr::ungroup() %>%
     dplyr::mutate(dplyr::across(tidyselect::everything(), as.character)) %>%
     tidyr::pivot_longer(cols = to_longer_columns,
                         names_to = c("key", "parameter"),
                         names_sep = "\\.",
-                        values_to = "value") #%>%
-    # tidyr::pivot_wider(names_from = "parameter",
-    #                    values_from = "value")
+                        values_to = "value") %>%
+    dplyr::filter(!is.na(value)) %>%
+    tidyr::pivot_wider(names_from = "parameter",
+                       values_from = "value") %>%
+    dplyr::mutate(dplyr::across(tidyselect::all_of(c("well_id", "action_id")), as.integer)) %>%
+    dplyr::mutate(dplyr::across(tidyselect::matches("date"), as.Date)) %>%
+    dplyr::mutate(dplyr::across(tidyselect::starts_with("Q"), as.double)) %>%
+    dplyr::mutate(dplyr::across(tidyselect::starts_with("W_"), as.double)) %>%
+    dplyr::mutate(dplyr::across(tidyselect::all_of(c("well_rehab",
+                                                   "substitute_pump",
+                                                   "pressure_sleeve",
+                                                   "comment_liner")), as.logical)) %>%
+    dplyr::filter(!(key == "operational_start" & action_id != 1)) %>%
+    dplyr::mutate(action_id = dplyr::if_else(key == "operational_start",
+                                             0L,
+                                             action_id)
+                  ) %>%
+    dplyr::arrange("well_id", "action_id")
 
-  df_pump_tests_tidy[1:7,] %>%
-  dplyr::mutate(pump_test_id = 1:7) %>%
-  tidyr::pivot_wider(names_from = "parameter",
-                     values_from = "value") %>%
-  View()
+  df_pump_tests_tidy %>% View()
 
 
   if (FALSE) {
