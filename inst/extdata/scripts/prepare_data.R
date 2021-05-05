@@ -131,21 +131,24 @@ if (FALSE) {
     # assign date format to dates
     dplyr::mutate(pump_test_1.date = as.Date(pump_test_1.date, format = "%Y-%m-%d"),
                   pump_test_2.date = as.Date(pump_test_2.date, format = "%Y-%m-%d")) %>%
-    #filter(!(is.na(df_pump_tests$pump_test_1.date) & is.na(df_pump_tests$pump_test_2.date))) %>% # delete row if both values are NA
+    # remove entries without dates (before or after pumping test)
+    dplyr::filter(!(is.na(df_pump_tests$pump_test_1.date) & is.na(df_pump_tests$pump_test_2.date))) %>% # delete row if both values are NA
     # get well characteristics to calculate Qs_rel
     dplyr::left_join(df_main_en, by = "well_id") %>%
     # filter data with pump tests before operational start (data refers to rehabilitated well)
     # dplyr::filter(Datum_KPVvor > Datum_Inbetriebnahme) %>%should be done later
     # calculate Qs and Qs_rel before and after pump tests
-    dplyr::mutate(pump_test_1.Qs = pump_test_1.Q /
+    dplyr::mutate(pump_test_date = ifelse(!is.na(pump_test_1.date),
+                                          pump_test_1.date, pump_test_2.date),
+                  pump_test_1.Qs = pump_test_1.Q /
                     (pump_test_1.W_dynamic - pump_test_1.W_static),
                  # pump_test_1.Qs_rel =  pump_test_1.Qs / Qs_neu,
                   pump_test_2.Qs = pump_test_2.Q /
                     (pump_test_2.W_dynamic - pump_test_2.W_static),
                  # pump_test_2.Qs_rel =  pump_test_2.Qs / Qs_neu
                  ) %>%
-    dplyr::arrange(well_id, ifelse(!is.na(pump_test_1.date),
-                                      pump_test_1.date, pump_test_2.date)) %>%
+    dplyr::arrange(well_id, pump_test_date) %>%
+    dplyr::group_by(well_id, pump_test_date)
     # check if pump test is associated with "Regenerierung"
     dplyr::mutate(pump_test_2.well_rehab = (well_rehab.general + well_rehab.shock +
                                      well_rehab.hydropulse) != 0,
@@ -167,6 +170,7 @@ if (FALSE) {
                                             pump_test_1.date))
 
 
+  df_pump_tests %>% dplyr::count(well_id) %>%  head()
 
   to_longer_columns <- df_pump_tests %>%
     dplyr::select(
@@ -188,6 +192,11 @@ if (FALSE) {
     # tidyr::pivot_wider(names_from = "parameter",
     #                    values_from = "value")
 
+  df_pump_tests_tidy[1:7,] %>%
+  dplyr::mutate(pump_test_id = 1:7) %>%
+  tidyr::pivot_wider(names_from = "parameter",
+                     values_from = "value") %>%
+  View()
 
 
   if (FALSE) {
