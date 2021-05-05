@@ -127,12 +127,7 @@ if (FALSE) {
                                       "WV_BRU_TBL_PUMPENTECHNDATEN",
                                       renamings$main,
                                       old_name_col = "old_name",
-                                      new_name_col = "new_name_en")
-
-
-
-   # clean data
-  df_pump_tests <- df_pump_tests %>%
+                                      new_name_col = "new_name_en") %>%
     # assign date format to dates
     dplyr::mutate(pump_test_1.date = as.Date(pump_test_1.date, format = "%Y-%m-%d"),
                   pump_test_2.date = as.Date(pump_test_2.date, format = "%Y-%m-%d")) %>%
@@ -152,19 +147,47 @@ if (FALSE) {
     dplyr::arrange(well_id, ifelse(!is.na(pump_test_1.date),
                                       pump_test_1.date, pump_test_2.date)) %>%
     # check if pump test is associated with "Regenerierung"
-    dplyr::mutate(well_rehab = (well_rehab.general + well_rehab.shock +
+    dplyr::mutate(pump_test_2.well_rehab = (well_rehab.general + well_rehab.shock +
                                      well_rehab.hydropulse) != 0,
-                  substitute_pump = substitute_pump != 0,
-                  pressure_sleeve =  pressure_sleeve != 0) %>%
-    dplyr::mutate(comment_Liner = ifelse(
-      grepl("Liner|liner|Inliner|inliner|Lining|lining", well_rehab.comment), "Yes", "No"
+                  pump_test_2.substitute_pump = substitute_pump != 0,
+                  pump_test_2.pressure_sleeve =  pressure_sleeve != 0) %>%
+    dplyr::mutate(pump_test_2.comment_liner = ifelse(
+      grepl("Liner|liner|Inliner|inliner|Lining|lining", well_rehab.comment), TRUE, FALSE
     )) %>%
     dplyr::select("well_id",
                   tidyselect::starts_with("operational_start"),
                   tidyselect::starts_with("pump_test"),
-                  "well_rehab",
-                  "substitute_pump",
-                  "pressure_sleeve")
+                  "pump_test_2.comment_liner",
+                  "pump_test_2.well_rehab",
+                  "pump_test_2.substitute_pump",
+                  "pump_test_2.pressure_sleeve") %>%
+    ### fix wrong date entry for well_id = 6405
+    dplyr::mutate(pump_test_1.date = ifelse(pump_test_1.date == "0205-04-28",
+                                            "2005-04-28",
+                                            pump_test_1.date))
+
+
+
+  to_longer_columns <- df_pump_tests %>%
+    dplyr::select(
+    tidyselect::starts_with("pump_test"),
+    "pump_test_2.comment_liner",
+    "pump_test_2.well_rehab",
+    "pump_test_2.substitute_pump",
+    "pump_test_2.pressure_sleeve") %>%
+    names(.)
+
+
+  df_pump_tests_tidy <- df_pump_tests %>%
+    #dplyr::group_by("well_id", "operational_start.date")
+    dplyr::mutate(dplyr::across(tidyselect::everything(), as.character)) %>%
+    tidyr::pivot_longer(cols = to_longer_columns,
+                        names_to = c("key", "parameter"),
+                        names_sep = "\\.",
+                        values_to = "value") #%>%
+    # tidyr::pivot_wider(names_from = "parameter",
+    #                    values_from = "value")
+
 
 
   if (FALSE) {
