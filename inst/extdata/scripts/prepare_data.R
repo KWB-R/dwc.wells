@@ -112,6 +112,16 @@ if (FALSE) {
 
 if (FALSE) {
 
+  # read main data
+  df_main_en <- read_select_rename(paths$db,
+                                "WV_GMS_TBL_GWBR",
+                                renamings$main,
+                                old_name_col = "old_name",
+                                new_name_col = "new_name_en") %>%
+    dplyr::select("well_id", tidyselect::starts_with("operational_start."))
+
+
+
   # read data
   df_pump_tests <- read_select_rename(paths$db,
                                       "WV_BRU_TBL_PUMPENTECHNDATEN",
@@ -128,16 +138,17 @@ if (FALSE) {
                   pump_test_2.date = as.Date(pump_test_2.date, format = "%Y-%m-%d")) %>%
     #filter(!(is.na(df_pump_tests$pump_test_1.date) & is.na(df_pump_tests$pump_test_2.date))) %>% # delete row if both values are NA
     # get well characteristics to calculate Qs_rel
-    dplyr::left_join(df_main[, c("id_Brunnen", "Datum_Inbetriebnahme", "Qs_neu")], by = c("well_id" = "id_Brunnen")) %>%
+    dplyr::left_join(df_main_en, by = "well_id") %>%
     # filter data with pump tests before operational start (data refers to rehabilitated well)
     # dplyr::filter(Datum_KPVvor > Datum_Inbetriebnahme) %>%should be done later
     # calculate Qs and Qs_rel before and after pump tests
     dplyr::mutate(pump_test_1.Qs = pump_test_1.Q /
                     (pump_test_1.W_dynamic - pump_test_1.W_static),
-                  pump_test_1.Qs_rel =  pump_test_1.Qs / Qs_neu,
+                 # pump_test_1.Qs_rel =  pump_test_1.Qs / Qs_neu,
                   pump_test_2.Qs = pump_test_2.Q /
                     (pump_test_2.W_dynamic - pump_test_2.W_static),
-                  pump_test_2.Qs_rel =  pump_test_2.Qs / Qs_neu) %>%
+                 # pump_test_2.Qs_rel =  pump_test_2.Qs / Qs_neu
+                 ) %>%
     dplyr::arrange(well_id, ifelse(!is.na(pump_test_1.date),
                                       pump_test_1.date, pump_test_2.date)) %>%
     # check if pump test is associated with "Regenerierung"
@@ -148,10 +159,12 @@ if (FALSE) {
     dplyr::mutate(comment_Liner = ifelse(
       grepl("Liner|liner|Inliner|inliner|Lining|lining", well_rehab.comment), "Yes", "No"
     )) %>%
-    dplyr::select(c("well_id", "Datum_Inbetriebnahme", "Qs_neu",
-                    "pump_test_1.date", "pump_test_1.Qs", "pump_test_1.Qs_rel",
-                    "pump_test_2.date", "pump_test_2.Qs", "pump_test_2.Qs_rel",
-                    "well_rehab", "substitute_pump", "pressure_sleeve"))
+    dplyr::select("well_id",
+                  tidyselect::starts_with("operational_start"),
+                  tidyselect::starts_with("pump_test"),
+                  "well_rehab",
+                  "substitute_pump",
+                  "pressure_sleeve")
 
 
   if (FALSE) {

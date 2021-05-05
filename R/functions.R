@@ -43,29 +43,11 @@ load_renamings_csv <- function(infile) {
 #' @param path_db full path to database
 #' @param tbl_name name of database table to be read
 #' @export
-#'
+#' @importFrom kwb.db hsGetTable
 read_ms_access <- function(path_db, tbl_name) {
 
-  # start server
-  odbc32::start_server(invisible = TRUE)
-
-  # open connection
-  con <- odbc32::odbcConnectAccess2007(path_db)
-
-  # show table names
-  #odbc32::sqlTables(con, tableType = "TABLE")$TABLE_NAME
-
-  # read data from table, "as.is = TRUE" is required to adopt data formats from ms access
-  df <- odbc32::sqlFetch(con, tbl_name,  as.is = TRUE)
-
-  odbc32::stop_server()
-
-
-  if(!is.data.frame(df)) {
-    stop("Table cannot be read. Is it already open and locked?")
-  }
-
-  df
+  kwb.db::hsGetTable(mdb = path_db,
+                     tbl = tbl_name)
 
 }
 
