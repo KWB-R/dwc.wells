@@ -184,6 +184,10 @@ if (FALSE) {
     ) %>%
     names(.)
 
+  # Helper function
+  cumsum_no_na <- function (x) {
+    cumsum(ifelse(is.na(x), 0, x)) + x*0
+  }
 
   df_pump_tests_tidy <- df_pump_tests %>%
     dplyr::ungroup() %>%
@@ -208,7 +212,14 @@ if (FALSE) {
                                              0L,
                                              action_id)
                   ) %>%
-    dplyr::arrange("well_id", "action_id")
+    dplyr::arrange("well_id", "action_id") %>%
+    dplyr::mutate(well_rehab = cumsum_no_na(well_rehab),
+                  substitute_pump = cumsum_no_na(substitute_pump),
+                  pressure_sleeve = cumsum_no_na(pressure_sleeve),
+                  comment_liner = cumsum_no_na(comment_liner)
+                  )
+
+
 
   df_pump_tests_tidy %>% View()
 
