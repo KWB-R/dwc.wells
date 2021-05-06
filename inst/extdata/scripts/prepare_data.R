@@ -106,14 +106,8 @@ if (FALSE) {
 if (FALSE) {
 
   # read main data
-  df_main_en <- read_select_rename(paths$db,
-                                "WV_GMS_TBL_GWBR",
-                                renamings$main,
-                                old_name_col = "old_name",
-                                new_name_col = "new_name_en") %>%
+  df_main_tmp <- df_main %>%
     dplyr::select("well_id", tidyselect::starts_with("operational_start."))
-
-
 
   # read data
   df_pump_tests <- read_select_rename(paths$db,
@@ -135,7 +129,7 @@ if (FALSE) {
                                           as.Date(pump_test_1.date),
                                           as.Date(pump_test_2.date))) %>%
     # get well characteristics to calculate Qs_rel
-    dplyr::left_join(df_main_en, by = "well_id") %>%
+    dplyr::left_join(df_main_tmp, by = "well_id") %>%
     # filter data with pump tests before operational start (data refers to rehabilitated well)
     # dplyr::filter(Datum_KPVvor > Datum_Inbetriebnahme) %>%should be done later
     # calculate Qs and Qs_rel before and after pump tests
@@ -175,11 +169,11 @@ if (FALSE) {
     tidyselect::starts_with("operational_start"),
     tidyselect::starts_with("pump_test")
     ) %>%
-    names(.)
+    names()
 
   # Helper function
   cumsum_no_na <- function (x) {
-    cumsum(ifelse(is.na(x), 0, x)) + x*0
+    cumsum(ifelse(is.na(x), 0, x))
   }
 
   df_pump_tests_tidy <- df_pump_tests %>%
@@ -203,13 +197,17 @@ if (FALSE) {
     dplyr::filter(!(key == "operational_start" & action_id != 1)) %>%
     dplyr::mutate(action_id = dplyr::if_else(key == "operational_start",
                                              0L,
-                                             action_id)
+                                             action_id),
+                  Qs_rel = dplyr::if_else(key == "operational_start",
+                                          100,
+                                          Qs_rel)
                   ) %>%
-    dplyr::arrange("well_id", "action_id") %>%
-    dplyr::mutate(well_rehab = cumsum_no_na(well_rehab),
-                  substitute_pump = cumsum_no_na(substitute_pump),
-                  pressure_sleeve = cumsum_no_na(pressure_sleeve),
-                  comment_liner = cumsum_no_na(comment_liner)
+    dplyr::arrange(well_id, action_id) %>%
+    dplyr::group_by(well_id) %>%
+    dplyr::mutate(n.well_rehab = cumsum_no_na(well_rehab),
+                  n.substitute_pump = cumsum_no_na(substitute_pump),
+                  n.pressure_sleeve = cumsum_no_na(pressure_sleeve),
+                  n.comment_liner = cumsum_no_na(comment_liner)
                   )
 
 
