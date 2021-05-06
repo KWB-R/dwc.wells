@@ -43,31 +43,30 @@ load_renamings_csv <- function(infile) {
 #' @param path_db full path to database
 #' @param tbl_name name of database table to be read
 #' @export
-#'
+#' @importFrom kwb.db hsGetTable
 read_ms_access <- function(path_db, tbl_name) {
 
+  kwb.db::hsGetTable(mdb = path_db,
+                     tbl = tbl_name)
+
+}
+
+read_ms_access_mri <- function(path_db, tbl_name) {
   # start server
   odbc32::start_server(invisible = TRUE)
-
   # open connection
   con <- odbc32::odbcConnectAccess2007(path_db)
-
   # show table names
   #odbc32::sqlTables(con, tableType = "TABLE")$TABLE_NAME
-
   # read data from table, "as.is = TRUE" is required to adopt data formats from ms access
   df <- odbc32::sqlFetch(con, tbl_name,  as.is = TRUE)
-
   odbc32::stop_server()
-
-
   if(!is.data.frame(df)) {
     stop("Table cannot be read. Is it already open and locked?")
   }
-
   df
-
 }
+
 
 
 # read_select_rename -----------------------------------------------------------
@@ -135,25 +134,6 @@ rename_values <- function(x,
 }
 
 
-# replace_NAs_in_factor_var ----------------------------------------------------
-
-#' rename values of a character vector according to renamings table
-#'
-#' @param x factor with NAs or gaps ("")
-#' @export
-#'
-replace_NAs_in_factor_var <- function(x) {
-
-  # turn NA into "Unbekannt"
-  x %>%
-    forcats::fct_explicit_na(na_level = "Unbekannt") %>%
-    forcats::fct_recode("Unbekannt" = "") %>%
-    droplevels() %>%
-    forcats::fct_infreq()
-
-}
-
-
 # summarise_marginal_factor_levels ---------------------------------------------
 
 #' summarise factor levels with relative frequency below a threshold
@@ -171,24 +151,23 @@ summarise_marginal_factor_levels <- function(x, perc_threshold, marginal_name) {
 
 }
 
-# replace_NAs_in_factor_vars ---------------------------------------------------
 
-#' rename values of a character vector according to renamings table
+
+# tidy_factor ------------------------------------------------------------------
+#' turn character into factor, sort factor levels and replace NA level
 #'
-#' @param df data frame, with factors to be checked for NAs
+#' @param x character vector to be turned to factor
+#'
 #' @export
 #'
-replace_NAs_in_factor_vars <- function(df) {
+tidy_factor <- function(x) {
 
-  factor_vars <- names(df)[sapply(df, is.factor)]
-
-  for (factor_var in factor_vars) {
-    df[, factor_var] <- replace_NAs_in_factor_var(df[, factor_var])
-  }
-
-  df
+  x %>% factor() %>% # turn character to factor
+    forcats::fct_infreq() %>% # sort according to frequency
+    forcats::fct_explicit_na(na_level = "Unbekannt") # turn NA values to 'Unbekannt'
 
 }
+
 
 
 # frequency_table --------------------------------------------------------------

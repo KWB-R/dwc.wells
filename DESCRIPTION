@@ -22,14 +22,16 @@ BugReports: https://github.com/KWB-R/dwc.wells/issues
 Imports:
     dplyr,
     forcats,
+    kwb.db,
     magrittr,
     odbc32,
     readxl,
     rlang,
     scales,
-    tidyr
+    tidyr,
+    tidyselect
 Remotes:
-    github::vh-d/odbc32,
+    github::kwb-r/kwb.db@dev,
     github::kwb-r/kwb.utils,
     github::kwb-r/sema.berlin.utils
 Encoding: UTF-8
