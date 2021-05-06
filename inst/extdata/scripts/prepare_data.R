@@ -7,8 +7,8 @@ path_list <- list(
   db = file.path(kwb.utils::desktop(), "tmp/DWC/wells/BWB_WV_Brunnenexport_2017.mdb"),
   renamings = dwc.wells::extdata_file("renamings"),
   renamings_main = "<renamings>/main.csv",
-  renamings_material_filter = "<renamings>/material_filter.csv",
-  renamings_material_vollrohr = "<renamings>/material_vollrohr.csv",
+  renamings_material_screen = "<renamings>/material_screen.csv",
+  renamings_material_casing = "<renamings>/material_casing.csv",
   renamings_surface_water = "<renamings>/surface_water.csv",
   renamings_quality = "<renamings>/quality.csv",
   lookup_actions = "<renamings>/actions.csv"
@@ -23,8 +23,8 @@ if (TRUE) {
 
   # load renamings
 
-  elements <- c("main", "quality", "material_filter",
-                "material_vollrohr", "surface_water")
+  elements <- c("main", "quality", "material_screen",
+                "material_casing", "surface_water")
 
   renamings <- lapply(paste("renamings", elements, sep = "_"), function(x) {
     load_renamings_csv(paths[[x]])
@@ -46,7 +46,7 @@ if (FALSE) {
                                 "WV_GMS_TBL_GWBR",
                                 renamings$main,
                                 old_name_col = "old_name",
-                                new_name_col = "new_name_de")
+                                new_name_col = "new_name_en")
 
 
   # read data with water body information
@@ -54,7 +54,7 @@ if (FALSE) {
                                     "WV_GMS_TBL_BOHRUNGEN",
                                     renamings$main,
                                     old_name_col = "old_name",
-                                    new_name_col = "new_name_de")
+                                    new_name_col = "new_name_en")
 
 
   # append water body data
@@ -62,47 +62,40 @@ if (FALSE) {
 
 
   # filter Vertikalfilterbrunnen
-  df_main <- df_main %>% dplyr::filter(grepl("V$", Name_Brunnen))
+  df_main <- df_main %>% dplyr::filter(grepl("V$", well_name))
 
 
-  # group categorical variables (material, surface water)
+  # group categorical variables
   df_main <- df_main %>%
-    dplyr::mutate(Filtermaterial = rename_values(Filtermaterial,
-                                                 renamings$material_filter),
-                  Vollrohrmaterial = rename_values(Vollrohrmaterial,
-                                                   renamings$material_vollrohr),
-                  Gewaesser = rename_values(Gewaesser, renamings$surface_water)
-    )
+    dplyr::mutate(screen_material = rename_values(screen_material,
+                                                 renamings$material_screen),
+                  casing_material = rename_values(casing_material,
+                                                   renamings$material_casing),
+                  surface_water = rename_values(surface_water, renamings$surface_water))
+
 
   # correct false date imports in case of NA
   df_main <- df_main %>%
-    dplyr::mutate(Datum_Inbetriebnahme = dplyr::na_if(Datum_Inbetriebnahme,
-                                                      "1899-12-30 00:00:00"))
+    dplyr::mutate(operational_start.date = dplyr::na_if(
+      operational_start.date, "1899-12-30 00:00:00")
+      )
+
 
   # modify data types
+  factor_cols <- c("well_function", "operational_state", "aquifer_confinement",
+                   "casing_material", "screen_material", "site", "surface_water")
+
   df_main <- df_main %>%
-    dplyr::mutate(Baujahr = as.Date(Baujahr, format = "%Y-%m-%d"),
-                  Datum_Inbetriebnahme = as.Date(Datum_Inbetriebnahme,
-                                                 format = "%Y-%m-%d"),
-                  Jahr_Inbetriebnahme = lubridate::year(Datum_Inbetriebnahme),
-                  Datum_RWS = as.Date(Datum_RWS, format = "%d.%m.%Y"),
-                  Funktion_Brunnen = as.factor(Funktion_Brunnen),
-                  Zustand_Brunnen = as.factor(Zustand_Brunnen),
-                  Aquifer = as.factor(Aquifer),
-                  Spannung = as.factor(Spannung),
-                  Vollrohrmaterial = as.factor(Vollrohrmaterial),
-                  Filtermaterial = as.factor(Filtermaterial),
-                  Gebiet = as.factor(Gebiet),
-                  Gewaesser = as.factor(Gewaesser))
-
-
-  # turn any NAs in factor variables to "Unbekannt"
-  df_main <- replace_NAs_in_factor_vars(df_main)
+    dplyr::mutate(construction_year = as.Date(construction_year, format = "%Y-%m-%d"),
+                  operational_start.date = as.Date(operational_start.date, format = "%Y-%m-%d"),
+                  operational_start.year = lubridate::year(operational_start.date),
+                  monitoring.date = as.Date(monitoring.date, format = "%d.%m.%Y")) %>%
+    dplyr::mutate(dplyr::across(.cols = all_of(factor_cols), .fns = tidy_factor))
 
 
   # Gebiet short name
-  df_main$Gebiet_short <- substr(df_main$Name_Brunnen, 1, 3)
-  table(df_main$Gebiet, df_main$Gebiet_short)
+  df_main$site_short <- substr(df_main$well_name, 1, 3)
+  table(df_main$site, df_main$site_short)
 
 }
 
@@ -224,6 +217,13 @@ if (FALSE) {
   df_pump_tests_tidy %>% View()
 
 
+  a <- df_pump_tests %>% dplyr::filter(is.na(df_pump_tests$pump_test_1.date) & is.na(df_pump_tests$pump_test_2.date))
+
+  frequency_table(a$well_rehab)
+  frequency_table(a$substitute_pump)
+  frequency_table(a$pressure_sleeve)
+
+
   if (FALSE) {
     write.table(df_pump_tests, file = "Kurzpumpversuche.csv", dec = ".", sep = ";", row.names = FALSE)
   }
@@ -240,19 +240,20 @@ if (FALSE) {
                              "WV_BRU_TBL_ERG",
                              renamings$main,
                              old_name_col = "old_name",
-                             new_name_col = "new_name_de")
+                             new_name_col = "new_name_en")
 
+
+  str(df_Q)
 
   # turn date to date format
   df_Q <- df_Q %>%
-    dplyr::mutate(Datum_Qmom = as.Date(Datum_Qmom, format = "%Y-%m-%d"))
+    dplyr::mutate(monitoring.date = as.Date(monitoring.date, format = "%Y-%m-%d"))
 
 
   # check ratio Qmom / Qzul
   df_Q <- df_Q %>%
-    dplyr::left_join(df_main[, c("id_Brunnen", "Qzul")]) %>%
-    dplyr::mutate(Ratio_Qmom_Qzul = Qmom / Qzul) %>%
-    dplyr::arrange(-Ratio_Qmom_Qzul)
+    dplyr::left_join(df_main[, c("well_id", "admissible_discharge")]) %>%
+    dplyr::mutate(Ratio_Qmom_Qzul = monitoring.Q / admissible_discharge)
 
 
   if (FALSE) {
@@ -275,41 +276,42 @@ if (FALSE) {
                                    "DB2LABOR_Daten",
                                    renamings$main,
                                    old_name_col = "old_name",
-                                   new_name_col = "new_name_de")
+                                   new_name_col = "new_name_en")
+
 
 
   # Select and rename quality parameter given in renamings file 'quality.csv'
   df_quality <- df_quality %>%
-    dplyr::filter(Parameter %in% renamings$quality$old_name) %>%
-    dplyr::mutate(Parameter = rename_values(Parameter,
+    dplyr::filter(quality.parameter %in% renamings$quality$old_name) %>%
+    dplyr::mutate(quality.parameter = rename_values(quality.parameter,
                                             renamings$quality,
                                             old_name_col = "old_name",
-                                            new_name_col = "new_name_de"))
+                                            new_name_col = "new_name_en"))
 
 
   df_quality <- df_quality %>%
-    dplyr::mutate(Datum = as.Date(Datum, format = "%Y-%m-%d"))
+    dplyr::mutate(quality.date = as.Date(quality.date, format = "%Y-%m-%d"))
 
-
-  # transform concentration units from "µg/l" to "mg/l"
-  indices <- df_quality$Einheit == "µg/l"
-  df_quality[indices, "Wert"] <- df_quality[indices, "Wert"] * 10^-3
-  df_quality[indices, "Einheit"] <- "mg/l"
+  # transform concentration units from "m�g/l" to "mg/l"
+  indices <- df_quality$quality.unit == "\u00B5g/l"
+  df_quality[indices, "quality.value"] <- df_quality[indices, "quality.value"] * 10^-3
+  df_quality[indices, "quality.unit"] <- "mg/l"
 
   # delete measurements in unit "mg/kg"
   df_quality <- df_quality %>%
-    dplyr::filter(Einheit != "mg/kg") %>%
-    dplyr::filter(! (Parameter == "TS" & Einheit == "%"))
+    dplyr::filter(quality.unit != "mg/kg") %>%
+    dplyr::filter(! (quality.parameter == "DR" & quality.unit == "%"))
 
-  df_quality %>% dplyr::group_by(Parameter) %>%
-    dplyr::summarise(length(unique(Einheit)))
+
+  df_quality %>% dplyr::group_by(quality.parameter) %>%
+    dplyr::summarise(length(unique(quality.unit)))
 
   # check units in quality data
-  for (par in unique(df_quality$Parameter)) {
+  for (par in unique(df_quality$quality.parameter)) {
 
     a <- df_quality %>%
-      dplyr::filter(Parameter == par) %>%
-      dplyr::pull(Einheit) %>%
+      dplyr::filter(quality.parameter == par) %>%
+      dplyr::pull(quality.unit) %>%
       frequency_table()
 
     cat(paste0("\n", par, ":\n"))
@@ -318,23 +320,24 @@ if (FALSE) {
 
   # aggregate / clean data
   df_quality_agg <- df_quality %>%
-    dplyr::mutate(Datum_Wasserchemie = as.Date(Datum, format = "%Y-%m-%d")) %>%
-    dplyr::group_by(id_Brunnen, Parameter) %>%
-    dplyr::summarise(median = median(Wert, na.rm = TRUE),
-                     std_dev = sd(Wert, na.rm = TRUE),
-                     number = dplyr::n()) %>%
-    dplyr::filter(Parameter != "GV") %>%  # discard Gluehverlust data (only 11 wells with observations)
-    dplyr::select(id_Brunnen, Parameter, median) %>%
-    tidyr::pivot_wider(names_from = Parameter, values_from = median,
-                       id_cols = "id_Brunnen") %>%
+    dplyr::mutate(quality.date = as.Date(quality.date, format = "%Y-%m-%d")) %>%
+    dplyr::group_by(well_id, quality.parameter) %>%
+    dplyr::summarise(quality.median = median(quality.value, na.rm = TRUE),
+                     quality.std_dev = sd(quality.value, na.rm = TRUE),
+                     quality.number = dplyr::n()) %>%
+    dplyr::filter(quality.parameter != "LOI") %>%  # discard Gluehverlust data (only 11 wells with observations)
+    dplyr::select(well_id, quality.parameter, quality.median) %>%
+    tidyr::pivot_wider(names_from = quality.parameter,
+                       values_from = quality.median,
+                       id_cols = "well_id") %>%
     data.frame()
 
-  lookup_par_unit <- aggregate(Einheit~Parameter, df_quality, FUN = unique)
+
+  lookup_par_unit <- aggregate(quality.unit~quality.parameter, df_quality, FUN = unique)
 
   df_quality_agg_long <- df_quality_agg %>%
-    tidyr::pivot_longer(cols = -1, names_to = "Parameter", values_to = "Wert") %>%
+    tidyr::pivot_longer(cols = -1, names_to = "quality.parameter", values_to = "quality.value") %>%
     dplyr::left_join(lookup_par_unit)
-
 
 }
 

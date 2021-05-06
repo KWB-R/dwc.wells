@@ -1,58 +1,58 @@
-old_name;description;tables;name_Hella (adapted in col 'new_name_de');new_name_de;new_name_en;cat/num;comment
-Bohrungsnummer;Auto-ID Bohrung;WV_GMS_TBL_GWBR, (WV_GMS_TBL_BOHRUNGEN, WV_GMS_TBL_BOHRTECHNIK);id_Bohrung;id_Bohrung;drilling_id;id;
-BHG_GWBR_NR;Auto-ID nach Ausbau zum Brunnen;WV_GMS_TBL_GWBR, WV_BRU_TBL_PUMPENTECHNDATEN, (WV_BRU_TBL_ERG), DB2LABOR_Daten;id_Brunnen;id_Brunnen;well_id;id;
-MESS_ID;Auto-ID Link Labordaten;WV_GMS_TBL_GWBR;id_Messstelle;id_Messstelle;well_id_laboratory;id;
-NAME_MESSSTELLE;Klarname des Brunnens nach BWB-Schema;WV_GMS_TBL_GWBR;name_Brunnen;Name_Brunnen;well_name;id;
-BRU_BAUJAHR;Baujahr des Brunnens;WV_GMS_TBL_GWBR;Baujahr;Baujahr;construction_year;num;
-BRU_DATUM_INBETRIEB;Inbetriebnahmedatum des Brunnens;WV_GMS_TBL_GWBR;dat_Inbetriebnahme;Inbetriebnahme.Datum;operational_start.date;date;
-BRU_FUNKTION;Funktion des Brunnens/ Zweck;WV_GMS_TBL_GWBR;fil_Brunnenfunktion;Funktion_Brunnen;well_function;cat;
-BRU_BETRIEBSZUST;Betriebszustand;WV_GMS_TBL_GWBR;fil_Brunnenzustand;Zustand_Brunnen;operational_state;cat;
-ADMINISTRATIVESMESSGEBIET;;WV_GMS_TBL_GWBR;;Gebiet;site;cat;ergänzt von Mathias
-BRU_ZUL_BRN_LEIST;Zulässige Förderleistung in m³/h;WV_GMS_TBL_GWBR;Qzul;Qzul;admissible_discharge;num;geändert durch Mathias, vorher BRU_ZUL_BRN_LEISTUNG
-BRU_Q_SPEZ_NEU;Spezifische Ergiebigkeit bei Neubau in m³/(h*m);WV_GMS_TBL_GWBR;Qs_neu;Inbetriebnahme.Qs;operational_start.Qs;num;
-BRU_PV_Q;Neubau-Pumpversuch: Förderleistung [m³/h];WV_GMS_TBL_GWBR;mw_Q_neu;Q_neu;current_discharge_new;num;
-BRU_PV_RWS;Neubau-Pumpversuch: Ruhewasserspiege [m u OKS];WV_GMS_TBL_GWBR;mw_RWS_neu;RWS_neu;static_water_level_new;num;
-BRU_PV_WSPI;Neubau-Pumpversuch: Betriebswasserspiegel Innenpegel [m u OKS];WV_GMS_TBL_GWBR;mw_BWS_neu;BWS_neu;dynamic_water_level_new;num;
-RUHEWASSERSPIEGEL_GEMESSEN_AM;Datum Ruhewasserspiegel;WV_GMS_TBL_GWBR;dat_RWS;Datum_RWS;date_static_water_level;date;
-RUHEWASSERSPIEGEL_GEMESSEN_BEI;Ruhewasserspiegel in m u OKS;WV_GMS_TBL_GWBR;mw_RWS;RWS;static_water_level;num;
-GW_DRUCK;Aquiferverhältnisse (frei, gespannt, artesisch);WV_GMS_TBL_GWBR;mw_Aquifer;Aquifer;./.;cat;Hella fragt nach
-GWSPANNUNG;Grundwasserleiter (gespannt/ ungespannt);WV_GMS_TBL_GWBR;mw_Spannung;Spannung;aquifer_confinement;cat;Hella fragt nach
-;Gewichteter kf-Wert;;mw_kf;kf;hydraulic conductivity;num;"Hella fragt nach; geändert Mathias 30.4.2021"
-BRU_FART;Material des Filterrohrs;WV_GMS_TBL_GWBR;mw_Filtermaterial;Filtermaterial;screen_material;cat;
-BRU_VART;Material des Vollrohrs;WV_GMS_TBL_GWBR;mw_Vollrohrmaterial;Vollrohrmaterial;casing_material;cat;
-BRU_FART_falsch;Material des Filterrohrs // Vorhandensein Inliner?;;mw_Inliner_falsch;;;cat;Spalte gibt es nicht, Info wird aus Filtermaterial entnommen
-BRU_DN_FILTER;Durchmesser des Filterrohrs in mm;WV_GMS_TBL_GWBR;mw_Durchmesser;Durchmesser;screen_diameter;num;--> es gibt nur bestimmte Werte, z.B. 300 - 400 - 600
-FILTEROBERKANTE_M;Lage der Filteroberkante in m u OKS;WV_GMS_TBL_GWBR;mw_FOK;FOK;screen_top_level;num;
-FILTERUNTERKANTE_M;Lage der Filterunterkante in m u OKS;WV_GMS_TBL_GWBR;mw_FUK;FUK;screen_bottom_level;num;
-ANZAHL_FILTERSTRECKEN;Anzahl Filterstrecken;WV_GMS_TBL_GWBR;mw_Filteranzahl;Filteranzahl;number_screens;cat;
-BRU_AUSBTIEFE;Tiefe des Brunnens in m NN;WV_GMS_TBL_GWBR;mw_Endteufe;Endteufe;well_depth;num;
-BRU_OKS;Höhe Oberkante Brunnenschacht in m NN;WV_GMS_TBL_GWBR;;;well_top_level;num;Ist für einige betriebliche Größen der Referenzpunkt
-BOHRUNGSNUMMER;Auto-ID Bohrung / Join;WV_GMS_TBL_BOHRUNGEN, WV_GMS_TBL_BOHRTECHNIK, (WV_GMS_TBL_GWBR);id_Bohrung;id_Bohrung;drilling_id;id;gleiche ID wie in WV_GMS_TBL_GWBR, aber großgeschrieben
-NAME_GEWAESSER;Nächstgelegenes Oberflächengewässer;WV_GMS_TBL_BOHRUNGEN;;Gewaesser;surface_water;cat;ergänzt von Mathias
-ENTFERNUNG_GEWAESSER;kürzeste horizontale Entfernung zum nächstgelegenen Oberflächengewässer in m;WV_GMS_TBL_BOHRUNGEN;;Entfernung_Gewaesser;surface_water_distance;num;muss noch ergänzt werden -> Hella
-BOHRVERFAHREN;Bohrverfahren (trocken, Lufthebe, Spül usw.);WV_GMS_TBL_BOHRTECHNIK;mw_Bohrverfahren;Bohrverfahren;drilling_method;cat;
-Q_N_M3_H;Nennleistung der installierten Pumpe in m³/h;WV_BRU_TBL_PUMPENTECHNDATEN;Qnenn;Qnenn;nominal_discharge_pump;num;
-KPV1_BDAT;Datum Pumpversuch vor Instandhaltung;WV_BRU_TBL_PUMPENTECHNDATEN;dat_KPVvor;KPV1.Datum;pump_test_1.date;date;
-KPV1_RWS;Ruhewasserspiegel Pumpversuch vor Instandhaltung in m u OKS;WV_BRU_TBL_PUMPENTECHNDATEN;mw_RWS_KPVvor;KPV1.RWS;pump_test_1.W_static;num;
-KPV1_WSPI;Betriebswasserspiegel Pumpversuch vor Instandhaltung in m u OKS;WV_BRU_TBL_PUMPENTECHNDATEN;mw_BWS_KPVvor;KPV1.BWS;pump_test_1.W_dynamic;num;
-KPV1_Q;Förderleistung Pumpversuch vor Instandhaltung in m³/h;WV_BRU_TBL_PUMPENTECHNDATEN;mw_Q_KPVvor;KPV1.Q;pump_test_1.Q;num;
-KPV2_BDAT;Datum Pumpversuch nach Instandhaltung;WV_BRU_TBL_PUMPENTECHNDATEN;dat_KPVnach;KPV2.Datum;pump_test_2.date;date;
-KPV2_RWS;Ruhewasserspiegel Pumpversuch nach Instandhaltung in m u OKS;WV_BRU_TBL_PUMPENTECHNDATEN;mw_RWS_KPVnach;KPV2.RWS;pump_test_2.W_static;num;
-KPV2_WSPI;Betriebswasserspiegel Pumpversuch nach Instandhaltung in m u OKS;WV_BRU_TBL_PUMPENTECHNDATEN;mw_BWS_KPVnach;KPV2.BWS;pump_test_2.W_dynamic;num;
-KPV2_Q;Förderleistung Pumpversuch nach Instandhaltung in m³/h;WV_BRU_TBL_PUMPENTECHNDATEN;mw_Q_KPVnach;KPV2.Q;pump_test_2.Q;num;
-ART_PW;;WV_BRU_TBL_PUMPENTECHNDATEN;;Pumpenwechsel;substitute_pump;cat_temp;ergänzt von Mathias
-ART_REG;;WV_BRU_TBL_PUMPENTECHNDATEN;;REG_Mechanisch;well_rehab.general;cat_temp;ergänzt von Mathias
-ART_REG_SS;;WV_BRU_TBL_PUMPENTECHNDATEN;;REG_Sprengschock;well_rehab.shock;cat_temp;ergänzt von Mathias
-ART_HYDRO_MS;;WV_BRU_TBL_PUMPENTECHNDATEN;;REG_Hydropuls;well_rehab.hydropulse;cat_temp;ergänzt von Mathias
-ART_REG_SAN;;WV_BRU_TBL_PUMPENTECHNDATEN;;Sanierung;well_rehab.inliner;cat_temp;ergänzt von Mathias
-ART_MAN;;WV_BRU_TBL_PUMPENTECHNDATEN;;Manschette;pressure_sleeve;cat_temp;ergänzt von Mathias
-ART_BEM;;WV_BRU_TBL_PUMPENTECHNDATEN;;Bemerkung;well_rehab.comment;txt;ergänzt von Mathias
-Bhg_GWBR_Nr;;WV_BRU_TBL_ERG;id_Brunnen;id_Brunnen;well_id;id;hier klein geschrieben, aber selbe ID wie in in Stammdaten (WV_GMS_TBL_GWBR)
-MESS_DAT;Datum der Messung;WV_BRU_TBL_ERG;dat_Qmom;Datum_Qmom;curent_discharge_date;date;
-Q_MOM;momentane gemessene Förderleistung in m³/h;WV_BRU_TBL_ERG;Qmom;Qmom;current_discharge;num;
-WSP_I;Betriebswasserspiegel in M u OKS;WV_BRU_TBL_ERG;;BWS;dynamic_water_level;num;ergänzt von Mathias
-PRUEFAUFTRAG;Veranlassung der Analyse;DB2LABOR_Daten;fil_lab-Veranlassung;Veranlassung;sampling_goal;cat;
-PN_DATUMO;Probenahme-Datum;DB2LABOR_Daten;dat_Wasserchemie;Datum;date;date;geändert Mathias 29.4.2021
-PARAM_KURZNAME;Parameter;DB2LABOR_Daten;;Parameter;parameter;cat;geändert Mathias 29.4.2021
-MESSWERT_MW;;DB2LABOR_Daten;;Wert;value;num;geändert Mathias 29.4.2021
-EINHEIT;Maßeinheit zum Messwert;DB2LABOR_Daten;unit_Wasserchemie;Einheit;unit;cat;
+old_name;description;tables;new_name_de;new_name_en;cat/num;comment
+Bohrungsnummer;Auto-ID Bohrung;WV_GMS_TBL_GWBR, (WV_GMS_TBL_BOHRUNGEN, WV_GMS_TBL_BOHRTECHNIK);id_Bohrung;drilling_id;id;
+BHG_GWBR_NR;Auto-ID nach Ausbau zum Brunnen;WV_GMS_TBL_GWBR, WV_BRU_TBL_PUMPENTECHNDATEN, (WV_BRU_TBL_ERG), DB2LABOR_Daten;id_Brunnen;well_id;id;
+MESS_ID;Auto-ID Link Labordaten;WV_GMS_TBL_GWBR;id_Messstelle;well_id_laboratory;id;
+NAME_MESSSTELLE;Klarname des Brunnens nach BWB-Schema;WV_GMS_TBL_GWBR;Name_Brunnen;well_name;id;
+BRU_BAUJAHR;Baujahr des Brunnens;WV_GMS_TBL_GWBR;Baujahr;construction_year;num;
+BRU_DATUM_INBETRIEB;Inbetriebnahmedatum des Brunnens;WV_GMS_TBL_GWBR;Inbetriebnahme.Datum;operational_start.date;date;
+BRU_FUNKTION;Funktion des Brunnens/ Zweck;WV_GMS_TBL_GWBR;Funktion_Brunnen;well_function;cat;
+BRU_BETRIEBSZUST;Betriebszustand;WV_GMS_TBL_GWBR;Zustand_Brunnen;operational_state;cat;
+ADMINISTRATIVESMESSGEBIET;;WV_GMS_TBL_GWBR;Gebiet;site;cat;ergänzt von Mathias
+BRU_ZUL_BRN_LEIST;Zulässige Förderleistung in m³/h;WV_GMS_TBL_GWBR;Qzul;admissible_discharge;num;geändert durch Mathias, vorher BRU_ZUL_BRN_LEISTUNG
+BRU_Q_SPEZ_NEU;Spezifische Ergiebigkeit bei Neubau in m³/(h*m);WV_GMS_TBL_GWBR;Inbetriebnahme.Qs;operational_start.Qs;num;
+BRU_PV_Q;Neubau-Pumpversuch: Förderleistung [m³/h];WV_GMS_TBL_GWBR;Q_neu;operational_start.Q;num;
+BRU_PV_RWS;Neubau-Pumpversuch: Ruhewasserspiege [m u OKS];WV_GMS_TBL_GWBR;RWS_neu;operational_start.W_static;num;
+BRU_PV_WSPI;Neubau-Pumpversuch: Betriebswasserspiegel Innenpegel [m u OKS];WV_GMS_TBL_GWBR;BWS_neu;operational_start.W_dyamic;num;
+RUHEWASSERSPIEGEL_GEMESSEN_AM;Datum Ruhewasserspiegel;WV_GMS_TBL_GWBR;Datum_RWS;monitoring.date;date;
+RUHEWASSERSPIEGEL_GEMESSEN_BEI;Ruhewasserspiegel in m u OKS;WV_GMS_TBL_GWBR;RWS;monitoring.W_static;num;
+GW_DRUCK;Aquiferverhältnisse (frei, gespannt, artesisch);WV_GMS_TBL_GWBR;Aquifer;./.;cat;Hella fragt nach
+GWSPANNUNG;Grundwasserleiter (gespannt/ ungespannt);WV_GMS_TBL_GWBR;Spannung;aquifer_confinement;cat;Hella fragt nach
+;Gewichteter kf-Wert;;kf;hydraulic conductivity;num;"Hella fragt nach; geändert Mathias 30.4.2021"
+BRU_FART;Material des Filterrohrs;WV_GMS_TBL_GWBR;Filtermaterial;screen_material;cat;
+BRU_VART;Material des Vollrohrs;WV_GMS_TBL_GWBR;Vollrohrmaterial;casing_material;cat;
+BRU_FART_falsch;Material des Filterrohrs // Vorhandensein Inliner?;;;;cat;Spalte gibt es nicht, Info wird aus Filtermaterial entnommen
+BRU_DN_FILTER;Durchmesser des Filterrohrs in mm;WV_GMS_TBL_GWBR;Durchmesser;screen_diameter;num;--> es gibt nur bestimmte Werte, z.B. 300 - 400 - 600
+FILTEROBERKANTE_M;Lage der Filteroberkante in m u OKS;WV_GMS_TBL_GWBR;FOK;screen_top_level;num;
+FILTERUNTERKANTE_M;Lage der Filterunterkante in m u OKS;WV_GMS_TBL_GWBR;FUK;screen_bottom_level;num;
+ANZAHL_FILTERSTRECKEN;Anzahl Filterstrecken;WV_GMS_TBL_GWBR;Filteranzahl;number_screens;cat;
+BRU_AUSBTIEFE;Tiefe des Brunnens in m NN;WV_GMS_TBL_GWBR;Endteufe;well_depth;num;
+BRU_OKS;Höhe Oberkante Brunnenschacht in m NN;WV_GMS_TBL_GWBR;;well_top_level;num;Ist für einige betriebliche Größen der Referenzpunkt
+BOHRUNGSNUMMER;Auto-ID Bohrung / Join;WV_GMS_TBL_BOHRUNGEN, WV_GMS_TBL_BOHRTECHNIK, (WV_GMS_TBL_GWBR);id_Bohrung;drilling_id;id;gleiche ID wie in WV_GMS_TBL_GWBR, aber großgeschrieben
+NAME_GEWAESSER;Nächstgelegenes Oberflächengewässer;WV_GMS_TBL_BOHRUNGEN;Gewaesser;surface_water;cat;ergänzt von Mathias
+ENTFERNUNG_GEWAESSER;kürzeste horizontale Entfernung zum nächstgelegenen Oberflächengewässer in m;WV_GMS_TBL_BOHRUNGEN;Entfernung_Gewaesser;surface_water.distance;num;muss noch ergänzt werden -> Hella
+BOHRVERFAHREN;Bohrverfahren (trocken, Lufthebe, Spül usw.);WV_GMS_TBL_BOHRTECHNIK;Bohrverfahren;drilling_method;cat;
+Q_N_M3_H;Nennleistung der installierten Pumpe in m³/h;WV_BRU_TBL_PUMPENTECHNDATEN;Qnenn;nominal_discharge_pump;num;
+KPV1_BDAT;Datum Pumpversuch vor Instandhaltung;WV_BRU_TBL_PUMPENTECHNDATEN;KPV1.Datum;pump_test_1.date;date;
+KPV1_RWS;Ruhewasserspiegel Pumpversuch vor Instandhaltung in m u OKS;WV_BRU_TBL_PUMPENTECHNDATEN;KPV1.RWS;pump_test_1.W_static;num;
+KPV1_WSPI;Betriebswasserspiegel Pumpversuch vor Instandhaltung in m u OKS;WV_BRU_TBL_PUMPENTECHNDATEN;KPV1.BWS;pump_test_1.W_dynamic;num;
+KPV1_Q;Förderleistung Pumpversuch vor Instandhaltung in m³/h;WV_BRU_TBL_PUMPENTECHNDATEN;KPV1.Q;pump_test_1.Q;num;
+KPV2_BDAT;Datum Pumpversuch nach Instandhaltung;WV_BRU_TBL_PUMPENTECHNDATEN;KPV2.Datum;pump_test_2.date;date;
+KPV2_RWS;Ruhewasserspiegel Pumpversuch nach Instandhaltung in m u OKS;WV_BRU_TBL_PUMPENTECHNDATEN;KPV2.RWS;pump_test_2.W_static;num;
+KPV2_WSPI;Betriebswasserspiegel Pumpversuch nach Instandhaltung in m u OKS;WV_BRU_TBL_PUMPENTECHNDATEN;KPV2.BWS;pump_test_2.W_dynamic;num;
+KPV2_Q;Förderleistung Pumpversuch nach Instandhaltung in m³/h;WV_BRU_TBL_PUMPENTECHNDATEN;KPV2.Q;pump_test_2.Q;num;
+ART_PW;;WV_BRU_TBL_PUMPENTECHNDATEN;Pumpenwechsel;substitute_pump;cat_temp;ergänzt von Mathias
+ART_REG;;WV_BRU_TBL_PUMPENTECHNDATEN;REG_Mechanisch;well_rehab.general;cat_temp;ergänzt von Mathias
+ART_REG_SS;;WV_BRU_TBL_PUMPENTECHNDATEN;REG_Sprengschock;well_rehab.shock;cat_temp;ergänzt von Mathias
+ART_HYDRO_MS;;WV_BRU_TBL_PUMPENTECHNDATEN;REG_Hydropuls;well_rehab.hydropulse;cat_temp;ergänzt von Mathias
+ART_REG_SAN;;WV_BRU_TBL_PUMPENTECHNDATEN;Sanierung;well_rehab.inliner;cat_temp;ergänzt von Mathias
+ART_MAN;;WV_BRU_TBL_PUMPENTECHNDATEN;Manschette;pressure_sleeve;cat_temp;ergänzt von Mathias
+ART_BEM;;WV_BRU_TBL_PUMPENTECHNDATEN;Bemerkung;well_rehab.comment;txt;ergänzt von Mathias
+Bhg_GWBR_Nr;;WV_BRU_TBL_ERG;id_Brunnen;well_id;id;hier klein geschrieben, aber selbe ID wie in in Stammdaten (WV_GMS_TBL_GWBR)
+MESS_DAT;Datum der Messung;WV_BRU_TBL_ERG;Datum_Qmom;monitoring.date;date;
+Q_MOM;momentane gemessene Förderleistung in m³/h;WV_BRU_TBL_ERG;Qmom;monitoring.Q;num;
+WSP_I;Betriebswasserspiegel in M u OKS;WV_BRU_TBL_ERG;BWS;monitoring.W_dynamic;num;ergänzt von Mathias
+PRUEFAUFTRAG;Veranlassung der Analyse;DB2LABOR_Daten;Veranlassung;quality.goal;cat;
+PN_DATUMO;Probenahme-Datum;DB2LABOR_Daten;Datum;quality.date;date;geändert Mathias 29.4.2021
+PARAM_KURZNAME;Parameter;DB2LABOR_Daten;Parameter;quality.parameter;cat;geändert Mathias 29.4.2021
+MESSWERT_MW;;DB2LABOR_Daten;Wert;quality.value;num;geändert Mathias 29.4.2021
+EINHEIT;Maßeinheit zum Messwert;DB2LABOR_Daten;Einheit;quality.unit;cat;

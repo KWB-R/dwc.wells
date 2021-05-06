@@ -6,11 +6,11 @@
 
 if (FALSE) {
 
-  variables_cat <- c("Zustand_Brunnen",
-                     "Filtermaterial",
-                     "Gebiet",
-                     "Spannung",
-                     "Gewaesser")
+  variables_cat <- c("operational_state",
+                     "screen_material",
+                     "site",
+                     "aquifer_confinement",
+                     "surface_water")
 
 
   plots_cat <- lapply(variables_cat, function(x) {
@@ -18,35 +18,28 @@ if (FALSE) {
   })
 
 
-  plot_frequencies(df_main, "Gewaesser")
-
-  ggplot2::ggsave("frequency_plot_Gewaesser_v3.png", width = 5,
-                  height = 6, dpi = 600)
-
-
   plot_num_1 <- plot_distribution(Data = df_main,
-                                  variable = "Jahr_Inbetriebnahme",
-                                  title = "Jahr Inbetriebnahme",
+                                  variable = "operational_start.year",
+                                  title = "operational start",
                                   vertical_x_axis_labels = FALSE) +
     ggplot2::scale_x_continuous(limits = c(1920, 2020),
                                 breaks = scales::pretty_breaks())
 
   plot_num_2 <- plot_distribution(Data = df_main,
-                                  variable = "Qs_neu",
-                                  title = "Qs (neu)",
+                                  variable = "operational_start.Qs",
+                                  title = "specific capacity at operational start",
                                   vertical_x_axis_labels = FALSE)
 
   plot_num_3 <- plot_frequencies(Data = df_main,
-                                 variable = "Filteranzahl",
-                                 title = "Filteranzahl",
+                                 variable = "number_screens",
+                                 title = "number of screens",
                                  offset_perc_labels = 0.05,
                                  vertical_x_axis_labels = FALSE)
 
-
   plot_num_4 <- plot_distribution(Data = df_main,
-                                  variable = "Durchmesser",
+                                  variable = "screen_diameter",
                                   binwidth = 50,
-                                  title = "Durchmesser",
+                                  title = "diameter",
                                   vertical_x_axis_labels = FALSE)
 
   plots <- cowplot::plot_grid(plotlist = c(plots_cat,
@@ -54,9 +47,10 @@ if (FALSE) {
                                                 plot_num_3, plot_num_4)),
                               nrow = 3, align = "hv", scale = 0.9)
 
-  ggplot2::ggsave("frequency_plots_v4.png", plot = plots, width = 20,
+  ggplot2::ggsave("frequency_plots_en.png", plot = plots, width = 20,
                   height = 20, dpi = 600)
 
+  getwd()
 
   htmlwidgets::saveWidget(widget = plotly::ggplotly(plot_num_1),
                           file = "frequency_plot_Inbetriebnahme.html",
@@ -77,7 +71,7 @@ if (FALSE) {
 # required data set: df_Q
 
 # distribution
-p1 <- ggplot2::ggplot(df_Q, ggplot2::aes(x = Qmom/Qzul, y = stat(count) / sum(stat(count)))) +
+p1 <- ggplot2::ggplot(df_Q, ggplot2::aes(x = Ratio_Qmom_Qzul, y = stat(count) / sum(stat(count)))) +
   ggplot2::geom_histogram(binwidth = 0.1, fill = "grey", col = "white", boundary = 1) +
   ggplot2::scale_x_continuous(limits = c(0, 2)) +
   ggplot2::scale_y_continuous(name = "Percentage",
@@ -87,7 +81,7 @@ p1 <- ggplot2::ggplot(df_Q, ggplot2::aes(x = Qmom/Qzul, y = stat(count) / sum(st
 plotly::ggplotly(p1)
 
 # cumulative distribution
-l <- lapply(seq(0, 2, 0.1), function(x) table(df_Q$Ratio > x))
+l <- lapply(seq(0, 2, 0.1), function(x) table(df_Q$Ratio_Qmom_Qzul > x))
 names(l) <- sprintf("%3.1f", seq(0, 2, 0.1))
 df <- data.frame(do.call("rbind", l))
 colnames(df) <- c("valid", "invalid")
