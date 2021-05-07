@@ -109,6 +109,7 @@ if (FALSE) {
   df_main_tmp <- df_main %>%
     dplyr::select("well_id", tidyselect::starts_with("operational_start."))
 
+
   # read data
   df_pump_tests <- read_select_rename(paths$db,
                                       "WV_BRU_TBL_PUMPENTECHNDATEN",
@@ -186,6 +187,7 @@ if (FALSE) {
     dplyr::filter(!is.na(value)) %>%
     tidyr::pivot_wider(names_from = "parameter",
                        values_from = "value") %>%
+    dplyr::select(- year) %>%
     dplyr::mutate(dplyr::across(tidyselect::all_of(c("well_id", "action_id")), as.integer)) %>%
     dplyr::mutate(dplyr::across(tidyselect::matches("date"), as.Date)) %>%
     dplyr::mutate(dplyr::across(tidyselect::starts_with("Q"), as.double)) %>%
@@ -204,7 +206,15 @@ if (FALSE) {
                   ) %>%
     dplyr::arrange(well_id, action_id) %>%
     dplyr::group_by(well_id) %>%
-    dplyr::mutate(n.well_rehab = cumsum_no_na(well_rehab),
+    dplyr::left_join(df_main_tmp %>%
+                     dplyr::select(well_id, operational_start.date),
+                     by = "well_id") %>%
+    dplyr::mutate(days_since_operational_start = difftime(date,
+                                                          operational_start.date,
+                                                          units = "days") %>% as.integer(),
+                  days_since_last_action = days_since_operational_start - dplyr::lag(days_since_operational_star,
+                                                                                     default = 0),
+                  n.well_rehab = cumsum_no_na(well_rehab),
                   n.substitute_pump = cumsum_no_na(substitute_pump),
                   n.pressure_sleeve = cumsum_no_na(pressure_sleeve),
                   n.comment_liner = cumsum_no_na(comment_liner)
