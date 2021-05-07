@@ -179,7 +179,7 @@ if (FALSE) {
   df_pump_tests_tidy <- df_pump_tests %>%
     dplyr::ungroup() %>%
     dplyr::mutate(dplyr::across(tidyselect::everything(), as.character)) %>%
-    tidyr::pivot_longer(cols = to_longer_columns,
+    tidyr::pivot_longer(cols = tidyselect::all_of(to_longer_columns),
                         names_to = c("key", "parameter"),
                         names_sep = "\\.",
                         values_to = "value") %>%
