@@ -220,9 +220,23 @@ if (FALSE) {
                   n.comment_liner = cumsum_no_na(comment_liner)
                   )
 
+ df_days_since_last_rehabs <- df_pump_tests_tidy %>%
+    dplyr::ungroup() %>%
+    dplyr::group_by(well_id, operational_start.date, n.well_rehab) %>%
+    dplyr::summarise(date = min(date)) %>%
+    dplyr::mutate(days_since_last_rehab = difftime(date,
+                           operational_start.date,
+                           units = "days") %>% as.integer()) %>%
+    dplyr::select(-date)
 
 
-  df_pump_tests_tidy %>% View()
+
+ df_pump_tests_tidy  <- df_pump_tests_tidy %>%
+  dplyr::left_join(df_days_since_last_rehabs,
+                   by = c("well_id", "operational_start.date", "n.well_rehab"))
+
+
+ df_pump_tests_tidy %>%  View()
 
   frequency_table(a$well_rehab)
   frequency_table(a$substitute_pump)
