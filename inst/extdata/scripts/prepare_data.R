@@ -212,7 +212,7 @@ if (FALSE) {
     dplyr::mutate(days_since_operational_start = difftime(date,
                                                           operational_start.date,
                                                           units = "days") %>% as.integer(),
-                  days_since_last_action = days_since_operational_start - dplyr::lag(days_since_operational_star,
+                  days_since_last_action = days_since_operational_start - dplyr::lag(days_since_operational_start,
                                                                                      default = 0),
                   n.well_rehab = cumsum_no_na(well_rehab),
                   n.substitute_pump = cumsum_no_na(substitute_pump),
@@ -223,9 +223,6 @@ if (FALSE) {
 
 
   df_pump_tests_tidy %>% View()
-
-
-  a <- df_pump_tests %>% dplyr::filter(is.na(df_pump_tests$pump_test_1.date) & is.na(df_pump_tests$pump_test_2.date))
 
   frequency_table(a$well_rehab)
   frequency_table(a$substitute_pump)
