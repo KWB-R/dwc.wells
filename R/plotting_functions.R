@@ -51,7 +51,7 @@ plot_frequencies <- function(Data, variable, title = variable, offset_perc_label
 #' @param boundary left boundary of bars, default: 0
 #'
 #' @export
-#'
+#' @importFrom sema.berlin.utils my_theme
 plot_distribution <- function(Data, variable, binwidth = NULL, title,
                              vertical_x_axis_labels = TRUE, boundary = 0) {
 
