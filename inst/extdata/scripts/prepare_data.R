@@ -109,6 +109,14 @@ if (FALSE) {
   df_main_tmp <- df_main %>%
     dplyr::select("well_id", tidyselect::starts_with("operational_start."))
 
+  # Helper functions for artifical date fillup
+  default_intervall <- function(dates_2, dates_1, func = mean) {
+  as.integer(abs(round(func(dates_2 - dates_1, na.rm = TRUE), 0)))
+  }
+
+  real_intervall <- function(dates_2, dates_1) {
+    as.integer(round(dates_2 - dates_1, 0))
+  }
 
   # read data
   df_pump_tests <- read_select_rename(paths$db,
@@ -121,14 +129,27 @@ if (FALSE) {
                   pump_test_2.date = as.Date(pump_test_2.date, format = "%Y-%m-%d")) %>%
     ### fix wrong date entry for well_id = 6405
     dplyr::mutate(pump_test_1.date = dplyr::if_else(pump_test_1.date == as.Date("0205-04-28"),
-                                            as.Date("2005-04-28"),
-                                            pump_test_1.date)) %>%
+                                                    as.Date("2005-04-28"),
+                                                    pump_test_1.date)) %>%
     # delete row if both values are NA
     dplyr::filter(!(is.na(pump_test_1.date) & is.na(pump_test_2.date))) %>%
     # add date column not containing NAs (required for creating an "action_id")
-    dplyr::mutate(pump_test.date = dplyr::if_else(!is.na(pump_test_1.date),
-                                          as.Date(pump_test_1.date),
-                                          as.Date(pump_test_2.date))) %>%
+    dplyr::mutate(intervall_days = dplyr::if_else(!is.na(pump_test_1.date) & !is.na(pump_test_2.date),
+                                                  real_intervall(pump_test_2.date,
+                                                                 pump_test_1.date),
+                                                  default_intervall(pump_test_2.date,
+                                                                    pump_test_1.date,
+                                                                    func = mean)),
+                  intervall_type = dplyr::if_else(!is.na(pump_test_1.date) & !is.na(pump_test_2.date),
+                                                  "real",
+                                                  "default"),
+                  pump_test_1.date = dplyr::if_else(is.na(pump_test_1.date) & !is.na(pump_test_2.date),
+                                                   pump_test_2.date - intervall_days,
+                                                   pump_test_1.date),
+                  pump_test_2.date = dplyr::if_else(is.na(pump_test_2.date) & !is.na(pump_test_1.date),
+                                                   pump_test_1.date + intervall_days,
+                                                   pump_test_2.date),
+                  action_date = pump_test_1.date + ceiling(intervall_days/2)) %>%
     # get well characteristics to calculate Qs_rel
     dplyr::left_join(df_main_tmp, by = "well_id") %>%
     # filter data with pump tests before operational start (data refers to rehabilitated well)
@@ -140,14 +161,14 @@ if (FALSE) {
                   pump_test_2.Qs = pump_test_2.Q /
                     (pump_test_2.W_dynamic - pump_test_2.W_static),
                   pump_test_2.Qs_rel =  pump_test_2.Qs / operational_start.Qs
-                 ) %>%
+    ) %>%
     #dplyr::mutate(dplyr::across(tidyselect::everything(), as.character)) %>%
-    dplyr::arrange(well_id, pump_test.date) %>%
+    dplyr::arrange(well_id, action_date) %>%
     dplyr::group_by(well_id) %>%
     dplyr::mutate(action_id = dplyr::row_number()) %>%
     # check if pump test is associated with "Regenerierung"
     dplyr::mutate(pump_test_2.well_rehab = (well_rehab.general + well_rehab.shock +
-                                     well_rehab.hydropulse) != 0,
+                                              well_rehab.hydropulse) != 0,
                   pump_test_2.substitute_pump = substitute_pump != 0,
                   pump_test_2.pressure_sleeve =  pressure_sleeve != 0) %>%
     dplyr::mutate(pump_test_2.comment_liner = ifelse(
@@ -155,14 +176,14 @@ if (FALSE) {
     )) %>%
     dplyr::select("well_id",
                   "action_id",
+                  "action_date",
+                  tidyselect::starts_with("intervall_"),
                   tidyselect::starts_with("operational_start"),
                   tidyselect::starts_with("pump_test"),
                   "pump_test_2.comment_liner",
                   "pump_test_2.well_rehab",
                   "pump_test_2.substitute_pump",
-                  "pump_test_2.pressure_sleeve") %>%
-    dplyr::select(- "pump_test.date")
-
+                  "pump_test_2.pressure_sleeve")
 
   to_longer_columns <- df_pump_tests %>%
     dplyr::ungroup() %>%
@@ -200,6 +221,9 @@ if (FALSE) {
     dplyr::mutate(action_id = dplyr::if_else(key == "operational_start",
                                              0L,
                                              action_id),
+                  action_date = dplyr::if_else(key == "operational_start",
+                                             date,
+                                             action_date),
                   Qs_rel = dplyr::if_else(key == "operational_start",
                                           1,
                                           Qs_rel)
@@ -212,30 +236,17 @@ if (FALSE) {
     dplyr::mutate(days_since_operational_start = difftime(date,
                                                           operational_start.date,
                                                           units = "days") %>% as.integer(),
-                  days_since_last_action = days_since_operational_start - dplyr::lag(days_since_operational_start,
-                                                                                     default = 0),
                   n.well_rehab = cumsum_no_na(well_rehab),
                   n.substitute_pump = cumsum_no_na(substitute_pump),
                   n.pressure_sleeve = cumsum_no_na(pressure_sleeve),
                   n.comment_liner = cumsum_no_na(comment_liner)
-                  )
-
- df_days_since_last_rehabs <- df_pump_tests_tidy %>%
-    dplyr::ungroup() %>%
-    dplyr::group_by(well_id, operational_start.date, n.well_rehab) %>%
-    dplyr::summarise(date = min(date)) %>%
-    dplyr::mutate(days_since_operational_start_rehab = difftime(date,
-                           operational_start.date,
-                           units = "days") %>% as.integer(),
-                  days_since_last_rehab = days_since_operational_start_rehab - dplyr::lag(days_since_operational_start_rehab,
-                                                                                     default = 0)) %>%
-    dplyr::select(-date)
-
-
-
- df_pump_tests_tidy  <- df_pump_tests_tidy %>%
-  dplyr::left_join(df_days_since_last_rehabs,
-                   by = c("well_id", "operational_start.date", "n.well_rehab"))
+                  ) %>%
+   dplyr::ungroup() %>%
+   dplyr::arrange(well_id, n.well_rehab, date) %>%
+   dplyr::group_by(well_id, n.well_rehab) %>%
+   dplyr::mutate(days_since_last_rehab =  dplyr::if_else(n.well_rehab > 0,
+                                                         as.integer(date - min(date) + (min(date) - min(action_date))),
+                                                         NA_integer_))
 
 
  df_pump_tests_tidy %>%  View()
