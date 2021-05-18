@@ -224,9 +224,11 @@ if (FALSE) {
     dplyr::ungroup() %>%
     dplyr::group_by(well_id, operational_start.date, n.well_rehab) %>%
     dplyr::summarise(date = min(date)) %>%
-    dplyr::mutate(days_since_last_rehab = difftime(date,
+    dplyr::mutate(days_since_operational_start_rehab = difftime(date,
                            operational_start.date,
-                           units = "days") %>% as.integer()) %>%
+                           units = "days") %>% as.integer(),
+                  days_since_last_rehab = days_since_operational_start - dplyr::lag(days_since_operational_start_rehab,
+                                                                                     default = 0)) %>%
     dplyr::select(-date)
 
 
