@@ -227,7 +227,7 @@ if (FALSE) {
     dplyr::mutate(days_since_operational_start_rehab = difftime(date,
                            operational_start.date,
                            units = "days") %>% as.integer(),
-                  days_since_last_rehab = days_since_operational_start - dplyr::lag(days_since_operational_start_rehab,
+                  days_since_last_rehab = days_since_operational_start_rehab - dplyr::lag(days_since_operational_start_rehab,
                                                                                      default = 0)) %>%
     dplyr::select(-date)
 
