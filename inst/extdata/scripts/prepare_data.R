@@ -201,7 +201,7 @@ if (FALSE) {
                                              0L,
                                              action_id),
                   Qs_rel = dplyr::if_else(key == "operational_start",
-                                          100,
+                                          1,
                                           Qs_rel)
                   ) %>%
     dplyr::arrange(well_id, action_id) %>%
