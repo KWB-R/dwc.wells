@@ -110,11 +110,11 @@ if (FALSE) {
     dplyr::select("well_id", tidyselect::starts_with("operational_start."))
 
   # Helper functions for artifical date fillup
-  default_intervall <- function(dates_2, dates_1, func = mean) {
+  default_interval <- function(dates_2, dates_1, func = mean) {
   as.integer(abs(round(func(dates_2 - dates_1, na.rm = TRUE), 0)))
   }
 
-  real_intervall <- function(dates_2, dates_1) {
+  real_interval <- function(dates_2, dates_1) {
     as.integer(round(dates_2 - dates_1, 0))
   }
 
@@ -134,22 +134,22 @@ if (FALSE) {
     # delete row if both values are NA
     dplyr::filter(!(is.na(pump_test_1.date) & is.na(pump_test_2.date))) %>%
     # add date column not containing NAs (required for creating an "action_id")
-    dplyr::mutate(intervall_days = dplyr::if_else(!is.na(pump_test_1.date) & !is.na(pump_test_2.date),
-                                                  real_intervall(pump_test_2.date,
+    dplyr::mutate(interval_days = dplyr::if_else(!is.na(pump_test_1.date) & !is.na(pump_test_2.date),
+                                                  real_interval(pump_test_2.date,
                                                                  pump_test_1.date),
-                                                  default_intervall(pump_test_2.date,
+                                                  default_interval(pump_test_2.date,
                                                                     pump_test_1.date,
                                                                     func = mean)),
-                  intervall_type = dplyr::if_else(!is.na(pump_test_1.date) & !is.na(pump_test_2.date),
+                  interval_type = dplyr::if_else(!is.na(pump_test_1.date) & !is.na(pump_test_2.date),
                                                   "real",
                                                   "default"),
                   pump_test_1.date = dplyr::if_else(is.na(pump_test_1.date) & !is.na(pump_test_2.date),
-                                                   pump_test_2.date - intervall_days,
+                                                   pump_test_2.date - interval_days,
                                                    pump_test_1.date),
                   pump_test_2.date = dplyr::if_else(is.na(pump_test_2.date) & !is.na(pump_test_1.date),
-                                                   pump_test_1.date + intervall_days,
+                                                   pump_test_1.date + interval_days,
                                                    pump_test_2.date),
-                  action_date = pump_test_1.date + ceiling(intervall_days/2)) %>%
+                  action_date = pump_test_1.date + ceiling(interval_days/2)) %>%
     # get well characteristics to calculate Qs_rel
     dplyr::left_join(df_main_tmp, by = "well_id") %>%
     # filter data with pump tests before operational start (data refers to rehabilitated well)
@@ -177,7 +177,7 @@ if (FALSE) {
     dplyr::select("well_id",
                   "action_id",
                   "action_date",
-                  tidyselect::starts_with("intervall_"),
+                  tidyselect::starts_with("interval_"),
                   tidyselect::starts_with("operational_start"),
                   tidyselect::starts_with("pump_test"),
                   "pump_test_2.comment_liner",
