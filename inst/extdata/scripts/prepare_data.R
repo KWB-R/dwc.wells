@@ -246,7 +246,7 @@ if (FALSE) {
    dplyr::group_by(well_id, n.well_rehab) %>%
    dplyr::mutate(days_since_last_rehab =  dplyr::if_else(n.well_rehab > 0,
                                                          as.integer(date - min(date) + (min(date) - min(action_date))),
-                                                         NA_integer_))
+                                                         days_since_operational_start))
 
 
  df_pump_tests_tidy %>%  View()
