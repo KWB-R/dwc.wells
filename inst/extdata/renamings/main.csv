@@ -12,7 +12,7 @@ BRU_ZUL_BRN_LEIST;Zulässige Förderleistung in m³/h;WV_GMS_TBL_GWBR;Qzul;admissib
 BRU_Q_SPEZ_NEU;Spezifische Ergiebigkeit bei Neubau in m³/(h*m);WV_GMS_TBL_GWBR;Inbetriebnahme.Qs;operational_start.Qs;num;
 BRU_PV_Q;Neubau-Pumpversuch: Förderleistung [m³/h];WV_GMS_TBL_GWBR;Q_neu;operational_start.Q;num;
 BRU_PV_RWS;Neubau-Pumpversuch: Ruhewasserspiege [m u OKS];WV_GMS_TBL_GWBR;RWS_neu;operational_start.W_static;num;
-BRU_PV_WSPI;Neubau-Pumpversuch: Betriebswasserspiegel Innenpegel [m u OKS];WV_GMS_TBL_GWBR;BWS_neu;operational_start.W_dyamic;num;
+BRU_PV_WSPI;Neubau-Pumpversuch: Betriebswasserspiegel Innenpegel [m u OKS];WV_GMS_TBL_GWBR;BWS_neu;operational_start.W_dynamic;num;
 RUHEWASSERSPIEGEL_GEMESSEN_AM;Datum Ruhewasserspiegel;WV_GMS_TBL_GWBR;Datum_RWS;monitoring.date;date;
 RUHEWASSERSPIEGEL_GEMESSEN_BEI;Ruhewasserspiegel in m u OKS;WV_GMS_TBL_GWBR;RWS;monitoring.W_static;num;
 GW_DRUCK;Aquiferverhältnisse (frei, gespannt, artesisch);WV_GMS_TBL_GWBR;Aquifer;./.;cat;Hella fragt nach
