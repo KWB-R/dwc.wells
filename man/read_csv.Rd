@@ -2,7 +2,7 @@
 % Please edit documentation in R/prepare_functions.R
 \name{read_csv}
 \alias{read_csv}
-\title{Title read csv data file exported by Sebastian Schimmelpfennig from db2}
+\title{read csv data file exported by Sebastian Schimmelpfennig from db2}
 \usage{
 read_csv(
   file,
@@ -30,5 +30,5 @@ read_csv(
 \item{na.strings}{string that represents NA, default = "(null)"}
 }
 \description{
-Title read csv data file exported by Sebastian Schimmelpfennig from db2
+read csv data file exported by Sebastian Schimmelpfennig from db2
 }
