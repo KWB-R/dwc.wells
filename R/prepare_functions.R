@@ -35,6 +35,29 @@ load_renamings_csv <- function(infile) {
   read.csv(file = infile, sep = ";", stringsAsFactors = FALSE, na.strings=c(""))
 }
 
+# read_csv ---------------------------------------------------------------------
+
+#' read csv data file exported by Sebastian Schimmelpfennig from db2
+#'
+#' @param file path to csv file
+#' @param header logical, default = TRUE
+#' @param fileEncoding default = UTF-8
+#' @param skip number of rows to skip, default = 2
+#' @param dec decimal separator, default = '.'
+#' @param sep columns separator, default = 'tab'
+#' @param na.strings string that represents NA, default = "(null)"
+#'
+#' @export
+#' @importFrom utils write.table
+#'
+read_csv <- function(file, header = TRUE, fileEncoding = "UTF-8",
+                     skip = 2, dec = ".", sep = "\t",
+                     na.strings = "(null)") {
+
+  read.csv(file = file, header = header, fileEncoding = fileEncoding,
+           skip = skip, dec = dec, sep = sep, na.strings = na.strings)
+}
+
 
 # read_ms_access ---------------------------------------------------------------
 
@@ -69,7 +92,7 @@ read_ms_access_mri <- function(path_db, tbl_name) {
 
 
 
-# read_select_rename -----------------------------------------------------------
+# read_select_rename (delete) --------------------------------------------------
 
 #' read table from MS Access data base; select and rename columns as defined in
 #' renamings table ('old_name' -> 'new_name')
@@ -109,6 +132,38 @@ read_select_rename <- function(path_db, tbl_name, renamings,
 
 }
 
+
+# select_rename_cols -----------------------------------------------------------
+#'
+#' selects and renames columns from a data frame according to a reference table
+#'
+#' @param df data frame with cols to be renamed
+#' @param renamings name of data frame with renamings
+#' @param old_name_col name of column with original variable names
+#' @param new_name_col name of column with new variable names
+#' @importFrom stats setNames
+#' @export
+#'
+select_rename_cols <- function(df, renamings,
+                               old_name_col = "old_name",
+                               new_name_col = "new_name") {
+
+
+  # make all column names upper case
+  colnames(df) <- toupper(colnames(df))
+
+  # select defined columns in df and renamings
+  df <- df[, colnames(df) %in% renamings[!is.na(renamings[, new_name_col]),
+                                         old_name_col]]
+  renamings <- renamings[renamings[, old_name_col] %in% colnames(df),]
+
+  # rename columns
+  colnames(df) <- rename_values(colnames(df), renamings,
+                                old_name_col, new_name_col)
+
+  df
+
+}
 
 # rename_values ----------------------------------------------------------------
 
@@ -182,8 +237,8 @@ tidy_factor <- function(x) {
 frequency_table <- function(x, perc_digits = 1) {
 
   data.frame(table(x, useNA = "ifany", deparse.level = 0)) %>%
-    dplyr::arrange(-Freq) %>%
-    dplyr::mutate(perc = round(Freq / sum(Freq) * 100, perc_digits)) %>%
-    dplyr::rename(value = Var1, n = Freq)
+    dplyr::arrange(-.data[["Freq"]]) %>%
+    dplyr::mutate(perc = round(.data[["Freq"]] / sum(.data[["Freq"]]) * 100, perc_digits)) %>%
+    dplyr::rename(value = .data[["Var1"]], n = .data[["Freq"]])
 
 }

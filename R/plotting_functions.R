@@ -9,20 +9,24 @@
 #'
 #' @export
 #'
-plot_frequencies <- function(Data, variable, title = variable, offset_perc_labels = 0.1, vertical_x_axis_labels = TRUE) {
+plot_frequencies <- function(Data,
+                             variable,
+                             title = variable,
+                             offset_perc_labels = 0.1,
+                             vertical_x_axis_labels = TRUE) {
 
   # count frequencies
   df <- data.frame(table(Data[, variable], useNA = "ifany")) %>%
-    dplyr::arrange(-Freq) %>%
-    dplyr::mutate(share = Freq / sum(Freq)) %>%
-    dplyr::mutate(pos = Freq + max(Freq) * offset_perc_labels) %>%
-    dplyr::mutate(factor(Var1, levels = unique(Var1)))
+    dplyr::arrange(-.data[["Freq"]]) %>%
+    dplyr::mutate(share = .data[["Freq"]] / sum(.data[["Freq"]])) %>%
+    dplyr::mutate(pos = .data[["Freq"]] + max(.data[["Freq"]]) * offset_perc_labels) %>%
+    dplyr::mutate(factor(.data[["Var1"]], levels = unique(.data[["Var1"]])))
 
   # plot
-  p <- ggplot2::ggplot(df, ggplot2::aes(x = Var1, y = Freq)) +
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[["Var1"]], y = .data[["Freq"]])) +
     ggplot2::geom_bar(stat = "identity", width = 0.7, fill = "lightblue") +
     ggplot2::geom_text(
-      ggplot2::aes(label = scales::percent(share, accuracy = 1), y = pos)
+      ggplot2::aes(label = scales::percent(.data[["share"]], accuracy = 1), y = .data[["pos"]])
       ) +
     ggplot2::scale_y_continuous(breaks = scales::pretty_breaks()) +
     #ggplot2::scale_x_discrete(expand = c(0.1, 0.1)) +
