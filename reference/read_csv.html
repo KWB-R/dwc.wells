@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • dwc.wells</title>
+<title>read csv data file exported by Sebastian Schimmelpfennig from db2 — read_csv • dwc.wells</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,8 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="read csv data file exported by Sebastian Schimmelpfennig from db2 — read_csv" />
+<meta property="og:description" content="read csv data file exported by Sebastian Schimmelpfennig from db2" />
 
 
 
@@ -58,7 +59,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -108,115 +109,62 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>read csv data file exported by Sebastian Schimmelpfennig from db2</h1>
+    <small class="dont-index">Source: <a href='https://github.com/KWB-R/dwc.wells/blob/master/R/prepare_functions.R'><code>R/prepare_functions.R</code></a></small>
+    <div class="hidden name"><code>read_csv.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>read csv data file exported by Sebastian Schimmelpfennig from db2</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>read_csv</span><span class='op'>(</span>
+  <span class='va'>file</span>,
+  header <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  fileEncoding <span class='op'>=</span> <span class='st'>"UTF-8"</span>,
+  skip <span class='op'>=</span> <span class='fl'>2</span>,
+  dec <span class='op'>=</span> <span class='st'>"."</span>,
+  sep <span class='op'>=</span> <span class='st'>"\t"</span>,
+  na.strings <span class='op'>=</span> <span class='st'>"(null)"</span>
+<span class='op'>)</span></pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="extdata_file.html">extdata_file()</a></code> </p>
-        </td>
-        <td><p>Get Path to File in This Package</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="frequency_table.html">frequency_table()</a></code> </p>
-        </td>
-        <td><p>calculate absolute and relative frequencies of categorical varables</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="load_renamings_csv.html">load_renamings_csv()</a></code> </p>
-        </td>
-        <td><p>load renaming table from original excel file</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="load_renamings_excel.html">load_renamings_excel()</a></code> </p>
-        </td>
-        <td><p>load renaming table from original excel file</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_distribution.html">plot_distribution()</a></code> </p>
-        </td>
-        <td><p>plot frequency distribution of numerical variable</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_frequencies.html">plot_frequencies()</a></code> </p>
-        </td>
-        <td><p>plot frequency distribution of factor variable</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="read_csv.html">read_csv()</a></code> </p>
-        </td>
-        <td><p>read csv data file exported by Sebastian Schimmelpfennig from db2</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="read_ms_access.html">read_ms_access()</a></code> </p>
-        </td>
-        <td><p>read table from MS Access data base via odbc connection under 64-bit-R</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="read_select_rename.html">read_select_rename()</a></code> </p>
-        </td>
-        <td><p>read table from MS Access data base; select and rename columns as defined in
-renamings table ('old_name' -&gt; 'new_name')</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="rename_values.html">rename_values()</a></code> </p>
-        </td>
-        <td><p>rename values of a character vector according to renamings table</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="select_rename_cols.html">select_rename_cols()</a></code> </p>
-        </td>
-        <td><p>selects and renames columns from a data frame according to a reference table</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="summarise_marginal_factor_levels.html">summarise_marginal_factor_levels()</a></code> </p>
-        </td>
-        <td><p>summarise factor levels with relative frequency below a threshold</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="tidy_factor.html">tidy_factor()</a></code> </p>
-        </td>
-        <td><p>turn character into factor, sort factor levels and replace NA level</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>file</th>
+      <td><p>path to csv file</p></td>
+    </tr>
+    <tr>
+      <th>header</th>
+      <td><p>logical, default = TRUE</p></td>
+    </tr>
+    <tr>
+      <th>fileEncoding</th>
+      <td><p>default = UTF-8</p></td>
+    </tr>
+    <tr>
+      <th>skip</th>
+      <td><p>number of rows to skip, default = 2</p></td>
+    </tr>
+    <tr>
+      <th>dec</th>
+      <td><p>decimal separator, default = '.'</p></td>
+    </tr>
+    <tr>
+      <th>sep</th>
+      <td><p>columns separator, default = 'tab'</p></td>
+    </tr>
+    <tr>
+      <th>na.strings</th>
+      <td><p>string that represents NA, default = "(null)"</p></td>
+    </tr>
     </table>
-  </div>
 
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
