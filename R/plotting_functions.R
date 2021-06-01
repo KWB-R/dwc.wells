@@ -1,3 +1,58 @@
+#  correlation_plot ------------------------------------------------------------
+
+#' plots Qs_rel vs. input variable as box plot (categorical input variable)
+#' or scatterplot (numerical input variable)
+#'
+#' @param df data frame
+#' @param x column name of x variable"
+#' @param y column name of y variable (default Qs_rel")
+#'
+#' @export
+#'
+correlation_plot <- function(df, x, y = "Qs_rel") {
+
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x]], y = .data[[y]])) +
+    ggplot2::scale_y_continuous(labels = scales::percent,
+                       breaks = scales::pretty_breaks()) +
+    sema.berlin.utils::my_theme() +
+    #theme(plot.subtitle = element_text(color = "deepskyblue4", face = "italic")) +
+    ggplot2::labs(x = "", title = gsub("_", " ", x))
+
+  if (is.numeric(df[, x])) {
+    p +  ggplot2::geom_point(size = 0.8)
+  } else {
+    p + ggplot2::geom_boxplot(width = 0.5)
+  }
+
+}
+
+# plot_Qs_over_time -------------------------------------------------------------
+plot_Qs_over_time <- function(df, xmax = 40, legend_position = "top") {
+
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = well_age_years, y = Qs_rel,
+                                   col = n_rehab, shape = key2)) +
+    ggplot2::geom_point() +
+    ggplot2::geom_line(ggplot2::aes(group = "all")) +
+    ggplot2::scale_color_manual(values = rev(RColorBrewer::brewer.pal(length(levels(df$n_rehab)), "RdYlGn"))) +
+    #ggplot2::scale_color_manual(values = rev(scales::hue_pal()(length(levels(df$n_rehab))))) +
+    ggplot2::scale_x_continuous(
+      limits = c(0, xmax),
+      breaks = scales::pretty_breaks()) +
+    ggplot2::scale_y_continuous(
+      limits = c(0, 1),
+      labels = scales::percent,
+      breaks = scales::pretty_breaks()) +
+    sema.berlin.utils::my_theme(legend.position = legend_position) +
+    ggplot2::labs(color = "n_rehab:", shape = "data type:",
+         x = "Well age [yrs]", y = "Qs_rel")
+
+  if (legend_position == "top") {
+    p + ggplot2::guides(color = guide_legend(nrow = 1))
+  } else {
+    p
+  }
+}
+
 # plot_frequencies -------------------------------------------------------------
 #'  plot frequency distribution of factor variable
 #'
@@ -78,3 +133,4 @@ plot_distribution <- function(Data, variable, binwidth = NULL, title,
 
   p
 }
+

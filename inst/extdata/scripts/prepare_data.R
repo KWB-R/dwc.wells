@@ -4,8 +4,8 @@
 library(dwc.wells)
 
 path_list <- list(
-  db = file.path(kwb.utils::desktop(), "tmp/DWC/wells/BWB_WV_Brunnenexport_2017.mdb"),
-  csv_data = file.path(kwb.utils::desktop(), "tmp/DWC/wells/Data/Daten_BWB_Schimmelpfennig"),
+  db = file.path(kwb.utils::desktop(), "tmp/DWC/wells/Data/01_ms_access/BWB_WV_Brunnenexport_2017.mdb"),
+  csv_data = file.path(kwb.utils::desktop(), "tmp/DWC/wells/Data/02_csv"),
   data_wells = "<csv_data>/GWBR.csv",
   data_drilling = "<csv_data>/Bohrungen.csv",
   data_drilling_tech = "<csv_data>/Bohrtechnik.csv",
@@ -124,7 +124,7 @@ if (FALSE)
                  "operational_state.date", "inliner.date")
 
   df_wells <- df_wells %>%
-    dplyr::mutate(dplyr::across(date_cols, .fns = as.Date, format = "%Y-%m-%d"),
+    dplyr::mutate(dplyr::across(dplyr::all_of(date_cols), .fns = as.Date, format = "%Y-%m-%d"),
                   monitoring.date = as.Date(monitoring.date, format = "%d.%m.%Y"),
                   dplyr::across(dplyr::all_of(factor_cols), .fns = tidy_factor))
 
@@ -162,7 +162,151 @@ if (FALSE)
   }
 
 
-# MAIN 2: pump test data -------------------------------------------------------
+# MAIN 2: Q measurement data ---------------------------------------------------
+
+if (FALSE) {
+
+  # read data
+  if (FALSE) {
+    df_Q <- read_select_rename(paths$db,
+                               "WV_BRU_TBL_ERG",
+                               renamings$main,
+                               old_name_col = "old_name",
+                               new_name_col = "new_name_en")
+  }
+
+  # read quantity measurement data
+  df_Q <- read_csv(paths$data_quantity) %>%
+    select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
+    dplyr::mutate(date = as.Date(date)) %>%
+    dplyr::mutate(date = dplyr::na_if(date, "1899-12-30 00:00:00")) %>%
+    tidyr::drop_na(-W_static) %>%
+    dplyr::distinct(.keep_all = TRUE)
+
+
+  # get static water level data from df_wells
+  df_W_static_1 <- df_wells %>%
+    dplyr::select(site_id, operational_start.date, operational_start.W_static, monitoring.date, monitoring.W_static) %>%
+    tidyr::pivot_longer(-site_id, names_sep = "\\.", names_to = c("origin", ".value")) %>%
+    dplyr::mutate(W_static = dplyr::na_if(W_static, 0)) %>%
+    dplyr::filter(!is.na(W_static))
+
+  # import other static water level data provided by Sebastian Schimmelpfennig
+  # origin: H2O2-Messungen, Kurzpumpversuche, Ergiebigkeitsmessungen
+  df_W_static_2 <- read_csv(paths$data_W_static, skip = 30) %>%
+    select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
+    dplyr::mutate(date = as.Date(date, format = "%Y-%m-%d")) %>%
+    dplyr::select(site_id, origin, date, W_static)
+
+  # combine both data sources
+  df_W_static <- dplyr::bind_rows(list(df_W_static_1, df_W_static_2)) %>%
+    tidyr::drop_na(site_id, date, W_static) %>% # one date missing
+    dplyr::arrange(site_id, date) %>%
+    dplyr::rename(W_static.origin = origin)
+
+  summary <- df_W_static %>% dplyr::group_by(site_id) %>%
+    dplyr::summarise(n_valid = sum(!is.na(W_static))) %>%
+    dplyr::arrange(dplyr::desc(n_valid))
+
+
+  # combine quantity data and extra static water level data
+  df_Q_W <- df_Q %>%
+    dplyr::mutate(W_static.origin = ifelse(
+      !is.na(W_static), "quantity_measurements", NA
+    )) %>%
+    dplyr::bind_rows(df_W_static) %>%
+    dplyr::arrange(site_id, date)
+
+
+  # Remove duplicate across site_id and date
+  df_Q_W <- df_Q_W %>%
+    dplyr::distinct(site_id, date, .keep_all = TRUE)
+
+  frequency_table(df_Q_W[!is.na(df_Q_W$W_static), "W_static.origin"])
+
+  # remove rows for wells with no static water level data at all
+  df_Q_W <- df_Q_W %>%
+    dplyr::group_by(site_id) %>%
+    dplyr::filter(!all(is.na(W_static)))
+
+
+  # check number of non-NA values per site
+  summary2 <- df_Q_W %>% dplyr::group_by(site_id) %>%
+    dplyr::summarise(n_valid = sum(!is.na(W_static))) %>%
+    dplyr::count(n_valid >= 1)
+
+
+  # interpolate and fill up static water level
+  df_Q_W_new <- interpolate_and_fill(
+    df_Q_W, x_col = "date", y_col = "W_static",
+    group_by_col = "site_id", origin_col = "W_static.origin"
+  )
+
+
+  # show origin of data
+  frequency_table(df_Q_W_new[!is.na(df_Q_W_new$W_static), "W_static.origin"])
+
+  # group types for W_static
+  df_Q_W_new <- df_Q_W_new %>%
+    dplyr::mutate(W_static.origin =
+                    forcats::fct_collapse(
+                      W_static.origin,
+                      measured = setdiff(unique(W_static.origin),
+                                         c("interpolated", "filled up"))) %>%
+                    forcats::fct_relevel("measured", "interpolated", "filled up"),
+                  full_data_set = !is.na(Q) & !is.na(W_dynamic)
+    )
+
+
+  # clean outliers and remove NA
+  df_Q_W_new <- df_Q_W_new %>%
+    dplyr::mutate(Q = ifelse(Q > 1000 | Q == 0, NA, Q),
+                  W_dynamic = ifelse(W_dynamic > 50 | W_dynamic == 0, NA, W_dynamic)
+    ) %>%
+    tidyr::drop_na(Q, W_dynamic) %>%
+    dplyr::select(-W_static.incomplete)
+
+
+  # calculate Qs and remove negative values
+  df_Q_W_new <- df_Q_W_new %>%
+    dplyr::mutate(Qs = Q / (W_dynamic - W_static))
+
+
+  # join with Qs from operational start and calculate Qs_rel
+  df_Q_W_new <- df_Q_W_new %>%
+    dplyr::left_join(df_wells[, c("site_id",
+                                  "well_id",
+                                  "operational_start.date",
+                                  "operational_start.Qs")],
+                     by = "site_id") %>%
+    # calculate Qs_rel
+    dplyr::mutate(Qs_rel =  Qs / operational_start.Qs) %>%
+    dplyr::select(-operational_start.Qs)
+
+
+  sum(df_Q_W_new$Qs < 0, na.rm = TRUE)
+  sum(df_Q_W_new$Qs_rel < 0, na.rm = TRUE)
+  sum(df_Q_W_new$Qs_rel > 1, na.rm = TRUE)
+
+
+  write.table(b, file = "W_static_filled_up_interpolated_complete.csv", dec = ".", sep = ";", row.names = FALSE)
+
+
+
+
+  # check ratio Qmom / Qzul
+  df_Q <- df_Q %>%
+    dplyr::left_join(df_main[, c("well_id", "admissible_discharge")]) %>%
+    dplyr::mutate(Ratio_Qmom_Qzul = Q / admissible_discharge)
+
+
+  if (FALSE) {
+    write_csv(df_Q, "Qmom_Qzul_ratio.csv")
+  }
+
+}
+
+# MAIN 3: pump test data -------------------------------------------------------
 
 if (FALSE) {
 
@@ -178,6 +322,10 @@ if (FALSE) {
 
 
   #colnames(df_pump_tests) %in% renamings$main$old_name
+
+  if (FALSE) {
+    write.table(df_pump_tests, file = "Kurzpumpversuche_untidy.csv", dec = ".", sep = ";", row.names = FALSE)
+  }
 
 
   # 1. assign date format to dates
@@ -202,22 +350,25 @@ if (FALSE) {
     # delete row if both values are NA
     dplyr::filter(!(is.na(pump_test_1.date) & is.na(pump_test_2.date))) %>%
     # add date column not containing NAs (required for creating an "action_id")
-    dplyr::mutate(interval_days = dplyr::if_else(!is.na(pump_test_1.date) & !is.na(pump_test_2.date),
-                                                  real_interval(pump_test_2.date,
-                                                                 pump_test_1.date),
-                                                  default_interval(pump_test_2.date,
-                                                                    pump_test_1.date,
-                                                                    func = mean)),
-                  interval_type = dplyr::if_else(!is.na(pump_test_1.date) & !is.na(pump_test_2.date),
-                                                  "real",
-                                                  "default"),
-                  pump_test_1.date = dplyr::if_else(is.na(pump_test_1.date) & !is.na(pump_test_2.date),
-                                                   pump_test_2.date - interval_days,
-                                                   pump_test_1.date),
-                  pump_test_2.date = dplyr::if_else(is.na(pump_test_2.date) & !is.na(pump_test_1.date),
-                                                   pump_test_1.date + interval_days,
-                                                   pump_test_2.date),
-                  action_date = pump_test_1.date + ceiling(interval_days/2))
+    dplyr::mutate(interval_days = dplyr::if_else(
+      !is.na(pump_test_1.date) & !is.na(pump_test_2.date),
+      real_interval(pump_test_2.date, pump_test_1.date),
+      default_interval(pump_test_2.date, pump_test_1.date, func = mean)
+    ),
+    interval_type = dplyr::if_else(
+      !is.na(pump_test_1.date) & !is.na(pump_test_2.date), "real", "default"
+    ),
+    pump_test_1.date = dplyr::if_else(
+      is.na(pump_test_1.date) & !is.na(pump_test_2.date),
+      pump_test_2.date - interval_days,
+      pump_test_1.date
+    ),
+    pump_test_2.date = dplyr::if_else(
+      is.na(pump_test_2.date) & !is.na(pump_test_1.date),
+      pump_test_1.date + interval_days,
+      pump_test_2.date
+    ),
+    action_date = pump_test_1.date + ceiling(interval_days/2))
 
 
   # 3. calculate Qs and Qs rel
@@ -259,8 +410,8 @@ if (FALSE) {
                   "action_date",
                   tidyselect::starts_with("interval_"),
                   tidyselect::starts_with("operational_start"),
-                  tidyselect::starts_with("pump_test"),
-                  -tidyselect::ends_with(c("Q", "W_static", "W_dynamic"))
+                  tidyselect::starts_with("pump_test")
+                  #-tidyselect::ends_with(c("Q", "W_static", "W_dynamic"))
                   )
 
 
@@ -303,90 +454,126 @@ if (FALSE) {
                                           Qs_rel)
                   ) %>%
     dplyr::arrange(site_id, action_id) %>%
-    dplyr::group_by(site_id) %>%
+
     # join  dates of operational start to calculate time differences
     dplyr::left_join(df_wells_operational_start %>%
                      dplyr::select(site_id, operational_start.date),
                      by = "site_id") %>%
-
     dplyr::mutate(days_since_operational_start =
                     as.integer(
                       difftime(date, operational_start.date, units = "days")
-                      ),
-                  n.well_rehab = cumsum_no_na(well_rehab),
+                      )) %>%
+    # filter rows for Alt-Brunnen
+    dplyr::filter(days_since_operational_start >= 0) %>%
+    dplyr::group_by(site_id) %>%
+    dplyr::mutate(n_rehab = cumsum_no_na(well_rehab),
                   n.substitute_pump = cumsum_no_na(substitute_pump),
                   n.pressure_sleeve = cumsum_no_na(pressure_sleeve),
                   n.comment_liner = cumsum_no_na(comment_liner)
                   ) %>%
    dplyr::ungroup() %>%
-   dplyr::arrange(site_id, n.well_rehab, date) %>%
-   dplyr::group_by(site_id, n.well_rehab) %>%
-   dplyr::mutate(days_since_last_rehab =  dplyr::if_else(
-     n.well_rehab > 0,
-     as.integer(date - min(date) + (min(date) - min(action_date))),
+   dplyr::arrange(site_id, n_rehab, date) %>%
+   dplyr::group_by(site_id, n_rehab) %>%
+   dplyr::mutate(
+     last_rehab.date = min(action_date),
+     days_since_last_rehab =  dplyr::if_else(
+     n_rehab > 0,
+     as.integer(date - last_rehab.date),
      days_since_operational_start
      ))
 
 
-relevant_cols <- c(
+  relevant_cols <- c(
     "site_id",
     "well_id",
     "date",
     "key",
     "Qs_rel",
+    "operational_start.date",
     "days_since_operational_start",
-    "n.well_rehab",
+    "n_rehab",
+    "last_rehab.date",
     "days_since_last_rehab")
 
+  if (FALSE) {
+    write.table(df_pump_tests_tidy[, relevant_cols], file = "Kurzpumpversuche_tidy.csv", dec = ".", sep = ";", row.names = FALSE)
+  }
 
 
- # preliminary model input
- df_model_input_1 <- df_pump_tests_tidy %>%
-   dplyr::select(relevant_cols) %>%
-   dplyr::left_join(df_wells_vars, by = "site_id")
+  # combine pump test data with other quantity measurements
+  df_Qs_all <- df_pump_tests_tidy %>%
+    dplyr::bind_rows(df_Q_W_new) %>%
+    dplyr::arrange(site_id, date) %>%
+    dplyr::select(c(dplyr::all_of(relevant_cols), "W_static.origin")) %>%
+    dplyr::filter(!is.na(date)) %>%
+    dplyr::ungroup()
+
+
+  # complete data
+  df_Qs_all <- df_Qs_all %>%
+    tidyr::fill(n_rehab) %>%
+    tidyr::fill(last_rehab.date) %>%
+    dplyr::mutate(key = dplyr::if_else(!is.na(W_static.origin),
+                                       "quantity measurements",
+                                       key),
+                  key2 = forcats::fct_collapse(
+                    key,
+                    'pump tests' = c("operational_start", "pump_test_1", "pump_test_2")
+                  ),
+                  W_static.origin = tidyr::replace_na(W_static.origin, "measured"),
+                  days_since_operational_start = as.integer(
+                    difftime(date, operational_start.date, units = "days")
+                  )) %>%
+    dplyr::group_by(site_id, n_rehab) %>%
+    dplyr::mutate(days_since_last_rehab =  dplyr::if_else(
+      is.na(days_since_last_rehab),
+      as.integer(date - min(last_rehab.date)),
+      days_since_last_rehab
+      )) %>%
+    dplyr::ungroup()
+
+
+  # recalculate days since operational start and days since last rehab into
+  # new variables well_age_years and years_since_last_rehab
+
+  df_Qs_all <- df_Qs_all %>%
+    dplyr::mutate(well_age_years = days_since_operational_start / 365.25,
+                  years_since_last_rehab = days_since_last_rehab / 365.25)
+
+
+ # join with well data variables and filter inliner
+ df_Qs_all <- df_Qs_all %>%
+   dplyr::left_join(df_wells_vars, by = "site_id") %>%
+   dplyr::filter(date < inliner.date | is.na(inliner.date)) %>%
+   dplyr::filter(!(screen_material == "Inliner" & is.na(inliner.date))) %>%
+   dplyr::mutate(screen_material = replace(
+     screen_material, date < inliner.date, "Unbekannt"
+     ) %>% forcats::fct_drop()) %>%
+   dplyr::select(-inliner.date) %>%
+   as.data.frame()
+
+ # remove invalid data
+ df_Qs_all <- df_Qs_all %>%
+   dplyr::filter(Qs_rel >= 0 & Qs_rel <= 1) %>%
+   dplyr::filter(n_screens != 0)
+
+
+ # save data
+ save(df_Qs_all, file = "model_data_v1_all.RData")
+ write.table(df_Qs_all, file = "model_data_v1_all.csv", dec = ".", sep = ";", row.names = FALSE)
+ df_Qs_all_2 <- df_Qs_all %>% dplyr::filter(key != "quantity measurements")
+ save(df_Qs_all_2, file = "model_data_v1_only_pump_tests.RData")
+ write.table(df_Qs_all_2, file = "model_data_v1_only_pump_tests.csv", dec = ".", sep = ";", row.names = FALSE)
+
+
+ # filter data for Alt-Brunnen
+ df <- df_Qs_all
+ df$n_rehab <- as.factor(df$n_rehab)
 
 
  if (FALSE) {
-    write.table(df_model_input_1, file = "model_input_1.csv", dec = ".", sep = ";", row.names = FALSE)
-   write.table(df_pump_tests_tidy, file = "Kurzpumpversuche_tidy.csv", dec = ".", sep = ";", row.names = FALSE)
+   write.table(df_model_input, file = "model_input_valid.csv", dec = ".", sep = ";", row.names = FALSE)
   }
-
-}
-
-
-# MAIN 3: Q measurement data ---------------------------------------------------
-
-if (FALSE) {
-
-  # read data
-  if (FALSE) {
-    df_Q <- read_select_rename(paths$db,
-                               "WV_BRU_TBL_ERG",
-                               renamings$main,
-                               old_name_col = "old_name",
-                               new_name_col = "new_name_en")
-  }
-
-  df_Q <- read_csv(paths$data_quantity) %>%
-    select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
-    dplyr::mutate(date = as.Date(date)) %>%
-    dplyr::mutate(date = dplyr::na_if(date, "1899-12-30 00:00:00"))
-
-
-  # check ratio Qmom / Qzul
-  df_Q <- df_Q %>%
-    dplyr::left_join(df_main[, c("well_id", "admissible_discharge")]) %>%
-    dplyr::mutate(Ratio_Qmom_Qzul = Q / admissible_discharge)
-
-
-
-  if (FALSE) {
-    write_csv(df_Q, "Qmom_Qzul_ratio.csv")
-  }
-
-  # Kommentar: Es gibt Messungen zu 929 Brunnen, im Durchschnitt 40 Messwerte
-  # pro Brunnen, im Median 80 m?/h momentane F?rderleistung
-
 
 }
 
@@ -398,8 +585,6 @@ if (FALSE) {
   # read data
   df_quality <- read_ms_access_mri(paths$db, "DB2LABOR_Daten") %>%
     select_rename_cols(renamings$main, "old_name", "new_name_en")
-
-  str(df_quality)
 
 
   # Select and rename quality parameter given in renamings file 'quality.csv'

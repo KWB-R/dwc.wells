@@ -1,4 +1,66 @@
 
+# interpolate_and_fill ---------------------------------------------------------
+#' Interpolate and fill up static water level
+#'
+#' @param df data frame
+#' @param x_col x column, e.g. date, to be used for interpolation
+#' @param y_col y column, e.g. measured values, to be used for interpolation
+#' @param group_by_col grouping variable within which interpolation is done
+#' @param origin_col already existing or to be created column with type of value
+#'
+#' @export
+#'
+interpolate_and_fill <- function(df, x_col, y_col, group_by_col,
+                                 origin_col) {
+
+  # set up column df_origin (either from existing or new)
+  if(origin_col %in% colnames(df)) {
+    df [, "origin_col"] <- df[, origin_col]
+  } else {
+    df[!is.na(df[, y_col]), "origin_col"] <- "original"
+  }
+
+  # wells with only 1 W_static data point
+  df1 <- df %>%
+    dplyr::group_by(.data[[group_by_col]]) %>%
+    dplyr::filter(sum(!is.na(.data[[y_col]])) == 1) %>%
+    dplyr::mutate(y_new = .data[[y_col]]) %>%
+    tidyr::fill(y_new, .direction = "updown") %>%
+    dplyr::mutate(origin = dplyr::if_else(is.na(.data[[y_col]]), "filled up", origin_col)) %>%
+    as.data.frame()
+
+  # wells with at least 2 W_static data points
+  df2 <- df %>%
+    dplyr::group_by(.data[[group_by_col]]) %>%
+    dplyr::filter(sum(!is.na(.data[[y_col]])) >= 2) %>%
+    dplyr::group_by(.data[[group_by_col]]) %>%
+    dplyr::mutate(y_new = approx(
+      .data[[x_col]], .data[[y_col]], .data[[x_col]], rule = 1)$y) %>%
+    dplyr::mutate(origin = dplyr::case_when(
+      is.na(.data[[y_col]]) & !is.na(y_new) ~ "interpolated",
+      is.na(.data[[y_col]]) & is.na(y_new) ~ "filled up"
+    )) %>%
+    dplyr::mutate(origin = ifelse(!is.na(.data[[y_col]]), origin_col, origin)) %>%
+    tidyr::fill(y_new, .direction = "updown") %>%
+    as.data.frame()
+
+  # combine the two datasets again and calculate Qs
+  df <- df1 %>% dplyr::bind_rows(df2) %>%
+    dplyr::arrange(.data[[group_by_col]], .data[[x_col]])
+
+  # exchange column names
+  df[, paste0(y_col, ".incomplete")] <- df[, y_col]
+  df[, y_col] <- df$y_new
+  df[, origin_col] <- df$origin
+
+
+  # delete temporary columns
+  df <- df %>% dplyr::select(-c(y_new, origin, origin_col))
+
+  df
+
+}
+
 # load_renamings_excel ---------------------------------------------------------
 
 #' load renaming table from original excel file
