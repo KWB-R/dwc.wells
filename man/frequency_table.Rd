@@ -4,12 +4,14 @@
 \alias{frequency_table}
 \title{calculate absolute and relative frequencies of categorical varables}
 \usage{
-frequency_table(x, perc_digits = 1)
+frequency_table(x, perc_digits = 1, sort_freq = FALSE)
 }
 \arguments{
 \item{x}{vector with categorical variable}
 
 \item{perc_digits}{number of decimal digits for percentages, default = 1}
+
+\item{sort_freq}{sort according to frequency counts, logical, default: TRUE}
 }
 \description{
 calculate absolute and relative frequencies of categorical varables

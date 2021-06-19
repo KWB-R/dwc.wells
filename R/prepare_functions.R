@@ -277,12 +277,33 @@ summarise_marginal_factor_levels <- function(x, perc_threshold, marginal_name) {
 #'
 #' @export
 #'
-tidy_factor <- function(x) {
+tidy_factor <- function(x, level_sorting = c("frequency", "alphabet")[1]) {
 
-  x %>% factor() %>% # turn character to factor
-    forcats::fct_infreq() %>% # sort according to frequency
-    forcats::fct_explicit_na(na_level = "Unbekannt") # turn NA values to 'Unbekannt'
+  # turn character to factor
+  x <- factor(x)
 
+  # sort according to frequency
+  if (level_sorting == "frequency") {
+    x <- forcats::fct_infreq(x)
+  }
+
+  # handle missing values
+  x <- x %>%
+    dplyr::na_if("") %>%
+    forcats::fct_explicit_na(na_level = "Unbekannt") %>% # replace NA with "Unbekannt"
+    forcats::fct_drop()
+
+  # put "Andere" to end
+  if ("Andere" %in% levels(x)) {
+  x <- forcats::fct_relevel(x, "Andere", after = Inf)
+  }
+
+  # put "Unbekannt" to end
+  if ("Unbekannt" %in% levels(x)) {
+    x <- forcats::fct_relevel(x, "Unbekannt", after = Inf)
+  }
+
+  x
 }
 
 
@@ -293,14 +314,20 @@ tidy_factor <- function(x) {
 #'
 #' @param x vector with categorical variable
 #' @param perc_digits number of decimal digits for percentages, default = 1
+#' @param sort_freq sort according to frequency counts, logical, default: TRUE
 #'
 #' @export
 #'
-frequency_table <- function(x, perc_digits = 1) {
+frequency_table <- function(x, perc_digits = 1, sort_freq = FALSE) {
 
-  data.frame(table(x, useNA = "ifany", deparse.level = 0)) %>%
-    dplyr::arrange(-.data[["Freq"]]) %>%
+  df <- data.frame(table(x, useNA = "ifany", deparse.level = 0)) %>%
     dplyr::mutate(perc = round(.data[["Freq"]] / sum(.data[["Freq"]]) * 100, perc_digits)) %>%
     dplyr::rename(value = .data[["Var1"]], n = .data[["Freq"]])
+
+  if (sort_freq) {
+    df %>% dplyr::arrange(-.data[["n"]])
+  } else {
+      df
+    }
 
 }

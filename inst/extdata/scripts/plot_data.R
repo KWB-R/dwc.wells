@@ -94,7 +94,23 @@ for (i in seq(1, length(unique(df$site_id)), 12)) {
 dev.off()
 
 
-# plot example one well
+# plot two wells in comparison ---
+
+library(dplyr)
+library(dwc.wells)
+site_ids <- c(4060070, 11020030)
+df <- df_Qs_all_2 %>%
+  dplyr::filter(site_id %in% site_ids) %>%
+  droplevels()
+df$n_rehab <- as.factor(df$n_rehab)
+
+plot_Qs_over_time(df, xmax = 40, legend_position =  "right") +
+  facet_wrap(~site_id, scales = "free", labeller = label_both, nrow = 1)
+
+ggsave("Qs_over_time_two_example_wells_v2.png", dpi = 600, width = 8, height = 2.5)
+
+# plot example one well ---
+
 df_test <- df %>% dplyr::filter(site_id == 4020180) %>%
   dplyr::mutate(type = "pump tests and quantity measurements") %>%
   dplyr::bind_rows(df %>% dplyr::filter(site_id == 4020180 & key2 == "pump tests") %>%
@@ -114,17 +130,129 @@ ggsave("Qsrel_over_time_site_id_4020180_pump_tests_vs_quantity_meas.png", dpi = 
 
 if (FALSE) {
 
-  variables_cat <- c("operational_state",
-                     "screen_material",
-                     "site",
-                     "aquifer_confinement",
-                     "surface_water")
+  str(df_wells_1)
+
+  # Version 1: with nice labels ---
+
+  well_vars_cat <- list("well_function" = "Well function",
+                     "operational_state" = "Operational state",
+                     "waterworks" = "Waterworks",
+                     "aquifer_coverage" = "Aquifer coverage",
+                     "screen_material" = "Filter material",
+                     "inliner" = "Inliner",
+                     "n_screens" = "Number of filter screens",
+                     "surface_water" = "Surface water",
+                     "surface_water.distance" = "Distance to surface water [m]")
 
 
-  plots_cat <- lapply(variables_cat, function(x) {
-    plot_frequencies(df_main, x, gsub("_", " ", x), 0.05)
+
+  well_vars_num <- list("operational_start.year" = "Year of operational start",
+                     "admissible_discharge" = "Admissible discharge [m³/h]",
+                     "operational_start.Qs" = "Initial specific capacity [m³/(h, m)]",
+                     "diameter" = "Diameter [mm]",
+                     "quality.Cu" = "Cu concentration [mg/L]",
+                     "quality.DR" = "Dry residues [mg/L]",
+                     #"quality.Fe_tot" = expression(paste("Fe"[tot], " concentration in mg/L")),
+                     "quality.Fe_tot" = "Fe (tot) concentration [mg/L]",
+                     "quality.Mn" = "Mn concentration [mg/L]",
+                     "quality.NO3" =  "NO3 concentration [mg/L]",
+                     "quality.P_tot" = "P (tot) concentration [mg/L]",
+                     "quality.pH" = "pH",
+                     #"quality.PO4" = expression(paste("PO"[4], " concentration [mg/L]")),
+                     "quality.PO4" = "PO4 concentration [mg/L]",
+                     "quality.Redox" = "Redox potential [mV]",
+                     "quality.SO4" = "SO4 concentration [mg/L]",
+                     "quality.Temp" = "Temperature [°C]",
+                     "quality.TSS" = "TSS concentration [mg/L]")
+
+
+  plots_cat <- lapply(names(well_vars_cat), function(x) {
+    plot_frequencies(df_wells, x, well_vars_cat[x], 0.1)
   })
 
+
+  plots_num <- lapply(names(well_vars_num), function(x) {
+    plot_distribution(df_wells, x, title = well_vars_num[x], vertical_x_axis_labels = FALSE)
+  })
+
+  # cowplot
+  plots <- cowplot::plot_grid(plotlist = c(plots_cat, plots_num),
+                              nrow = 4, align = "hv", scale = 0.9)
+
+  # save overview plot
+  ggplot2::ggsave("_frequency_plots_all.png", plot = plots, width = 30,
+                  height = 20, dpi = 600)
+
+
+  # save all plots individually
+  lapply(c(plots_cat, plots_num), function(x) {
+    ggplot2::ggsave(filename = paste0(gsub("\\.", "_", names(x$labels$subtitle)), ".png"),
+                    plot = x,
+                    dpi = 600,
+                    width = 6,
+                    height = 4)
+  })
+
+
+  # Version 2: standard labels ---
+
+  well_vars_cat <- c(NULL,
+                     #"well_function",
+                     "operational_state",
+                     "waterworks",
+                     #"aquifer_confinement",
+                     "aquifer_coverage",
+                     "screen_material",
+                     "inliner",
+                     "n_screens",
+                     "surface_water",
+                     "surface_water.distance")
+
+  well_vars_num <- c("operational_start.year",
+                     "admissible_discharge",
+                     "operational_start.Qs",
+                   "diameter",
+                   "quality.Cu",
+                   "quality.DR",
+                   "quality.Fe_tot",
+                   "quality.Mn",
+                   "quality.NO3",
+                   "quality.P_tot",
+                   "quality.pH",
+                   "quality.PO4",
+                   "quality.Redox",
+                   "quality.SO4",
+                   "quality.Temp",
+                   "quality.TSS")
+
+
+  df_wells <- df_wells %>% dplyr::filter(well_function == "Betriebsbrunnen" & operational_state == "betriebsbereit")
+
+  plots_cat <- lapply(well_vars_cat, function(x) {
+    plot_frequencies(df_wells, x, gsub("_|\\.", " ", x), 0.1)
+  })
+
+  plots_num <- lapply(well_vars_num, function(x) {
+    plot_distribution(df_wells, x, title = gsub("_|\\.", " ", x), vertical_x_axis_labels = FALSE)
+  })
+
+  # cowplot
+  plots <- cowplot::plot_grid(plotlist = c(plots_cat, plots_num),
+                              nrow = 4, align = "hv", scale = 0.9)
+
+  # save overview plot
+  ggplot2::ggsave("_frequency_plots_all.png", plot = plots, width = 30,
+                  height = 20, dpi = 600)
+
+
+  # save all plots individually
+  lapply(c(plots_cat, plots_num), function(x) {
+    ggplot2::ggsave(filename = paste0(gsub(" ", "_", x$labels$subtitle), ".png"),
+                    plot = x,
+                    dpi = 600,
+                    width = 6,
+                    height = 4)
+    })
 
   plot_num_1 <- plot_distribution(Data = df_main,
                                   variable = "operational_start.year",
@@ -155,22 +283,6 @@ if (FALSE) {
                                                 plot_num_3, plot_num_4)),
                               nrow = 3, align = "hv", scale = 0.9)
 
-  ggplot2::ggsave("frequency_plots_en.png", plot = plots, width = 20,
-                  height = 20, dpi = 600)
-
-  getwd()
-
-  htmlwidgets::saveWidget(widget = plotly::ggplotly(plot_num_1),
-                          file = "frequency_plot_Inbetriebnahme.html",
-                          selfcontained = TRUE)
-
-  htmlwidgets::saveWidget(widget = plotly::ggplotly(plot_num_2),
-                          file = "frequency_plot_Qs_neu.html",
-                          selfcontained = TRUE)
-
-  htmlwidgets::saveWidget(widget = plotly::ggplotly(plot_num_4),
-                          file = "frequency_plot_Durchmesser.html",
-                          selfcontained = TRUE)
 }
 
 
