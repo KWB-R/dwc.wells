@@ -9,22 +9,30 @@
 #'
 #' @export
 #'
-correlation_plot <- function(df, x, y = "Qs_rel") {
+correlation_plot <- function(df, x, y = "Qs_rel", title = gsub("_", " ", x)) {
 
   p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x]], y = .data[[y]])) +
     ggplot2::scale_y_continuous(labels = scales::percent,
-                       breaks = scales::pretty_breaks()) +
+                                breaks = scales::pretty_breaks()) +
     sema.berlin.utils::my_theme() +
     #theme(plot.subtitle = element_text(color = "deepskyblue4", face = "italic")) +
-    ggplot2::labs(x = "", title = gsub("_", " ", x))
+    ggplot2::labs(x = "", title = title)
+
 
   if (is.numeric(df[, x])) {
-    p +  ggplot2::geom_point(size = 0.8)
+    p <- p +  ggplot2::geom_point(size = 0.8)
   } else {
-    p + ggplot2::geom_boxplot(width = 0.5)
+    p <- p + ggplot2::geom_boxplot(width = 0.5)
+
+    if (max(nchar(unique(as.character(df[, x]))), na.rm = TRUE) > 3) {
+      p <- p +
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+    }
   }
 
+  p
 }
+
 
 # plot_Qs_over_time -------------------------------------------------------------
 plot_Qs_over_time <- function(df, xmax = 40, legend_position = "top") {
@@ -39,9 +47,10 @@ plot_Qs_over_time <- function(df, xmax = 40, legend_position = "top") {
       limits = c(0, xmax),
       breaks = scales::pretty_breaks()) +
     ggplot2::scale_y_continuous(
-      limits = c(0, 1),
+      limits = c(0, 1.4),
       labels = scales::percent,
-      breaks = scales::pretty_breaks()) +
+      breaks = scales::pretty_breaks(),
+      oob = scales::rescale_none) +
     sema.berlin.utils::my_theme(legend.position = legend_position) +
     ggplot2::labs(color = "n_rehab:", shape = "data type:",
          x = "Well age [yrs]", y = "Qs_rel")

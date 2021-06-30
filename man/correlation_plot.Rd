@@ -5,7 +5,7 @@
 \title{plots Qs_rel vs. input variable as box plot (categorical input variable)
 or scatterplot (numerical input variable)}
 \usage{
-correlation_plot(df, x, y = "Qs_rel")
+correlation_plot(df, x, y = "Qs_rel", title = gsub("_", " ", x))
 }
 \arguments{
 \item{df}{data frame}

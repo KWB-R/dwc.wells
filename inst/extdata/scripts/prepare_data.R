@@ -17,6 +17,7 @@ path_list <- list(
   data_pump_tests = "<csv_data>/Arbeitsberichte.csv",
   data_W_static = "<csv_data>/RWS.csv",
   data_quantity = "<csv_data>/ERG_02.csv",
+  data_operational_hours = "<csv_data>/Betriebsstunden_zw_Regenerierungen.csv",
   #data_quality = "<csv_data>/___.csv",
   #data_quality_para1 = "<csv_data>/LIMS_Para.csv",
   #data_quality_para2 = "<csv_data>/LIMS_PM.csv",
@@ -521,12 +522,30 @@ if (FALSE) {
     # delete data with pump test date in the future
     dplyr::filter(pump_test_1.date < Sys.Date()| pump_test_2.date < Sys.Date())
 
-  cond <- df_pump_tests$pump_test_2.date < df_pump_tests$pump_test_1.date &
-    !is.na(df_pump_tests$pump_test_1.date) & !is.na(df_pump_tests$pump_test_2.date)
-  sum(cond, na.rm = TRUE)
-  df_pump_tests[cond, c("site_id", "pump_test_1.date", "pump_test_2.date")]
 
-  # swap pump test dates 1 and 2 if pump_test_2.date < pump_test_1.date
+  swapped_dates <- function(df) {
+    df$pump_test_2.date < df$pump_test_1.date &
+      !is.na(df$pump_test_1.date) &
+      !is.na(df$pump_test_2.date)
+  }
+
+  check_swapped_dates <- function(cond) {
+
+    n <- sum(cond, na.rm = TRUE)
+    cat("number of rows with swapped dates:", n)
+    if (n > 0) {
+      cat("...\n\n")
+      df_pump_tests[cond, c("site_id", "pump_test_1.date", "pump_test_2.date")]
+    }
+  }
+
+  # swap pump test dates 1 and 2 if pump_test_2.date < pump_test_1.date --------
+
+  # check, how many rows have dates in wrong order
+  cond <- dwc.wells:::swapped_dates(df_pump_tests)
+  dwc.wells:::check_swapped_dates(cond)
+
+  # swap dates
   df_pump_tests <- df_pump_tests %>%
     dplyr::mutate(
       pump_test_1.date_tmp = dplyr::if_else(cond, pump_test_2.date, pump_test_1.date),
@@ -536,12 +555,11 @@ if (FALSE) {
                   pump_test_2.date = pump_test_2.date_tmp) %>%
     dplyr::select(-c(pump_test_1.date_tmp, pump_test_2.date_tmp))
 
-  cond <- df_pump_tests$pump_test_2.date < df_pump_tests$pump_test_1.date &
-    !is.na(df_pump_tests$pump_test_1.date) & !is.na(df_pump_tests$pump_test_2.date)
-  sum(cond, na.rm = TRUE)
+  # check again, how many dates are in wrong order
+  dwc.wells:::check_swapped_dates(dwc.wells:::swapped_dates(df_pump_tests))
 
 
-  # fill up pump test dates and calculate action date ---
+  # fill up pump test dates and calculate action date --------------------------
   df_pump_tests <- df_pump_tests %>%
     # add date column not containing NAs (required for creating an "action_id")
     dplyr::mutate(
@@ -567,7 +585,7 @@ if (FALSE) {
     )
 
 
-  # correct ids for replaced wells ---
+  # correct ids for replaced wells ---------------------------------------------
 
   # join relevant ids and construction date from well data
   cols <-  c("site_id", "well_id", "well_id_replaced", "construction_date")
@@ -584,6 +602,7 @@ if (FALSE) {
 
   cond <- which(df_pump_tests$pump_test_1.date < df_pump_tests$construction_date |
                   df_pump_tests$pump_test_2.date < df_pump_tests$construction_date)
+
   df_pump_tests[cond, "well_id"] <- df_pump_tests[cond, "well_id_replaced"]
 
   # delete unrequired columns, further on use 'well_id' as join column
@@ -591,7 +610,7 @@ if (FALSE) {
     dplyr::select(-c("site_id", "well_id_replaced", "construction_date"))
 
 
-  # calculate Qs and Qs rel ---
+  # calculate Qs and Qs rel ----------------------------------------------------
   df_pump_tests <- df_pump_tests %>%
     # get well characteristics to calculate Qs_rel
     dplyr::inner_join(df_wells_operational_start, by = "well_id") %>%
@@ -607,7 +626,8 @@ if (FALSE) {
     )
 
 
-  # 4. derive action type
+  # derive action type ---------------------------------------------------------
+
   df_pump_tests <- df_pump_tests %>%
     # give action id
     dplyr::arrange(well_id, action_date) %>%
@@ -623,7 +643,7 @@ if (FALSE) {
     ))
 
 
-  # 5. select relevant columns
+  # select relevant columns ----------------------------------------------------
   df_pump_tests <- df_pump_tests %>%
     # select important variables
     dplyr::select("well_id",
@@ -636,14 +656,13 @@ if (FALSE) {
                   )
 
 
-  # get column names needed for pivoting data
+  # tidy data ------------------------------------------------------------------
+
   cols_to_longer <- df_pump_tests %>%
     dplyr::ungroup() %>%
     dplyr::select(tidyr::starts_with(c("operational_start", "pump_test"))) %>%
     names()
 
-
-  # 6. tidy data
   df_pump_tests_tidy <- df_pump_tests %>%
     dplyr::ungroup() %>%
     dplyr::mutate(dplyr::across(tidyselect::everything(), as.character)) %>%
@@ -715,7 +734,6 @@ if (FALSE) {
   df_pump_tests_tidy <- df_pump_tests_tidy %>%
     dplyr::mutate(well_age_years = days_since_operational_start / 365.25,
                   years_since_last_rehab = days_since_last_rehab / 365.25)
-
 
 
   if (FALSE) {
@@ -843,6 +861,30 @@ if (FALSE) {
 
 }
 
+# MAIN 7: load operational hour data -------------------------------------------
 
+if (FALSE) {
+
+  # read, rename and clean data ---
+  df_hours <- read_csv(paths$data_operational_hours, skip = 57) %>%
+    select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
+    dplyr::mutate(from = as.Date(from, format = "%Y-%m-%d"),
+                  to = as.Date(to, format = "%Y-%m-%d"))
+  head(df_hours)
+
+
+  head(df_pump_tests)
+  sum(duplicated(df_hours[,c("well_id", "from", "to")]))
+  df_pump_tests$pump_test_1.date
+  a <- dplyr::left_join(df_pump_tests, df_hours, by = c("well_id", "pump_test_1.date" = "to"))
+  summary(a$operational_hours)
+
+  well_ids_Qs <- unique(df_Qs_all$well_id)
+  well_ids_hours <- unique(df_hours$well_id)
+  sum(!well_ids_hours %in% well_ids_Qs)
+  sum(!well_ids_Qs %in% well_ids_hours)
+  well_ids_Qs[!well_ids_Qs %in% well_ids_hours]
+  length(unique(df_Qs_all$well_id))
+}
 
 

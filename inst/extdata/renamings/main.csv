@@ -34,8 +34,8 @@ VORGAENGER;GWBR-Nr des Vorgaengerbrunnen, falls bereits erneuert;WV.GMS_TBL_GWBR
 NACHFOLGER;GWBR-Nr des Vorgaengerbrunnen, falls bereits erneuert;WV.GMS_TBL_GWBR;Nachfolger_Brunnen;well_id.after_replacement;id;
 ;Gewichteter kf-Wert;;kf;hydraulic_conductivity;num;"not used anymore; Werte kommen aus eigener Tabelle"
 BOHRUNGSNUMMER;Auto-ID Bohrung;WV.GMS_TBL_KF_WERTE;id_Bohrung;driling_id;id;
-VON;Schichtbeginn;WV.GMS_TBL_KF_WERTE;von;drilling_from;num;
-BIS;Schichtende;WV.GMS_TBL_KF_WERTE;bis;drilling_to;num;
+VON;Schichtbeginn;WV.GMS_TBL_KF_WERTE;von;from;num;
+BIS;Schichtende;WV.GMS_TBL_KF_WERTE;bis;to;num;
 PUMPVERSUCH;kf-Wert berechnet aus Pumpversuch;WV.GMS_TBL_KF_WERTE;kf_pumptest;hydraulic_conductivity_pumptest;num;
 NACH_BEYER;kf-Wert berechnet nach Beyer;WV.GMS_TBL_KF_WERTE;kf_beyer;hydraulic_conductivity_beyer;num;
 NACH_HAZEN;kf-Wert berechnet nach Hazen;WV.GMS_TBL_KF_WERTE;kf_hazen;hydraulic_conductivity_hazen;num;
@@ -99,3 +99,4 @@ BHG_GWBR_NR;Auto-ID nach Ausbau zum Brunnen;WV.GMS_TBL_MENGENTABELLE;id_Brunnen;
 MESSDATUM;Datum Fördermenge absolut;WV.GMS_TBL_MENGENTABELLE;Datum_Menge;date;date;
 MESSZEITRAUM;Intervall der Mengenmessung (monatlich, täglich);WV.GMS_TBL_MENGENTABELLE;Intervall_Menge;interval;num;
 MESSWERT;Fördermenge absolut;WV.GMS_TBL_MENGENTABELLE;Menge;abstracted_volume;num;
+SUMME_BETRIEBSSTUNDEN;Summe Stunden zwischen Regenerierungen;Abfrage;Betriebsstunden;operational_hours;num;
