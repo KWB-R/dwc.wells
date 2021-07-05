@@ -522,21 +522,6 @@ if (FALSE) {
     # delete data with pump test date in the future
     dplyr::filter(pump_test_1.date < Sys.Date()| pump_test_2.date < Sys.Date())
 
-
-  swapped_dates <- function(df) {
-    df$pump_test_2.date < df$pump_test_1.date &
-      !is.na(df$pump_test_1.date) &
-      !is.na(df$pump_test_2.date)
-  }
-
-  check_swapped_dates <- function(cond) {
-
-    n <- sum(cond, na.rm = TRUE)
-    cat("number of rows with swapped dates:", n)
-    if (n > 0) {
-      cat("...\n\n")
-      df_pump_tests[cond, c("site_id", "pump_test_1.date", "pump_test_2.date")]
-    }
   }
 
   # swap pump test dates 1 and 2 if pump_test_2.date < pump_test_1.date --------
