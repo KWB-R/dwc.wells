@@ -36,12 +36,14 @@ swapped_dates <- function(df) {
 }
 
 # return info / summary on number of rows with swapped dates
-check_swapped_dates <- function(cond) {
+check_swapped_dates <- function(df) {
+
+  cond <- swapped_dates(df)
 
   n <- sum(cond, na.rm = TRUE)
   cat("number of rows with swapped dates:", n)
   if (n > 0) {
     cat("...\n\n")
-    df_pump_tests[cond, c("site_id", "pump_test_1.date", "pump_test_2.date")]
+    df[cond, c("site_id", "pump_test_1.date", "pump_test_2.date")]
   }
 }
