@@ -9,7 +9,8 @@
 #' @param origin_col already existing or to be created column with type of value
 #'
 #' @export
-#'
+#' @importFrom stats approx
+#' @importFrom tidyselect all_of
 interpolate_and_fill <- function(df, x_col, y_col, group_by_col,
                                  origin_col) {
 
@@ -25,8 +26,10 @@ interpolate_and_fill <- function(df, x_col, y_col, group_by_col,
     dplyr::group_by(.data[[group_by_col]]) %>%
     dplyr::filter(sum(!is.na(.data[[y_col]])) == 1) %>%
     dplyr::mutate(y_new = .data[[y_col]]) %>%
-    tidyr::fill(y_new, .direction = "updown") %>%
-    dplyr::mutate(origin = dplyr::if_else(is.na(.data[[y_col]]), "filled up", origin_col)) %>%
+    tidyr::fill(.data$y_new, .direction = "updown") %>%
+    dplyr::mutate(origin = dplyr::if_else(is.na(.data[[y_col]]),
+                                          "filled up",
+                                          .data$origin_col)) %>%
     as.data.frame()
 
   # wells with at least 2 W_static data points
@@ -34,14 +37,16 @@ interpolate_and_fill <- function(df, x_col, y_col, group_by_col,
     dplyr::group_by(.data[[group_by_col]]) %>%
     dplyr::filter(sum(!is.na(.data[[y_col]])) >= 2) %>%
     dplyr::group_by(.data[[group_by_col]]) %>%
-    dplyr::mutate(y_new = approx(
+    dplyr::mutate(y_new = stats::approx(
       .data[[x_col]], .data[[y_col]], .data[[x_col]], rule = 1)$y) %>%
     dplyr::mutate(origin = dplyr::case_when(
-      is.na(.data[[y_col]]) & !is.na(y_new) ~ "interpolated",
-      is.na(.data[[y_col]]) & is.na(y_new) ~ "filled up"
+      is.na(.data[[y_col]]) & !is.na(.data$y_new) ~ "interpolated",
+      is.na(.data[[y_col]]) & is.na(.data$y_new) ~ "filled up"
     )) %>%
-    dplyr::mutate(origin = ifelse(!is.na(.data[[y_col]]), origin_col, origin)) %>%
-    tidyr::fill(y_new, .direction = "updown") %>%
+    dplyr::mutate(origin = ifelse(!is.na(.data[[y_col]]),
+                                  .data[[origin_col]],
+                                  .data$origin)) %>%
+    tidyr::fill(.data$y_new, .direction = "updown") %>%
     as.data.frame()
 
   # combine the two datasets again and calculate Qs
@@ -55,7 +60,8 @@ interpolate_and_fill <- function(df, x_col, y_col, group_by_col,
 
 
   # delete temporary columns
-  df <- df %>% dplyr::select(-c(y_new, origin, origin_col))
+  temp_columns <- c("y_new", "origin", "origin_col")
+  df <- df %>% dplyr::select(- tidyselect::all_of(x = temp_columns))
 
   df
 
@@ -274,7 +280,7 @@ summarise_marginal_factor_levels <- function(x, perc_threshold, marginal_name) {
 #' turn character into factor, sort factor levels and replace NA level
 #'
 #' @param x character vector to be turned to factor
-#'
+#' @param level_sorting one of "frequency" or "alphabet" (default: "frequency")
 #' @export
 #'
 tidy_factor <- function(x, level_sorting = c("frequency", "alphabet")[1]) {
