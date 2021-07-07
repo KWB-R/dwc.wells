@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>turn character into factor, sort factor levels and replace NA level — tidy_factor • dwc.wells</title>
+<title>Fill up NA values with median of lookup table — fill_up_na_with_median • dwc.wells</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="turn character into factor, sort factor levels and replace NA level — tidy_factor" />
-<meta property="og:description" content="turn character into factor, sort factor levels and replace NA level" />
+<meta property="og:title" content="Fill up NA values with median of lookup table — fill_up_na_with_median" />
+<meta property="og:description" content="Fill up NA values with median of lookup table" />
 
 
 
@@ -111,28 +111,31 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>turn character into factor, sort factor levels and replace NA level</h1>
+    <h1>Fill up NA values with median of lookup table</h1>
     <small class="dont-index">Source: <a href='https://github.com/KWB-R/dwc.wells/blob/master/R/prepare_functions.R'><code>R/prepare_functions.R</code></a></small>
-    <div class="hidden name"><code>tidy_factor.Rd</code></div>
+    <div class="hidden name"><code>fill_up_na_with_median.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>turn character into factor, sort factor levels and replace NA level</p>
+    <p>Fill up NA values with median of lookup table</p>
     </div>
 
-    <pre class="usage"><span class='fu'>tidy_factor</span><span class='op'>(</span><span class='va'>x</span>, level_sorting <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"frequency"</span>, <span class='st'>"alphabet"</span><span class='op'>)</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>fill_up_na_with_median</span><span class='op'>(</span><span class='va'>df</span>, <span class='va'>df_lookup</span>, matching_id <span class='op'>=</span> <span class='st'>"well_id"</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>character vector to be turned to factor</p></td>
+      <th>df</th>
+      <td><p>data frame with NA values</p></td>
     </tr>
     <tr>
-      <th>level_sorting</th>
-      <td><p>sorting of factor levels; two options: "frequency"
-(default) and "alphabet"; level "Unbekannt" is always always at the end</p></td>
+      <th>df_lookup</th>
+      <td><p>data frame to calculate median values</p></td>
+    </tr>
+    <tr>
+      <th>matching_id</th>
+      <td><p>column with ids for which median should be calculated</p></td>
     </tr>
     </table>
 
