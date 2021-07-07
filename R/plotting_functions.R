@@ -6,6 +6,7 @@
 #' @param df data frame
 #' @param x column name of x variable"
 #' @param y column name of y variable (default Qs_rel")
+#' @param title plot title
 #'
 #' @export
 #'
@@ -20,13 +21,13 @@ correlation_plot <- function(df, x, y = "Qs_rel", title = gsub("_", " ", x)) {
 
 
   if (is.numeric(df[, x])) {
-    p <- p +  ggplot2::geom_point(size = 0.8)
+    p <- p +  ggplot2::geom_point(size = 0.8, shape = 16, colour = "grey20", alpha = 0.3)
   } else {
     p <- p + ggplot2::geom_boxplot(width = 0.5)
 
     if (max(nchar(unique(as.character(df[, x]))), na.rm = TRUE) > 3) {
       p <- p +
-        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1))
     }
   }
 

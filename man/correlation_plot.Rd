@@ -13,6 +13,8 @@ correlation_plot(df, x, y = "Qs_rel", title = gsub("_", " ", x))
 \item{x}{column name of x variable"}
 
 \item{y}{column name of y variable (default Qs_rel")}
+
+\item{title}{plot title}
 }
 \description{
 plots Qs_rel vs. input variable as box plot (categorical input variable)

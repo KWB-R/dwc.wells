@@ -8,6 +8,9 @@ tidy_factor(x, level_sorting = c("frequency", "alphabet")[1])
 }
 \arguments{
 \item{x}{character vector to be turned to factor}
+
+\item{level_sorting}{sorting of factor levels; two options: "frequency"
+(default) and "alphabet"; level "Unbekannt" is always always at the end}
 }
 \description{
 turn character into factor, sort factor levels and replace NA level

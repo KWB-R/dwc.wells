@@ -28,7 +28,7 @@ BRU_DN_FILTER;Durchmesser des Filterrohrs in mm;WV.GMS_TBL_GWBR;Durchmesser;diam
 FILTEROBERKANTE_M;Lage der Filteroberkante in m u OKS;WV.GMS_TBL_GWBR;FOK;screen_top_level;num;
 FILTERUNTERKANTE_M;Lage der Filterunterkante in m u OKS;WV.GMS_TBL_GWBR;FUK;screen_bottom_level;num;
 ANZAHL_FILTERSTRECKEN;Anzahl Filterstrecken;WV.GMS_TBL_GWBR;Filteranzahl;n_screens;cat;
-BRU_AUSBTIEFE;Tiefe des Brunnens in m NN;WV.GMS_TBL_GWBR;Endteufe;well_depth;num;
+BRU_AUSBTIEFE;Tiefe des Brunnens in m NN;WV.GMS_TBL_GWBR;Endteufe;well_depth_level;num;
 BRU_OKS;Höhe Oberkante Brunnenschacht in m NN;WV.GMS_TBL_GWBR;;well_top_level;num;Ist für einige betriebliche Größen der Referenzpunkt
 VORGAENGER;GWBR-Nr des Vorgaengerbrunnen, falls bereits erneuert;WV.GMS_TBL_GWBR;Vorgaenger_Brunnen;well_id_replaced;id;
 NACHFOLGER;GWBR-Nr des Vorgaengerbrunnen, falls bereits erneuert;WV.GMS_TBL_GWBR;Nachfolger_Brunnen;well_id.after_replacement;id;

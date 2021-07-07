@@ -274,6 +274,8 @@ summarise_marginal_factor_levels <- function(x, perc_threshold, marginal_name) {
 #' turn character into factor, sort factor levels and replace NA level
 #'
 #' @param x character vector to be turned to factor
+#' @param level_sorting sorting of factor levels; two options: "frequency"
+#' (default) and "alphabet"; level "Unbekannt" is always always at the end
 #'
 #' @export
 #'
@@ -330,4 +332,80 @@ frequency_table <- function(x, perc_digits = 1, sort_freq = FALSE) {
       df
     }
 
+}
+
+
+# handle_inliner ---------------------------------------------------------------
+
+handle_inliner <- function(df) {
+
+  # handle inliner (but keep them)
+  df <- df %>%
+    # filter inliner with unknown inliner date
+    dplyr::filter(!((screen_material == "Inliner" | inliner == "Yes") &
+                      is.na(inliner.date))) %>%
+    # # set screen material to 'Unbekannt' for date < inliner.date
+    # dplyr::mutate(screen_material = replace(
+    #   screen_material, date < inliner.date, "Unbekannt"
+    # ) %>% forcats::fct_drop()) %>%
+    # set screen material to 'Unbekannt' if liner (inliner column will be used)
+    dplyr::mutate(screen_material = replace(
+      screen_material, screen_material == "Inliner", "Unbekannt"
+    ) %>% forcats::fct_drop()) %>%
+    # set inliner to 'Yes' if date > inliner.date, otherwise to 'No'
+    dplyr::mutate(inliner = dplyr::if_else(
+      date > inliner.date & !is.na(date) & !is.na(inliner.date),
+      "Yes", "No")
+    ) %>%
+    dplyr::select(-inliner.date) %>%
+    as.data.frame()
+
+  df
+}
+
+
+# save_data --------------------------------------------------------------------
+
+#' Save data frame in different formats: csv, RData, rds
+#'
+#' @param Data data frame
+#' @param path out path for saving data
+#' @param filename core of file name
+#'
+#' @export
+#'
+save_data <- function(Data, path, filename) {
+  write.table(Data, file = file.path(path, sprintf("%s.csv", filename)),
+              dec = ".", sep = ";", row.names = FALSE)
+  save(Data, file = file.path(path, sprintf("%s.RData", filename)))
+  saveRDS(Data, file = file.path(path, sprintf("%s.rds", filename)))
+}
+
+
+# fill_up_na_with_median -------------------------------------------------------
+
+#' Fill up NA values with median of lookup table
+#'
+#' @param df data frame with NA values
+#' @param df_lookup data frame to calculate median values
+#' @param matching_id column with ids for which median should be calculated
+
+#' @export
+#'
+
+fill_up_na_with_median <- function(df, df_lookup, matching_id = "well_id") {
+
+  na_colnames <- setdiff(names(which(colSums(is.na(df)) > 0)), "well_id_replaced")
+  lookup_indices <- df_lookup[, matching_id] %in% df[, matching_id]
+  lookup_data <- df_lookup[lookup_indices, na_colnames]
+  median_values <- lapply(lookup_data, median, na.rm = TRUE)
+
+  for (colname in na_colnames) {
+    n1 <- sum(is.na(df[, colname]))
+    df[, colname] <- tidyr::replace_na(df[, colname], median_values[[colname]])
+    n2 <- sum(is.na(df[, colname]))
+    cat(sprintf("NA values filled up for '%s': %d\n", colname, n1-n2))
+  }
+
+  df
 }
