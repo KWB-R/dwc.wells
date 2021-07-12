@@ -128,47 +128,116 @@ ggsave("Qs_over_time_two_example_wells_v2.png", dpi = 600, width = 8, height = 3
 
 }
 
+
+
+# plot Qs-data for all wells as heatmap ----------------------------------------
+
+if (FALSE) {
+
+  # requires 'model_data'
+
+  # select data
+  df <- Data %>% select(well_id, well_name, date, Qs_rel, waterworks, well_gallery)
+
+  # arrange data
+  #df <- df %>% arrange(waterworks, well_gallery, well_id, date)
+
+  # interpolate
+  df_interpol <- interpolate(df, 1)
+
+  waterworks_well_ids <- df %>% group_by(waterworks) %>%
+    summarise(well_id = as.character(unique(well_id)))
+
+  colours <- sema.berlin.utils::get_bwb_colours()[c(2,3,5)]
+
+  dummy_labels <- c("",
+                    " ",
+                    "  ",
+                    "   ",
+                    "    ",
+                    "     ",
+                    "      ",
+                    "       ",
+                    "        ",
+                    "         ",
+                    "          ",
+                    "           ",
+                    "            ",
+                    "             ",
+                    "              ",
+                    "               ",
+                    "                ",
+                    "                 ",
+                    "                  ",
+                    "                   ")
+
+  pdf("Qsrel_over_time_heatmap_raster.pdf", width = 9, height = 5)
+
+  for (waterwork in unique(waterworks_well_ids$waterworks)) {
+
+    #pdf(sprintf("Qsrel_over_time_heatmap_%s.pdf", waterwork), 9, 5)
+
+    well_ids <- waterworks_well_ids %>% filter(waterworks == waterwork) %>% pull(well_id)
+
+    for (i in seq(1, length(well_ids), 20)) {
+
+      well_ids_plot <- well_ids[i:(i + 19)]
+
+      Data <- df_interpol %>% filter(well_id %in% well_ids_plot)
+
+      print(
+        ggplot2::ggplot(Data, ggplot2::aes(x = date, y = well_id, fill = Qs_rel)) +
+          ggplot2::geom_raster() +
+          ggplot2::scale_fill_gradient2(low = unname(colours["red"]),
+                                        mid = unname(colours["yellow"]),
+                                        high = unname(colours["green"]),
+                                        midpoint = 0.5,
+                                        na.value = "grey90",
+                                        limits = c(0, 1),
+                                        breaks = seq(0, 1, 0.2),
+                                        labels = paste0(seq(0, 100, 20), "%"),
+                                        oob = scales::squish,
+                                        guide = guide_colourbar(reverse = TRUE)) +
+          ggplot2::scale_y_discrete(limits = function(x) {rev(c(x, dummy_labels)[1:20])},
+                                    labels = function(x) {stringr::str_sub(stringr::str_pad(x, 5, "left"), 1, 5)},
+                                    expand = c(0.05, 0.05)) +
+          ggplot2::scale_x_date(limits = as.Date(c("1960-01-01", "2021-12-31")),
+                                breaks = scales::pretty_breaks(8)) +
+          ggplot2::labs(y = "well_id", x = "Years", fill = "Specific\ncapacity",
+                        title = waterwork) +
+          sema.berlin.utils::my_theme() +
+          ggplot2::theme(panel.grid.major = ggplot2::element_line(),
+                         legend.position = "top",
+                         legend.key.width = ggplot2::unit(2, "cm"),
+                         legend.key.height = ggplot2::unit(0.35, "cm"),
+                         legend.spacing.x = unit(0.8, "cm"),
+                         axis.title = element_text(face = "plain"),
+                         legend.title = element_text(face = "plain"),
+                         title = element_text(size = 12)) +
+          geom_hline(yintercept = seq(0.5, 20, 1), color = "white", lwd = 1)
+      )
+
+      print(paste("Data for", i + length(well_ids_plot) - 1, "well(s) of",  waterwork, "plotted."))
+    }
+
+    #dev.off()
+
+  }
+
+  dev.off()
+
+  ggsave("example_plot_Qs_over_time_heatmap.png", width = 10, height = 5, dpi = 600)
+  ggsave("example_plot_Qs_over_time_heatmap_v2.png", width = 8, height = 5, dpi = 600)
+
+}
+
+
+
 # MAIN 3: plots of data distribution -------------------------------------------
 
 # required data set: df_wells
 
 if (FALSE) {
-
-  str(df_wells_1)
-
-  # Version 1: with nice labels ---
-
-  well_vars_cat <- list("well_function" = "Well function",
-                     "operational_state" = "Operational state",
-                     "waterworks" = "Waterworks",
-                     "aquifer_coverage" = "Aquifer coverage",
-                     "screen_material" = "Filter material",
-                     "inliner" = "Inliner",
-                     "n_screens" = "Number of filter screens",
-                     "surface_water" = "Surface water",
-                     "surface_water.distance" = "Distance to surface water [m]")
-
-
-
-  well_vars_num <- list("operational_start.year" = "Year of operational start",
-                     "admissible_discharge" = "Admissible discharge [m³/h]",
-                     "operational_start.Qs" = "Initial specific capacity [m³/(h, m)]",
-                     "diameter" = "Diameter [mm]",
-                     "quality.Cu" = "Cu concentration [mg/L]",
-                     "quality.DR" = "Dry residues [mg/L]",
-                     #"quality.Fe_tot" = expression(paste("Fe"[tot], " concentration in mg/L")),
-                     "quality.Fe_tot" = "Fe (tot) concentration [mg/L]",
-                     "quality.Mn" = "Mn concentration [mg/L]",
-                     "quality.NO3" =  "NO3 concentration [mg/L]",
-                     "quality.P_tot" = "P (tot) concentration [mg/L]",
-                     "quality.pH" = "pH",
-                     #"quality.PO4" = expression(paste("PO"[4], " concentration [mg/L]")),
-                     "quality.PO4" = "PO4 concentration [mg/L]",
-                     "quality.Redox" = "Redox potential [mV]",
-                     "quality.SO4" = "SO4 concentration [mg/L]",
-                     "quality.Temp" = "Temperature [°C]",
-                     "quality.TSS" = "TSS concentration [mg/L]")
-
 
   nums <- sunlist(lapply(df_well_features, is.numeric))
   df_well_features_num <- df_well_features[, nums] %>%

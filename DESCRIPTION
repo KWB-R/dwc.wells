@@ -32,7 +32,8 @@ Imports:
     scales,
     sema.berlin.utils,
     tidyr,
-    tidyselect
+    tidyselect,
+    zoo
 Remotes:
     github::kwb-r/kwb.db@dev,
     github::kwb-r/kwb.utils,

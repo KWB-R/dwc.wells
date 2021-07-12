@@ -1,7 +1,7 @@
 old_name;new_name;new_name_2
 TrB;Trockenbohrung;Trockenbohrung
-BP;Standardbohrung;Bohrung mit vollständiger Beprobung
-BuP;Standardbohrung;Bohrung mit unvollständiger Beprobung
+BP;Kernbohrung;Bohrung mit vollständiger Beprobung
+BuP;Kernbohrung;Bohrung mit unvollständiger Beprobung
 SpB;Spülbohrung;Spülbohrung
 CF;Gegenstrombohrung;Gegenstrombohrung
 LH;Lufthebebohrung;Lufthebebohrung

@@ -19,5 +19,5 @@ prepare_model_data <- function(df_Qs = df_pump_tests_tidy,
   # fill up NA values
   df <- fill_up_na_with_median(df, df_well_features)
 
-  df
+  df %>% droplevels()
 }

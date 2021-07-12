@@ -61,6 +61,44 @@ interpolate_and_fill <- function(df, x_col, y_col, group_by_col,
 
 }
 
+
+# interpolate_Qs ---------------------------------------------------------------
+
+#' Title
+#'
+#' @param df data frame with date and Qs measurements
+#' @param interval_days interval for interpolation
+#' @export
+#'
+interpolate_Qs <- function(df, interval_days = 1) {
+
+  # get min and max dates per well
+  min_max_dates <- df %>% group_by(well_id) %>%
+    summarise(from = min(date), to = max(date))
+
+  # create list with one data frame per well with complete date vector
+  dates <- lapply(a$well_id, function(x) {
+    data.frame(well_id = x,
+               date = seq(min_max_dates$from[min_max_dates$well_id == x],
+                          min_max_dates$to[min_max_dates$well_id == x],
+                          interval_days)
+    )
+  })
+
+  # bind back to data frame
+  dates_df <- bind_rows(dates)
+
+  # join and interpolate
+  df_interpol <- dates_df %>%
+    full_join(df[, c("well_id", "date", "Qs_rel")],
+              by = c("well_id", "date")) %>%
+    mutate(Qs_rel = zoo::na.approx(Qs_rel)) %>%
+    mutate(well_id = as.character(well_id))
+
+  df_interpol
+}
+
+
 # load_renamings_excel ---------------------------------------------------------
 
 #' load renaming table from original excel file
