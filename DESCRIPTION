@@ -1,7 +1,7 @@
 Package: dwc.wells
 Title: A Package for Condition Predictions for Drinking Water
     Wells
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
     c(person(given = "Mathias",
              family = "Riechel",
