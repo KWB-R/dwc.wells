@@ -1,6 +1,5 @@
 Package: dwc.wells
-Title: A Package for Condition Predictions for Drinking Water
-    Wells
+Title: A Package for Condition Predictions for Drinking Water Wells
 Version: 0.1.0
 Authors@R: 
     c(person(given = "Mathias",
@@ -17,10 +16,10 @@ Authors@R:
              role = "fnd"),
       person(given = "Kompetenzzentrum Wasser Berlin gGmbH (KWB)",
              role = "cph"))
-Description: This package allows to predict the condition
-    of a drinking water well based on ML models. The models are trained
-    with results from pump tests and a large set of input variables e.g.
-    the well material, the age and the number of regenerations.
+Description: This package allows to predict the condition of a drinking
+    water well based on ML models. The models are trained with results
+    from pump tests and a large set of input variables e.g.  the well
+    material, the age and the number of regenerations.
 License: MIT + file LICENSE
 URL: https://github.com/KWB-R/dwc.wells
 BugReports: https://github.com/KWB-R/dwc.wells/issues
@@ -31,14 +30,21 @@ Imports:
     lubridate,
     magrittr,
     odbc32,
-    readxl,
     RColorBrewer,
+    readxl,
     rlang,
     scales,
     sema.berlin.utils,
     tidyr,
     tidyselect,
     zoo
+Suggests: 
+    covr,
+    ggplot2,
+    knitr,
+    rmarkdown
+VignetteBuilder: 
+    knitr
 Remotes:
     github::kwb-r/kwb.db@dev,
     github::kwb-r/kwb.utils,
@@ -47,9 +53,3 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-Suggests: 
-    covr,
-    ggplot2,
-    knitr,
-    rmarkdown
-VignetteBuilder: knitr
