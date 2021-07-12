@@ -1,0 +1,17 @@
+old_name;new_name_de;new_name_en
+Abfiltr. Stoffe (susp. St.);AFS;TSS
+Eisen;Fe_ges;Fe_tot
+el. Leitfähigkeit (25 °C);LF;EC
+Gesamttrockenrückstand;TS;DR
+Trockenrückstand;TS;DR
+Glühverlust Schlamm;GV;LOI
+Kupfer;Cu;Cu
+Mangan;Mn;Mn
+pH-Wert;pH;pH
+Redox-Spannung vor Ort;Redox;Redox
+Sauerstoff gel.;O2;DO
+Nitrat;NO3;NO3
+Sulfat;SO4;SO4
+Temperatur;Temp;Temp
+P ges. als PO4;PO4;PO4
+Phosphor ges.;P_ges;P_tot

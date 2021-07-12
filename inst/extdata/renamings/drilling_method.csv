@@ -1,0 +1,34 @@
+old_name;new_name;new_name_2
+TrB;Trockenbohrung;Trockenbohrung
+BP;Kernbohrung;Bohrung mit vollständiger Beprobung
+BuP;Kernbohrung;Bohrung mit unvollständiger Beprobung
+SpB;Spülbohrung;Spülbohrung
+CF;Gegenstrombohrung;Gegenstrombohrung
+LH;Lufthebebohrung;Lufthebebohrung
+BS;Andere;Andere
+BK;Andere;Andere
+Spü;Spülbohrung;Spülbohrung
+SB;Saugbohrung;Saugbohrung
+TR;Trockenbohrung;Trockenbohrung
+Tro;Trockenbohrung;Trockenbohrung
+TG;Andere;Andere
+HS;Andere;Andere
+Dru;Andere;Andere
+Sch;Andere;Andere
+;Unbekannt;Unbekannt
+HSB;Andere;Andere
+HA;Andere;Andere
+Han;Andere;Andere
+Ker;Andere;Andere
+SA;Andere;Andere
+DL;Andere;Andere
+KBr;Andere;Andere
+MA;Andere;Andere
+RKB;Andere;Andere
+Rot;Andere;Andere
+rot/schlag;Andere;Andere
+SP;Spülbohrung;Spülbohrung
+SpB, druck;Spülbohrung;Spülbohrung
+TrB, rot;Trockenbohrung;Trockenbohrung
+Trockenbohrung;Trockenbohrung;Trockenbohrung
+unb;Unbekannt;Unbekannt
