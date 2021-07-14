@@ -17,7 +17,7 @@ prepare_model_data <- function(df_Qs = df_pump_tests_tidy,
   df <- df %>% dplyr::select(- construction_date, operational_start.date)
 
   # fill up NA values
-  df <- fill_up_na_with_median(df, df_well_features)
+  df <- fill_up_na_with_median_from_lookup(df, df_well_features)
 
   df %>% droplevels()
 }

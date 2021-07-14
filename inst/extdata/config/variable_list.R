@@ -23,6 +23,8 @@ well_features <- c(
   "surface_water.distance",
   "inliner",
   "inliner.date",
+  "volume_m3_d.mean",
+  "volume_m3_d.sd",
   "quality.Cu",
   "quality.DR",
   "quality.EC",
@@ -52,8 +54,8 @@ pump_test_vars <- c(
   "well_age_years",
   "n_rehab",
   "last_rehab.date",
-  "days_since_last_rehab",
-  "years_since_last_rehab"
+  "time_since_rehab_days",
+  "time_since_rehab_years"
 )
 
 
@@ -61,9 +63,8 @@ pump_test_vars <- c(
 model_features_with_plot_names <- list(
 
   # well characteristics
-  "well_age_years" = "Well age in years",
+  "well_age_years" = "Well age [yrs]",
   "construction_year" = "Construction year",
-  "operational_start.year" = "Year of operational start",
   "screen_material" = "Filter material",
   "n_screens" = "Number of filter screens",
   "diameter" = "Diameter [mm]",
@@ -82,25 +83,39 @@ model_features_with_plot_names <- list(
 
   # rehabilitation
   "n_rehab" = "Number of rehabs",
-  "years_since_last_rehab" = "Years since last rehab",
+  "time_since_rehab_years" = "Time since rehab [yrs]",
   "inliner" = "Inliner",
 
+  # operational information
+  "volume_m3_d.mean" = "Abstraction volume, mean [m³/d]",
+  "volume_m3_d.sd" = "Abstraction volume, std-dev [m³/d]",
+
   # water quality
-  "quality.Cu" = "Cu concentration [mg/L]",
   "quality.DR" = "Dry residues [mg/L]",
   "quality.EC" = "Electrical conductivity [µS/cm]",
   "quality.DO" = "Dissolved oxygen [mg/L]",
+  "quality.Temp" = "Temperature [°C]",
+  "quality.pH" = "pH",
+  "quality.Redox" = "Redox potential [mV]",
   #"quality.Fe_tot" = expression(paste("Fe"[tot], " concentration in mg/L")),
   "quality.Fe_tot" = "Fe (tot) concentration [mg/L]",
   "quality.Mn" = "Mn concentration [mg/L]",
+  "quality.Cu" = "Cu concentration [mg/L]",
   "quality.NO3" =  "NO3 concentration [mg/L]",
   "quality.P_tot" = "P (tot) concentration [mg/L]",
-  "quality.pH" = "pH",
   #"quality.PO4" = expression(paste("PO"[4], " concentration [mg/L]")),
   "quality.PO4" = "PO4 concentration [mg/L]",
-  "quality.Redox" = "Redox potential [mV]",
   "quality.SO4" = "SO4 concentration [mg/L]",
-  "quality.Temp" = "Temperature [°C]",
-  "quality.TSS" = "TSS concentration [mg/L]")
+  "quality.TSS" = "TSS concentration [mg/L]"
+
+  )
 
 model_features <- names(model_features_with_plot_names)
+
+
+redundant_vars <- c(
+  "construction_date",
+  "operational_start.date",
+  "operational_start.year",
+  "waterworks"
+)

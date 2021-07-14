@@ -1,12 +1,18 @@
 # path_list --------------------------------------------------------------------
 
 path_list <- list(
+
+  # project folder
+  project = file.path(kwb.utils::desktop(), "tmp/DWC/wells"),
+
+  # data preparation folder
+  data_prep = "<project>/01_data_prep",
+
   # mas access database ---
-  db = file.path(kwb.utils::desktop(), "tmp/DWC/wells/Data/01_ms_access",
-                 "BWB_WV_Brunnenexport_2017.mdb"),
+  db =  "<data_prep>/01_data_in/ms_access/BWB_WV_Brunnenexport_2017.mdb",
 
   # csv data ---
-  csv_data = file.path(kwb.utils::desktop(), "tmp/DWC/wells/Data/02_csv"),
+  csv_data = "<data_prep>/01_data_in/csv",
   data_wells = "<csv_data>/GWBR_02.csv",
   data_drilling = "<csv_data>/Bohrungen_02.csv",
   data_drilling_tech = "<csv_data>/Bohrtechnik.csv",
@@ -32,5 +38,18 @@ path_list <- list(
   renamings_quality = "<renamings>/quality.csv",
   lookup_actions = "<renamings>/actions.csv",
 
-  data_out = file.path(kwb.utils::desktop(), "tmp/DWC/wells/Data/03_data_prep/02_output")
+  # output path ---
+  data_prep_out = "<data_prep>/03_data_out",
+
+  # statistics ---
+  stats = "<project>/02_statistics",
+  stats_data = "<stats>/data",
+  stats_plots = "<stats>/plots",
+
+  # modelling ---
+  ml = "<project>/03_modelling",
+  ml_models = "<ml>/models",
+  ml_data = "<ml>/data",
+  ml_plots = "<ml>/plots"
+
 )

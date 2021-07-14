@@ -26,10 +26,10 @@ combine_pump_test_and_Q_monitoring_data <- function(df_pump_tests_tidy, df_Q_mon
                     difftime(date, operational_start.date, units = "days")
                   )) %>%
     dplyr::group_by(well_id, n_rehab) %>%
-    dplyr::mutate(days_since_last_rehab =  dplyr::if_else(
-      is.na(days_since_last_rehab),
+    dplyr::mutate(time_since_rehab_days =  dplyr::if_else(
+      is.na(time_since_rehab_days),
       as.integer(date - min(last_rehab.date)),
-      days_since_last_rehab
+      time_since_rehab_days
     )) %>%
     dplyr::ungroup()
 

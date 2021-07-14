@@ -77,7 +77,7 @@ interpolate_Qs <- function(df, interval_days = 1) {
     summarise(from = min(date), to = max(date))
 
   # create list with one data frame per well with complete date vector
-  dates <- lapply(a$well_id, function(x) {
+  dates <- lapply(min_max_dates$well_id, function(x) {
     data.frame(well_id = x,
                date = seq(min_max_dates$from[min_max_dates$well_id == x],
                           min_max_dates$to[min_max_dates$well_id == x],
@@ -431,7 +431,7 @@ save_data <- function(Data, path, filename) {
 #' @export
 #'
 
-fill_up_na_with_median <- function(df, df_lookup, matching_id = "well_id") {
+fill_up_na_with_median_from_lookup <- function(df, df_lookup, matching_id = "well_id") {
 
   na_colnames <- setdiff(names(which(colSums(is.na(df)) > 0)), "well_id_replaced")
   lookup_indices <- df_lookup[, matching_id] %in% df[, matching_id]
@@ -446,4 +446,16 @@ fill_up_na_with_median <- function(df, df_lookup, matching_id = "well_id") {
   }
 
   df
+}
+
+# replace_na_with_median -------------------------------------------------------
+
+#' Replace NAs with median
+#'
+#' @param x vector, for which NA should be replaced
+#' @export
+#'
+replace_na_with_median <- function(x) {
+  x[is.na(x)] <- median(x, na.rm = TRUE)
+  x
 }

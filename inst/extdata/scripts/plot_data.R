@@ -1,6 +1,5 @@
-
-library(dwc.wells)
-library(ggplot2)
+# load package, paths and variable sets from global.R --------------------------
+source("inst/extdata/scripts/global.R")
 
 
 # MAIN 0: histogram of static water level measurements and data origin ---------
@@ -37,19 +36,71 @@ ggsave("plot_Qs_rel_vs_n_rehabs.png", dpi = 600, width = 5, height = 3)
 }
 
 
-# MAIN 1: correlation of Qs vs. other variables plots --------------------------
+# MAIN 1: plots of data distribution -------------------------------------------
+
+# required data set: df_wells
 
 if (FALSE) {
 
+
+  load(file.path(paths$data_prep_out, "well_feature_data.RData"), verbose = TRUE)
+  df_well_features <- Data
+
+  nums <- unlist(lapply(df_well_features, is.numeric))
+  df_well_features_num <- df_well_features[, nums] %>%
+    dplyr::select(- c(well_id, well_id_replaced, operational_start.year))
+  df_well_features_cat <- df_well_features[, !nums] %>%
+    dplyr::select(-c("well_name", tidyr::ends_with("date")))
+
+  well_features_num <- model_features_with_plot_names[names(df_well_features_num)]
+  well_features_cat <- model_features_with_plot_names[names(df_well_features_cat)]
+
+  plots_cat <- lapply(names(well_features_cat), function(x) {
+    plot_frequencies(df_well_features, x, well_features_cat[x], 0.1)
+  })
+
+
+  plots_num <- lapply(names(well_features_num), function(x) {
+    plot_distribution(df_well_features, x, title = well_features_num[x],
+                      vertical_x_axis_labels = FALSE)
+  })
+
+  # cowplot
+  plots <- cowplot::plot_grid(plotlist = c(plots_cat, plots_num),
+                              nrow = 5, ncol = 7, align = "hv", scale = 0.9)
+
+  # save overview plot
+  ggplot2::ggsave("well_feature_distribution.png", plot = plots, width = 25,
+                  height = 20, dpi = 600)
+
+
+  # save all plots individually
+  lapply(c(plots_cat, plots_num), function(x) {
+    ggplot2::ggsave(filename = paste0(gsub("\\.", "_", names(x$labels$subtitle)), ".png"),
+                    plot = x,
+                    dpi = 600,
+                    width = 6,
+                    height = 4)
+  })
+
+}
+
+# MAIN 2: correlation of Qs vs. other variables plots --------------------------
+
+if (FALSE) {
+
+load(file.path(paths$data_prep_out, "model_data.RData"), verbose = TRUE)
+df <- Data
+
 correlation_plots <- lapply(model_features, function(x) {
-  correlation_plot(df = df, x = x, title = model_features_with_plot_names[x])
+correlation_plot(df = df, x = x, title = model_features_with_plot_names[x])
 })
 
 multiplots <- cowplot::plot_grid(plotlist = correlation_plots,
                                   nrow = 5, ncol = 7, align = "hv", scale = 0.9)
 
 
-ggplot2::ggsave("correlation_plots_v2.png", multiplots, dpi = 600, width = 25, height = 20)
+ggplot2::ggsave("correlation_plots.png", multiplots, dpi = 600, width = 25, height = 20)
 
 
 # save individual plots
@@ -65,7 +116,7 @@ lapply(correlation_plots, function(x) {
 }
 
 
-# MAIN 2: Plots zu Qs per well over time ---------------------------------------
+# MAIN 3: Plots zu Qs per well over time ---------------------------------------
 
 if (FALSE) {
 
@@ -130,7 +181,7 @@ ggsave("Qs_over_time_two_example_wells_v2.png", dpi = 600, width = 8, height = 3
 
 
 
-# plot Qs-data for all wells as heatmap ----------------------------------------
+# MAIN 4: plot Qs-data for all wells as heatmap --------------------------------
 
 if (FALSE) {
 
@@ -143,7 +194,7 @@ if (FALSE) {
   #df <- df %>% arrange(waterworks, well_gallery, well_id, date)
 
   # interpolate
-  df_interpol <- interpolate(df, 1)
+  df_interpol <- interpolate_Qs(df, 1)
 
   waterworks_well_ids <- df %>% group_by(waterworks) %>%
     summarise(well_id = as.character(unique(well_id)))
@@ -232,53 +283,7 @@ if (FALSE) {
 }
 
 
-
-# MAIN 3: plots of data distribution -------------------------------------------
-
-# required data set: df_wells
-
-if (FALSE) {
-
-  nums <- sunlist(lapply(df_well_features, is.numeric))
-  df_well_features_num <- df_well_features[, nums] %>%
-    dplyr::select(- c(well_id, well_id_replaced))
-  df_well_features_cat <- df_well_features[, !nums] %>%
-    dplyr::select(-c("well_name", tidyr::ends_with("date")))
-
-  well_features_num <- model_features_with_plot_names[names(df_well_features_num)]
-  well_features_cat <- model_features_with_plot_names[names(df_well_features_cat)]
-
-  plots_cat <- lapply(names(well_features_cat), function(x) {
-    plot_frequencies(df_well_features, x, well_features_cat[x], 0.1)
-  })
-
-
-  plots_num <- lapply(names(well_features_num), function(x) {
-    plot_distribution(df_well_features, x, title = well_features_num[x],
-                      vertical_x_axis_labels = FALSE)
-  })
-
-  # cowplot
-  plots <- cowplot::plot_grid(plotlist = c(plots_cat, plots_num),
-                              nrow = 5, ncol = 6, align = "hv", scale = 0.9)
-
-  # save overview plot
-  ggplot2::ggsave("well_feature_distribution.png", plot = plots, width = 25,
-                  height = 20, dpi = 600)
-
-
-  # save all plots individually
-  lapply(c(plots_cat, plots_num), function(x) {
-    ggplot2::ggsave(filename = paste0(gsub("\\.", "_", names(x$labels$subtitle)), ".png"),
-                    plot = x,
-                    dpi = 600,
-                    width = 6,
-                    height = 4)
-  })
-
-}
-
-# MAIN 4: plots for Qmom-Qzul relation -----------------------------------------
+# MAIN 5: plots for Qmom-Qzul relation -----------------------------------------
 
 if (FALSE) {
   # required data set: df_Q_monitoring

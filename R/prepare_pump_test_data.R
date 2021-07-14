@@ -196,7 +196,7 @@ prepare_pump_test_data <- function(df_wells_operational_start) {
     dplyr::group_by(well_id, n_rehab) %>%
     dplyr::mutate(
       last_rehab.date = min(action_date),
-      days_since_last_rehab =  dplyr::if_else(
+      time_since_rehab_days =  dplyr::if_else(
         n_rehab > 0,
         as.integer(date - last_rehab.date),
         days_since_operational_start
@@ -205,11 +205,11 @@ prepare_pump_test_data <- function(df_wells_operational_start) {
 
 
   # recalculate days since operational start and days since last rehab into
-  # new variables well_age_years and years_since_last_rehab
+  # new variables well_age_years and time_since_rehab_years
 
   df_pump_tests_tidy <- df_pump_tests_tidy %>%
     dplyr::mutate(well_age_years = days_since_operational_start / 365.25,
-                  years_since_last_rehab = days_since_last_rehab / 365.25)
+                  time_since_rehab_years = time_since_rehab_days / 365.25)
 
   df_pump_tests_tidy %>%
     dplyr::select(pump_test_vars) %>%
