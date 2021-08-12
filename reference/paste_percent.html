@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Save data frame in different formats: csv, RData, rds — save_data • dwc.wells</title>
+<title>Paste percent sign to numbers — paste_percent • dwc.wells</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Save data frame in different formats: csv, RData, rds — save_data" />
-<meta property="og:description" content="Save data frame in different formats: csv, RData, rds" />
+<meta property="og:title" content="Paste percent sign to numbers — paste_percent" />
+<meta property="og:description" content="Paste percent sign to numbers" />
 
 
 
@@ -111,35 +111,23 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Save data frame in different formats: csv, RData, rds</h1>
-    <small class="dont-index">Source: <a href='https://github.com/KWB-R/dwc.wells/blob/master/R/prepare_functions.R'><code>R/prepare_functions.R</code></a></small>
-    <div class="hidden name"><code>save_data.Rd</code></div>
+    <h1>Paste percent sign to numbers</h1>
+    <small class="dont-index">Source: <a href='https://github.com/KWB-R/dwc.wells/blob/master/R/plotting_functions.R'><code>R/plotting_functions.R</code></a></small>
+    <div class="hidden name"><code>paste_percent.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Save data frame in different formats: csv, RData, rds</p>
+    <p>Paste percent sign to numbers</p>
     </div>
 
-    <pre class="usage"><span class='fu'>save_data</span><span class='op'>(</span><span class='va'>Data</span>, <span class='va'>path</span>, <span class='va'>filename</span>, formats <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"csv"</span>, <span class='st'>"RData"</span>, <span class='st'>"rds"</span><span class='op'>)</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>paste_percent</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>Data</th>
-      <td><p>data frame</p></td>
-    </tr>
-    <tr>
-      <th>path</th>
-      <td><p>out path for saving data</p></td>
-    </tr>
-    <tr>
-      <th>filename</th>
-      <td><p>core of file name</p></td>
-    </tr>
-    <tr>
-      <th>formats</th>
-      <td><p>export formats: "csv", "RData", "rds" or several using 'c'</p></td>
+      <th>x</th>
+      <td><p>numeric vector</p></td>
     </tr>
     </table>
 

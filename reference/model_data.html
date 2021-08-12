@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Save data frame in different formats: csv, RData, rds — save_data • dwc.wells</title>
+<title>Data for well capacity prediction — model_data • dwc.wells</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Save data frame in different formats: csv, RData, rds — save_data" />
-<meta property="og:description" content="Save data frame in different formats: csv, RData, rds" />
+<meta property="og:title" content="Data for well capacity prediction — model_data" />
+<meta property="og:description" content="A dataset for well capacity prediction created with R script in /data-raw/model_data.R" />
 
 
 
@@ -111,37 +111,30 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Save data frame in different formats: csv, RData, rds</h1>
-    <small class="dont-index">Source: <a href='https://github.com/KWB-R/dwc.wells/blob/master/R/prepare_functions.R'><code>R/prepare_functions.R</code></a></small>
-    <div class="hidden name"><code>save_data.Rd</code></div>
+    <h1>Data for well capacity prediction</h1>
+    <small class="dont-index">Source: <a href='https://github.com/KWB-R/dwc.wells/blob/master/R/docu_model_data.R'><code>R/docu_model_data.R</code></a></small>
+    <div class="hidden name"><code>model_data.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Save data frame in different formats: csv, RData, rds</p>
+    <p>A dataset for well capacity prediction created with R script in /data-raw/model_data.R</p>
     </div>
 
-    <pre class="usage"><span class='fu'>save_data</span><span class='op'>(</span><span class='va'>Data</span>, <span class='va'>path</span>, <span class='va'>filename</span>, formats <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"csv"</span>, <span class='st'>"RData"</span>, <span class='st'>"rds"</span><span class='op'>)</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='va'>model_data</span></pre>
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>Data</th>
-      <td><p>data frame</p></td>
-    </tr>
-    <tr>
-      <th>path</th>
-      <td><p>out path for saving data</p></td>
-    </tr>
-    <tr>
-      <th>filename</th>
-      <td><p>core of file name</p></td>
-    </tr>
-    <tr>
-      <th>formats</th>
-      <td><p>export formats: "csv", "RData", "rds" or several using 'c'</p></td>
-    </tr>
-    </table>
+
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
+
+    <p>A data.frame with 6308 rows and 47 variables:</p><dl>
+<dt>well_id</dt><dd><p>well id, for info</p></dd>
+<dt>date</dt><dd><p>date of capacity measurement, for info</p></dd>
+<dt>key</dt><dd><p>measurement key, e.g. operational_start, pump_test_1, pump_test_2, for info</p></dd>
+<dt>Qs_rel</dt><dd><p>specific capacity of well relative to operational start condition, output</p></dd>
+<dt>days_since_operational_start</dt><dd><p>days since operational start, redundant</p></dd>
+<dt>well_age_years</dt><dd><p>years since operationa start, input, numeric</p></dd>
+<dt>to be continued</dt><dd><p>...</p></dd>
+
+</dl>
 
 
   </div>

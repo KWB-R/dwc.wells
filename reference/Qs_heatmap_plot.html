@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Save data frame in different formats: csv, RData, rds — save_data • dwc.wells</title>
+<title>Heatmap / raster plot for Qs values over time with each well as one line — Qs_heatmap_plot • dwc.wells</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Save data frame in different formats: csv, RData, rds — save_data" />
-<meta property="og:description" content="Save data frame in different formats: csv, RData, rds" />
+<meta property="og:title" content="Heatmap / raster plot for Qs values over time with each well as one line — Qs_heatmap_plot" />
+<meta property="og:description" content="Heatmap / raster plot for Qs values over time with each well as one line" />
 
 
 
@@ -111,35 +111,50 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Save data frame in different formats: csv, RData, rds</h1>
-    <small class="dont-index">Source: <a href='https://github.com/KWB-R/dwc.wells/blob/master/R/prepare_functions.R'><code>R/prepare_functions.R</code></a></small>
-    <div class="hidden name"><code>save_data.Rd</code></div>
+    <h1>Heatmap / raster plot for Qs values over time with each well as one line</h1>
+    <small class="dont-index">Source: <a href='https://github.com/KWB-R/dwc.wells/blob/master/R/plotting_functions.R'><code>R/plotting_functions.R</code></a></small>
+    <div class="hidden name"><code>Qs_heatmap_plot.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Save data frame in different formats: csv, RData, rds</p>
+    <p>Heatmap / raster plot for Qs values over time with each well as one line</p>
     </div>
 
-    <pre class="usage"><span class='fu'>save_data</span><span class='op'>(</span><span class='va'>Data</span>, <span class='va'>path</span>, <span class='va'>filename</span>, formats <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"csv"</span>, <span class='st'>"RData"</span>, <span class='st'>"rds"</span><span class='op'>)</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>Qs_heatmap_plot</span><span class='op'>(</span>
+  <span class='va'>df</span>,
+  <span class='va'>colours</span>,
+  <span class='va'>dummy_labels</span>,
+  <span class='va'>date_limits</span>,
+  <span class='va'>title</span>,
+  <span class='va'>n_wells_per_page</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>Data</th>
-      <td><p>data frame</p></td>
+      <th>df</th>
+      <td><p>data frame with date, well_id, Qs_rel</p></td>
     </tr>
     <tr>
-      <th>path</th>
-      <td><p>out path for saving data</p></td>
+      <th>colours</th>
+      <td><p>3 colours for low, middle and high colour limits</p></td>
     </tr>
     <tr>
-      <th>filename</th>
-      <td><p>core of file name</p></td>
+      <th>dummy_labels</th>
+      <td><p>dummy labels if there are less wells than expected</p></td>
     </tr>
     <tr>
-      <th>formats</th>
-      <td><p>export formats: "csv", "RData", "rds" or several using 'c'</p></td>
+      <th>date_limits</th>
+      <td><p>vector with two date strings in format "yyyy-mm-dd"</p></td>
+    </tr>
+    <tr>
+      <th>title</th>
+      <td><p>plot title</p></td>
+    </tr>
+    <tr>
+      <th>n_wells_per_page</th>
+      <td><p>number of wells do be shown</p></td>
     </tr>
     </table>
 
