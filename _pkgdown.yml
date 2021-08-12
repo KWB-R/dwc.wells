@@ -17,3 +17,43 @@ template:
 development:
   mode: auto
 
+reference:
+  - title: Datasets
+    desc: >
+      Datasets for predicting well capacity
+    contents:
+      - model_data
+
+  # - title: Perform predictions
+  #   desc: >
+  #     ...
+  #   contents:
+  #     - ...
+
+  # - title: Web-apps
+  #   desc: >
+  #     ...
+  #   contents:
+  #     - starts_with("opencpu_")
+
+
+  - title: Visualise results
+    desc: >
+      Functions for plotting
+    contents:
+      - starts_with("plot")
+      - ends_with("plot")
+
+  - title: Export data
+    desc: >
+      Functions for exporting data
+    contents:
+      - save_data
+
+  - title: Helper functions
+    desc: >
+      Helper functions
+    contents:
+      - interpolate_and_fill
+
+

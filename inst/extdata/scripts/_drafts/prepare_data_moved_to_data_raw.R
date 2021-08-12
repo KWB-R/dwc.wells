@@ -37,7 +37,12 @@ if (FALSE) {
   df_pump_tests_tidy <- dwc.wells:::prepare_pump_test_data(df_wells_operational_start)
   save_data(df_pump_tests_tidy, paths$data_prep_out, "pump_test_data")
 
-}
+  # 8. get standard deviation in static water level measurements
+  df_W_static_sd <- get_W_static_data(df_wells) %>%
+    group_by(well_id) %>%
+    summarise(W_static.sd = sd(W_static, na.rm = TRUE))
+
+  }
 
 if (FALSE) {
 
@@ -59,12 +64,13 @@ if (FALSE) {
     dplyr::left_join(df_drilling_tech, by = "drilling_id") %>%
     dplyr::left_join(df_quality_agg, by = "well_id") %>%
     dplyr::left_join(df_volumes_agg, by = "well_id") %>%
+    dplyr::left_join(df_W_static_sd, by = "well_id") %>%
     dplyr::select(dplyr::all_of(well_features)) %>%
     dplyr::mutate(drilling_method = tidyr::replace_na(drilling_method, "Unbekannt"),
+                  W_static.sd = replace_na_with_median(W_static.sd),
                   volume_m3_d.mean = replace_na_with_median(volume_m3_d.mean),
                   volume_m3_d.sd = replace_na_with_median(volume_m3_d.sd)) %>%
     droplevels()
-
   save_data(df_well_features, paths$data_prep_out, "well_feature_data")
 
 
@@ -75,10 +81,10 @@ if (FALSE) {
     )
 
 
-
   # 3. combine Qs and feature tables
   df <- dwc.wells:::prepare_model_data(df_pump_tests_tidy, df_well_features)
   save_data(df, paths$data_prep_out, "model_data")
-  summary(df)
 
+
+  usethis::use_data()
 }

@@ -8,37 +8,40 @@ well_features <- c(
   "construction_year",
   "operational_start.date",
   "operational_start.year",
-  "waterworks",
-  "well_gallery",
-  "admissible_discharge",
-  "operational_start.Qs",
-  "aquifer_coverage",
   "screen_material",
-  "diameter",
   "n_screens",
+  "diameter",
   "filter_length",
   "well_depth",
   "drilling_method",
+  "admissible_discharge",
+  "operational_start.Qs",
+  "waterworks",
+  "well_gallery",
+  "aquifer_coverage",
   "surface_water",
   "surface_water.distance",
   "inliner",
   "inliner.date",
   "volume_m3_d.mean",
   "volume_m3_d.sd",
-  "quality.Cu",
+  "volume_m3_d.cv",
+  "W_static.sd",
   "quality.DR",
   "quality.EC",
   "quality.DO",
+  "quality.Temp",
+  "quality.pH",
+  "quality.Redox",
   "quality.Fe_tot",
   "quality.Mn",
+  "quality.Cu",
   "quality.NO3",
   "quality.P_tot",
-  "quality.pH",
   "quality.PO4",
-  "quality.Redox",
   "quality.SO4",
-  "quality.Temp",
-  "quality.TSS"
+  "quality.TSS",
+  "well_function"
 )
 
 
@@ -78,6 +81,7 @@ model_features_with_plot_names <- list(
   "waterworks" = "Waterworks",
   "well_gallery" = "Well gallery",
   "aquifer_coverage" = "Aquifer coverage",
+  "W_static.sd" = "Static water level, std-dev [m]",
   "surface_water" = "Surface water",
   "surface_water.distance" = "Distance to surface water [m]",
 
@@ -89,13 +93,14 @@ model_features_with_plot_names <- list(
   # operational information
   "volume_m3_d.mean" = "Abstraction volume, mean [m³/d]",
   "volume_m3_d.sd" = "Abstraction volume, std-dev [m³/d]",
+  "volume_m3_d.cv" = "Abstraction volume, cv [-]",
 
   # water quality
   "quality.DR" = "Dry residues [mg/L]",
   "quality.EC" = "Electrical conductivity [µS/cm]",
   "quality.DO" = "Dissolved oxygen [mg/L]",
   "quality.Temp" = "Temperature [°C]",
-  "quality.pH" = "pH",
+  "quality.pH" = "pH [-]",
   "quality.Redox" = "Redox potential [mV]",
   #"quality.Fe_tot" = expression(paste("Fe"[tot], " concentration in mg/L")),
   "quality.Fe_tot" = "Fe (tot) concentration [mg/L]",
@@ -108,14 +113,14 @@ model_features_with_plot_names <- list(
   "quality.SO4" = "SO4 concentration [mg/L]",
   "quality.TSS" = "TSS concentration [mg/L]"
 
+  #"well_function" = "Brunnenfunktion"
+
   )
 
 model_features <- names(model_features_with_plot_names)
 
-
-redundant_vars <- c(
-  "construction_date",
-  "operational_start.date",
-  "operational_start.year",
-  "waterworks"
-)
+top5_model_features <- c("well_age_years",
+                         "time_since_rehab_years",
+                         "well_gallery",
+                         "n_rehab",
+                         "volume_m3_d.cv")

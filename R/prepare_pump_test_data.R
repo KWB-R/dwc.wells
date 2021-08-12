@@ -1,6 +1,11 @@
 # prepare_pump_test_data -------------------------------------------------------
 
-prepare_pump_test_data <- function(df_wells_operational_start) {
+# Title: prepare pump test data under consideration of rehab activities
+# df_wells: data frame with well characteristics and at least the
+# following columns: site_id, well_id, well_id_replaced, "construction_date,
+# operational_start.date, operational_start.Qs)
+#
+prepare_pump_test_data <- function(df_wells) {
 
   # read, rename and clean data ---
   df_pump_tests <- read_csv(paths$data_pump_tests, skip = 2) %>%
@@ -22,8 +27,8 @@ prepare_pump_test_data <- function(df_wells_operational_start) {
   # swap pump test dates 1 and 2 if pump_test_2.date < pump_test_1.date --------
 
   # check, how many rows have dates in wrong order
-  cond <- dwc.wells:::swapped_dates(df_pump_tests)
-  dwc.wells:::check_swapped_dates(cond, df_pump_tests)
+  cond <- swapped_dates(df_pump_tests)
+  check_swapped_dates(cond, df_pump_tests)
 
   # swap dates
   df_pump_tests <- df_pump_tests %>%
@@ -36,8 +41,8 @@ prepare_pump_test_data <- function(df_wells_operational_start) {
     dplyr::select(-c(pump_test_1.date_tmp, pump_test_2.date_tmp))
 
   # check again, how many dates are in wrong order
-  cond <- dwc.wells:::swapped_dates(df_pump_tests)
-  dwc.wells:::check_swapped_dates(cond, df_pump_tests)
+  cond <- swapped_dates(df_pump_tests)
+  check_swapped_dates(cond, df_pump_tests)
 
 
   # fill up pump test dates and calculate action date --------------------------
@@ -46,8 +51,8 @@ prepare_pump_test_data <- function(df_wells_operational_start) {
     dplyr::mutate(
       interval_days = dplyr::if_else(
         !is.na(pump_test_1.date) & !is.na(pump_test_2.date),
-        dwc.wells:::real_interval(pump_test_2.date, pump_test_1.date),
-        dwc.wells:::default_interval(pump_test_2.date, pump_test_1.date, func = mean)
+        real_interval(pump_test_2.date, pump_test_1.date),
+        default_interval(pump_test_2.date, pump_test_1.date, func = mean)
       ),
       interval_type = dplyr::if_else(
         !is.na(pump_test_1.date) & !is.na(pump_test_2.date), "real", "default"
@@ -92,6 +97,9 @@ prepare_pump_test_data <- function(df_wells_operational_start) {
 
 
   # calculate Qs and Qs rel ----------------------------------------------------
+  df_wells_operational_start <- df_wells %>%
+    dplyr::select("well_id", tidyselect::starts_with("operational_start."))
+
   df_pump_tests <- df_pump_tests %>%
     # get well characteristics to calculate Qs_rel
     dplyr::inner_join(df_wells_operational_start, by = "well_id") %>%
@@ -186,10 +194,10 @@ prepare_pump_test_data <- function(df_wells_operational_start) {
                     )) %>%
     dplyr::filter(days_since_operational_start >= 0) %>%
     dplyr::group_by(well_id) %>%
-    dplyr::mutate(n_rehab = dwc.wells:::cumsum_no_na(well_rehab),
-                  n.substitute_pump = dwc.wells:::cumsum_no_na(substitute_pump),
-                  n.pressure_sleeve = dwc.wells:::cumsum_no_na(pressure_sleeve),
-                  n.comment_liner = dwc.wells:::cumsum_no_na(comment_liner)
+    dplyr::mutate(n_rehab = cumsum_no_na(well_rehab),
+                  n.substitute_pump = cumsum_no_na(substitute_pump),
+                  n.pressure_sleeve = cumsum_no_na(pressure_sleeve),
+                  n.comment_liner = cumsum_no_na(comment_liner)
     ) %>%
     dplyr::ungroup() %>%
     dplyr::arrange(well_id, n_rehab, date) %>%
@@ -213,7 +221,7 @@ prepare_pump_test_data <- function(df_wells_operational_start) {
 
   df_pump_tests_tidy %>%
     dplyr::select(pump_test_vars) %>%
-    dplyr::filter(!is.na(Qs_rel))
-
+    dplyr::filter(!is.na(Qs_rel)) %>%
+    dplyr::mutate(Qs_rel = Qs_rel * 100)
 
 }

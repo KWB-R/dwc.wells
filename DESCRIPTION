@@ -24,9 +24,12 @@ License: MIT + file LICENSE
 URL: https://github.com/KWB-R/dwc.wells
 BugReports: https://github.com/KWB-R/dwc.wells/issues
 Imports:
+    corrplot,
     dplyr,
     forcats,
     kwb.db,
+    kwb.utils,
+    lsr,
     lubridate,
     magrittr,
     odbc32,
@@ -35,6 +38,7 @@ Imports:
     rlang,
     scales,
     sema.berlin.utils,
+    stringr,
     tidyr,
     tidyselect,
     zoo
@@ -53,3 +57,5 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+Depends: 
+    R (>= 3.50)

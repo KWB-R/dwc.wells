@@ -1,5 +1,5 @@
 # load volume data
-df_volumes <- dwc.wells:::read_ms_access_mri(paths$db, "WV_GMS_TBL_MENGENTABELLE") %>%
+df_volumes <- read_ms_access_mri(paths$db, "WV_GMS_TBL_MENGENTABELLE") %>%
   select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
   #dplyr::select(well_id, date, abstracted_volume) %>%
   dplyr::mutate(date = as.Date(date))

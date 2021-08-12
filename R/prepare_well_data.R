@@ -30,7 +30,8 @@ prepare_well_data  <- function() {
       # false dates
       dplyr::across(dplyr::all_of(date_cols), .fns = dplyr::na_if, "1899-12-30"),
       # specific capacity at operational start
-      operational_start.Qs = dplyr::na_if(operational_start.Qs, 469)
+      operational_start.Qs = dplyr::na_if(operational_start.Qs, 469),
+      admissible_discharge = dplyr::na_if(admissible_discharge, 0)
     )
 
 
@@ -86,7 +87,7 @@ prepare_well_data  <- function() {
   # assign data type "factor"
   factor_cols <- c("well_function", "operational_state", "aquifer_confinement",
                    "aquifer_coverage", "casing_material", "screen_material",
-                   "waterworks")
+                   "waterworks", "well_gallery")
   df_wells <- df_wells %>%
     dplyr::mutate(dplyr::across(dplyr::all_of(factor_cols), .fns = tidy_factor))
 

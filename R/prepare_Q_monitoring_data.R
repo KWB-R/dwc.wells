@@ -1,3 +1,40 @@
+#' Get W_static measurement data from Neubaupumpversuche, Kurzpumpversuche and other sources
+#'
+#' @param df_wells data frame with prepared well data
+#'
+#' @export
+#'
+get_W_static_data <- function(df_wells) {
+
+  # get static water level data from df_wells (Neubaupumpversuche)
+  df_W_static_1 <- df_wells %>%
+    dplyr::select(site_id, well_id, operational_start.date,
+                  operational_start.W_static,
+                  monitoring.date, monitoring.W_static) %>%
+    tidyr::pivot_longer(-c(site_id, well_id), names_sep = "\\.", names_to = c("origin", ".value")) %>%
+    dplyr::mutate(W_static = dplyr::na_if(W_static, 0)) %>%
+    dplyr::filter(!is.na(W_static))
+
+  # import other static water level data provided by Sebastian Schimmelpfennig
+  # origin: H2O2-Messungen, Kurzpumpversuche, Ergiebigkeitsmessungen
+  df_W_static_2 <- read_csv(paths$data_W_static, skip = 30) %>%
+    select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
+    dplyr::mutate(date = as.Date(date, format = "%Y-%m-%d")) %>%
+    dplyr::select(site_id, well_id, origin, date, W_static)
+
+  names(df_W_static_2)
+  names(df_W_static_1)
+
+  # combine both data sources
+  df_W_static <- dplyr::bind_rows(list(df_W_static_1, df_W_static_2)) %>%
+    tidyr::drop_na(site_id, date, W_static) %>% # one date missing
+    dplyr::arrange(site_id, date) %>%
+    dplyr::rename(W_static.origin = origin)
+
+  df_W_static
+}
+
+
 # prepare_Q_monitoring_data ----------------------------------------------------
 
 prepare_Q_monitoring_data <- function(df_wells) {
@@ -10,44 +47,25 @@ prepare_Q_monitoring_data <- function(df_wells) {
     tidyr::drop_na(-W_static) %>%
     dplyr::distinct(.keep_all = TRUE)
 
+  # get data for static water level measurements
+  df_W_static <- get_W_static_data(df_wells)
 
-  # get static water level data from df_wells
-  df_W_static_1 <- df_wells %>%
-    dplyr::select(site_id, operational_start.date, operational_start.W_static, monitoring.date, monitoring.W_static) %>%
-    tidyr::pivot_longer(-site_id, names_sep = "\\.", names_to = c("origin", ".value")) %>%
-    dplyr::mutate(W_static = dplyr::na_if(W_static, 0)) %>%
-    dplyr::filter(!is.na(W_static))
-
-  # import other static water level data provided by Sebastian Schimmelpfennig
-  # origin: H2O2-Messungen, Kurzpumpversuche, Ergiebigkeitsmessungen
-  df_W_static_2 <- read_csv(paths$data_W_static, skip = 30) %>%
-    select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
-    dplyr::mutate(date = as.Date(date, format = "%Y-%m-%d")) %>%
-    dplyr::select(site_id, origin, date, W_static)
-
-  # combine both data sources
-  df_W_static <- dplyr::bind_rows(list(df_W_static_1, df_W_static_2)) %>%
-    tidyr::drop_na(site_id, date, W_static) %>% # one date missing
-    dplyr::arrange(site_id, date) %>%
-    dplyr::rename(W_static.origin = origin)
-
-  summary <- df_W_static %>% dplyr::group_by(site_id) %>%
+  summary <- df_W_static %>% dplyr::group_by(well_id) %>%
     dplyr::summarise(n_valid = sum(!is.na(W_static))) %>%
     dplyr::arrange(dplyr::desc(n_valid))
-
 
   # combine quantity data and extra static water level data
   df_Q_W <- df_Q %>%
     dplyr::mutate(W_static.origin = ifelse(
       !is.na(W_static), "quantity_measurements", NA
     )) %>%
-    dplyr::bind_rows(df_W_static) %>%
+    dplyr::bind_rows(dplyr::select(df_W_static, -well_id)) %>%
+    # remove duplicates
+    dplyr::distinct(site_id, date, .keep_all = TRUE) %>%
     dplyr::arrange(site_id, date)
 
-
-  # Remove duplicate across site_id and date
-  df_Q_W <- df_Q_W %>%
-    dplyr::distinct(site_id, date, .keep_all = TRUE)
+  frequency_table(duplicated((df_Q_W[, c("site_id", "date")])))
+  a <- df_Q_W[duplicated(df_Q_W[, c("site_id", "date")]), ]
 
   print(frequency_table(df_Q_W[!is.na(df_Q_W$W_static), "W_static.origin"]))
 
@@ -105,8 +123,7 @@ prepare_Q_monitoring_data <- function(df_wells) {
 
   # join with Qs from operational start and calculate Qs_rel
   df_Q_W_new <- df_Q_W_new %>%
-    dplyr::left_join(df_wells[, c("site_id",
-                                  "well_id",
+    dplyr::left_join(df_wells[, c("site_id", "well_id",
                                   "operational_start.date",
                                   "operational_start.Qs",
                                   "admissible_discharge")],

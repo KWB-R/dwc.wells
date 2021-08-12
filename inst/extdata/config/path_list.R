@@ -41,15 +41,13 @@ path_list <- list(
   # output path ---
   data_prep_out = "<data_prep>/03_data_out",
 
+  # plotting ---
+  plotting = "<project>/02_plotting",
+
   # statistics ---
-  stats = "<project>/02_statistics",
-  stats_data = "<stats>/data",
-  stats_plots = "<stats>/plots",
+  statistics = "<project>/03_statistics",
 
   # modelling ---
-  ml = "<project>/03_modelling",
-  ml_models = "<ml>/models",
-  ml_data = "<ml>/data",
-  ml_plots = "<ml>/plots"
+  modelling = "<project>/04_modelling"
 
 )

@@ -10,7 +10,7 @@
 prepare_volume_data <- function(df_wells) {
 
   # load volume data
-  dwc.wells:::read_ms_access_mri(paths$db, "WV_GMS_TBL_MENGENTABELLE") %>%
+  read_ms_access_mri(paths$db, "WV_GMS_TBL_MENGENTABELLE") %>%
     select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
     dplyr::mutate(date = as.Date(date)) %>%
     dplyr::arrange(well_id, date) %>%
@@ -25,7 +25,9 @@ prepare_volume_data <- function(df_wells) {
     # aggregate data
     dplyr::group_by(well_id) %>%
     dplyr::summarise(volume_m3_d.mean = mean(volume_m3_d, na.rm = TRUE),
-                     volume_m3_d.sd = sd(volume_m3_d, na.rm = TRUE))
+                     volume_m3_d.sd = sd(volume_m3_d, na.rm = TRUE)) %>%
+    dplyr::mutate(volume_m3_d.cv = volume_m3_d.sd / volume_m3_d.mean) %>%
+    dplyr::mutate(volume_m3_d.cv = tidyr::replace_na(volume_m3_d.cv, 0))
 
 }
 

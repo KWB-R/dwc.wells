@@ -1,7 +1,7 @@
 prepare_quality_data <- function() {
 
   # read data
-  df_quality <- dwc.wells:::read_ms_access_mri(paths$db, "DB2LABOR_Daten") %>%
+  df_quality <- read_ms_access_mri(paths$db, "DB2LABOR_Daten") %>%
     select_rename_cols(renamings$main, "old_name", "new_name_en")
 
 
@@ -29,7 +29,7 @@ prepare_quality_data <- function() {
 
   # overview quality data: parameters and units
   cat("Overview of quality data (data count per parameter and unit):\n\n")
-  print(dwc.wells:::check_n_parameters_and_units(df_quality))
+  print(check_n_parameters_and_units(df_quality))
 
 
   # aggregate / clean data

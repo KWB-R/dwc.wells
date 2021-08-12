@@ -8,6 +8,8 @@
 #' @param group_by_col grouping variable within which interpolation is done
 #' @param origin_col already existing or to be created column with type of value
 #'
+#'@importFrom stats approx
+#'
 #' @export
 #'
 interpolate_and_fill <- function(df, x_col, y_col, group_by_col,
@@ -391,9 +393,9 @@ handle_inliner <- function(df) {
       screen_material, screen_material == "Inliner", "Unbekannt"
     ) %>% forcats::fct_drop()) %>%
     # set inliner to 'Yes' if date > inliner.date, otherwise to 'No'
-    dplyr::mutate(inliner = dplyr::if_else(
+    dplyr::mutate(inliner = factor(dplyr::if_else(
       date > inliner.date & !is.na(date) & !is.na(inliner.date),
-      "Yes", "No")
+      "Yes", "No"), levels = c("Yes", "No"))
     ) %>%
     dplyr::select(-inliner.date) %>%
     as.data.frame()
@@ -409,14 +411,24 @@ handle_inliner <- function(df) {
 #' @param Data data frame
 #' @param path out path for saving data
 #' @param filename core of file name
+#' @param formats export formats: "csv", "RData", "rds" or several using 'c'
 #'
 #' @export
 #'
-save_data <- function(Data, path, filename) {
-  write.table(Data, file = file.path(path, sprintf("%s.csv", filename)),
-              dec = ".", sep = ";", row.names = FALSE)
-  save(Data, file = file.path(path, sprintf("%s.RData", filename)))
-  saveRDS(Data, file = file.path(path, sprintf("%s.rds", filename)))
+save_data <- function(Data, path, filename, formats = c("csv", "RData", "rds")) {
+
+  if ("csv" %in% formats) {
+    write.table(Data, file = file.path(path, sprintf("%s.csv", filename)),
+                dec = ".", sep = ";", row.names = FALSE)
+  }
+
+  if ("RData" %in% formats) {
+    save(Data, file = file.path(path, sprintf("%s.RData", filename)))
+  }
+
+  if ("rds" %in% formats) {
+    saveRDS(Data, file = file.path(path, sprintf("%s.rds", filename)))
+  }
 }
 
 

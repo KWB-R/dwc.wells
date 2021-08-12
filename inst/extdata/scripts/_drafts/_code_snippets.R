@@ -1,32 +1,18 @@
-# old code snipped for interpolating W_static, later put into function
 
+# check counts per well generation
 if (FALSE) {
-  # wells with only 1 W_static data point
-  df_Q_W_1 <- df_Q_W %>%
-    dplyr::group_by(site_id) %>%
-    dplyr::filter(sum(!is.na(W_static)) == 1) %>%
-    dplyr::mutate(W_static_2 = W_static) %>%
-    tidyr::fill("W_static_2", .direction = "updown") %>%
-    dplyr::mutate(W_static.origin = dplyr::if_else(
-      is.na(W_static), "filled up", W_static.origin
-    )) %>%
-    as.data.frame()
+
+  frequency_table(ifelse(is.na(df_wells$well_id_replaced), 1, 2)) # count well generation
+
+  df_quality_agg_long <- df_quality_agg %>%
+    tidyr::pivot_longer(cols = -1, names_to = "quality.parameter", values_to = "quality.value") %>%
+    dplyr::left_join(lookup_par_unit)
+}
 
 
-  # wells with at least 2 W_static data points
-  df_Q_W_2 <- df_Q_W %>%
-    dplyr::group_by(site_id) %>%
-    dplyr::filter(sum(!is.na(W_static)) >= 2) %>%
-    dplyr::group_by(site_id) %>%
-    dplyr::mutate(W_static_2 = approx(date, W_static, date, rule = 1)$y) %>%
-    #dplyr::mutate(W_static_2 = approx(date, W_static, date, rule = 2)$y) %>%
-    dplyr::mutate(W_static.origin = dplyr::case_when(is.na(W_static) & !is.na(W_static_2) ~ "interpolated",
-                                                     is.na(W_static) & is.na(W_static_2) ~ "filled up",
-                                                     !is.na(W_static) ~ W_static.origin)) %>%
-    tidyr::fill(W_static_2, .direction = "updown") %>%
-    as.data.frame()
-
-  # combine the two datasets again and calculate Qs
-  df_Q_W_new <- df_Q_W_1 %>% dplyr::bind_rows(df_Q_W_2) %>%
-    dplyr::arrange(site_id, date)
+# non binary split of Qs_rel
+if (FALSE) {
+  df$Qs_rel_cat <- cut(df$Qs_rel,
+                       breaks = c(-Inf, 1/3 * 100, 2/3 * 100, Inf),
+                       labels = c("1-low","2-middle","3-high"))
 }

@@ -1,4 +1,4 @@
-#  correlation_plot ------------------------------------------------------------
+# correlation_plot ------------------------------------------------------------
 
 #' plots Qs_rel vs. input variable as box plot (categorical input variable)
 #' or scatterplot (numerical input variable)
@@ -13,7 +13,7 @@
 correlation_plot <- function(df, x, y = "Qs_rel", title = gsub("_", " ", x)) {
 
   p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x]], y = .data[[y]])) +
-    ggplot2::scale_y_continuous(labels = scales::percent,
+    ggplot2::scale_y_continuous(labels = function(x) { paste0(x, "%") },
                                 breaks = scales::pretty_breaks()) +
     sema.berlin.utils::my_theme() +
     #theme(plot.subtitle = element_text(color = "deepskyblue4", face = "italic")) +
@@ -57,7 +57,7 @@ plot_Qs_over_time <- function(df, xmax = 40, legend_position = "top") {
          x = "Well age [yrs]", y = "Qs_rel")
 
   if (legend_position == "top") {
-    p + ggplot2::guides(color = guide_legend(nrow = 1))
+    p + ggplot2::guides(color = ggplot2::guide_legend(nrow = 1))
   } else {
     p
   }
@@ -70,6 +70,7 @@ plot_Qs_over_time <- function(df, xmax = 40, legend_position = "top") {
 #' @param variable variable
 #' @param title plot title
 #' @param offset_perc_labels distance of labels from bars
+#' @param size_perc_labels size of percent labels
 #' @param vertical_x_axis_labels should x-axis labels be ploted vertically (TRUE / FALSE)
 #'
 #' @export
@@ -78,6 +79,7 @@ plot_frequencies <- function(Data,
                              variable,
                              title = variable,
                              offset_perc_labels = 0.1,
+                             size_perc_labels = 3,
                              vertical_x_axis_labels = TRUE) {
 
   # count frequencies
@@ -91,7 +93,9 @@ plot_frequencies <- function(Data,
   p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[["Var1"]], y = .data[["Freq"]])) +
     ggplot2::geom_bar(stat = "identity", width = 0.7, fill = "lightblue") +
     ggplot2::geom_text(
-      ggplot2::aes(label = scales::percent(.data[["share"]], accuracy = 1), y = .data[["pos"]])
+      ggplot2::aes(label = scales::percent(.data[["share"]], accuracy = 1),
+                   y = .data[["pos"]]),
+      size = size_perc_labels
       ) +
     ggplot2::scale_y_continuous(breaks = scales::pretty_breaks()) +
     #ggplot2::scale_x_discrete(expand = c(0.1, 0.1)) +
@@ -142,5 +146,81 @@ plot_distribution <- function(Data, variable, binwidth = NULL, title,
   }
 
   p
+}
+
+
+
+# my.corrplot.mixed ------------------------------------------------------------
+my.corrplot.mixed <- function(data, cl.lim = c(-1,1), number.cex = 1.0) {
+  corrplot::corrplot.mixed(data, lower = "number", upper = "color", outline = TRUE,
+                           tl.cex = 1.0, tl.pos = "lt", tl.col = "black", diag = "u",
+                           cl.cex = 1.0, cl.ratio = 0.2, number.cex = number.cex, cl.lim = cl.lim)
+}
+
+
+# my.corrplot ------------------------------------------------------------------
+my.corrplot <- function(data, cl.lim = c(-1,1)) {
+  corrplot::corrplot(data, method = "color", outline = TRUE, tl.cex = 1.1, cl.lim = cl.lim,
+                     tl.col = "black", cl.cex = 1.0, cl.ratio = 0.2)
+}
+
+
+# paste_percent ----------------------------------------------------------------
+#' Paste percent sign to numbers
+#'
+#' @param x numeric vector
+#' @export
+#'
+paste_percent <- function(x) { paste0(x, "%") }
+
+
+# Qs_heatmap_plot --------------------------------------------------------------
+
+#' Heatmap / raster plot for Qs values over time with each well as one line
+#'
+#' @param df data frame with date, well_id, Qs_rel
+#' @param colours 3 colours for low, middle and high colour limits
+#' @param dummy_labels dummy labels if there are less wells than expected
+#' @param date_limits vector with two date strings in format "yyyy-mm-dd"
+#' @param title plot title
+#' @param n_wells_per_page number of wells do be shown
+#'
+#' @export
+#'
+Qs_heatmap_plot <- function(df, colours, dummy_labels, date_limits, title,
+                            n_wells_per_page) {
+
+  ggplot2::ggplot(df, ggplot2::aes(x = .data$date,
+                                   y = .data$well_id,
+                                   fill = .data$Qs_rel)) +
+    ggplot2::geom_raster() +
+    ggplot2::scale_fill_gradient2(low = unname(colours["red"]),
+                                  mid = unname(colours["yellow"]),
+                                  high = unname(colours["green"]),
+                                  midpoint = 50,
+                                  na.value = "grey90",
+                                  limits = c(0, 100),
+                                  breaks = seq(0, 100, 20),
+                                  labels = paste0(seq(0, 100, 20), "%"),
+                                  oob = scales::squish,
+                                  guide = ggplot2::guide_colourbar(reverse = TRUE)) +
+    ggplot2::scale_y_discrete(limits = function(x) {rev(c(x, dummy_labels)[1:n_wells_per_page])},
+                              labels = function(x) {stringr::str_sub(stringr::str_pad(x, 5, "left"), 1, 5)},
+                              expand = c(0.05, 0.05)) +
+    ggplot2::scale_x_date(limits = as.Date(date_limits),
+                          breaks = scales::pretty_breaks(8)) +
+    ggplot2::labs(y = "well_id", x = "Years", fill = "Specific\ncapacity",
+                  title = title) +
+    sema.berlin.utils::my_theme() +
+    ggplot2::theme(panel.grid.major = ggplot2::element_line(),
+                   legend.position = "top",
+                   legend.key.width = ggplot2::unit(2, "cm"),
+                   legend.key.height = ggplot2::unit(0.35, "cm"),
+                   legend.spacing.x = ggplot2::unit(0.8, "cm"),
+                   axis.title = ggplot2::element_text(face = "plain"),
+                   legend.title = ggplot2::element_text(face = "plain"),
+                   title = ggplot2::element_text(size = 12)) +
+    ggplot2::geom_hline(yintercept = seq(0.5, 20, 1), color = "white", lwd = 1)
+
 }
 
