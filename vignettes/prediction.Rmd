@@ -1,0 +1,23 @@
+---
+title: "Well capacity prediction"
+author: "Mathias Riechel"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Well capacity prediction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+```{r setup}
+
+head(dwc.wells::model_data)
+
+```
