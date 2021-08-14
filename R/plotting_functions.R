@@ -224,3 +224,41 @@ Qs_heatmap_plot <- function(df, colours, dummy_labels, date_limits, title,
 
 }
 
+
+
+# scatterplot ------------------------------------------------------------------
+#' scatterplot for comparing numeric predictions with observations
+#'
+#' @param df_pred data frame obtained with tidymodels::collect_predictions() with
+#' columns Qs_rel and .pred
+#' @param lines_80perc logical value; shout 80%-lines be drawn?; default = FALSE
+#'
+#' @export
+#'
+scatterplot <- function(df_pred, lines_80perc = FALSE) {
+
+  # error metrics
+  a <- df_pred %>% rmse(truth = .data$Qs_rel, estimate = .data$.pred)
+  b <- df_pred %>% rsq(truth = .data$Qs_rel, estimate = .data$.pred)
+
+  legend_str <- sprintf("r2 = %.2f\nRMSE = %.1f%%", b$.estimate, a$.estimate)
+
+  p <- ggplot(df_pred, aes(x = .data$Qs_rel, y = .data$.pred)) +
+    geom_point() +
+    geom_abline(color = 'blue', linetype = 2) +
+    scale_x_continuous(lim = c(0, 100), labels = paste_percent) +
+    scale_y_continuous(lim = c(0, 100), labels = paste_percent) +
+    labs(x = "observations", y = "predictions") +
+    sema.berlin.utils::my_theme() +
+    annotate("text", x = 100, y = 5, hjust = 1, col = "grey30", size = 3,
+             label = legend_str)
+
+  if (lines_80perc) {
+    p +  geom_hline(yintercept = 80, colour = "red", lty = "dashed") +
+      geom_vline(xintercept = 80, colour = "red", lty = "dashed")
+
+  } else {
+    p
+  }
+
+}

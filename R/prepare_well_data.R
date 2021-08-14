@@ -31,7 +31,8 @@ prepare_well_data  <- function() {
       dplyr::across(dplyr::all_of(date_cols), .fns = dplyr::na_if, "1899-12-30"),
       # specific capacity at operational start
       operational_start.Qs = dplyr::na_if(operational_start.Qs, 469),
-      admissible_discharge = dplyr::na_if(admissible_discharge, 0)
+      admissible_discharge = dplyr::na_if(admissible_discharge, 0),
+      n_screens = dplyr::na_if(n_screens, 0)
     )
 
 
@@ -63,9 +64,8 @@ prepare_well_data  <- function() {
   # clean categorical variables
   df_wells <- df_wells %>%
     dplyr::mutate(
-      dplyr::across(tidyr::starts_with("aquifer"), ~dplyr::na_if(., "nicht bekannt")),
-      n_screens = dplyr::na_if(n_screens, 0) %>% tidy_factor(level_sorting = "alphabet")
-    )
+      dplyr::across(tidyr::starts_with("aquifer"), ~dplyr::na_if(., "nicht bekannt"))
+      )
 
 
   # group categorical variables according to lookup table

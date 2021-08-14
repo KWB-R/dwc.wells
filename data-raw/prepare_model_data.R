@@ -68,7 +68,7 @@ df_pump_test_Q_monitoring <-
 
 
 # 3. combine Qs and well_features
-model_data <- dwc.wells:::prepare_model_data(df_pump_tests_tidy, df_well_features)
+model_data <- dwc.wells:::combine_to_model_data(df_pump_tests_tidy, df_well_features)
 save_data(model_data, paths$data_prep_out, "model_data")
 
 

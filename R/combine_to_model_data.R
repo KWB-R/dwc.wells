@@ -1,6 +1,6 @@
-# prepare model data -----------------------------------------------------------
+# combine to model data --------------------------------------------------------
 
-prepare_model_data <- function(df_Qs = df_pump_tests_tidy,
+combine_to_model_data <- function(df_Qs = df_pump_tests_tidy,
                                df_well_features = df_well_features) {
 
   # join with feature table

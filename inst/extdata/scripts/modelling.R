@@ -3,7 +3,6 @@
 source("inst/extdata/scripts/global.R")
 library(tidymodels)
 
-
 # MAIN 0: load, select and split model data ------------------------------------
 
 if (TRUE) {
@@ -30,6 +29,11 @@ if (TRUE) {
 
   }
 
+  # select only top 5 variables
+  if (FALSE) {
+    df <- df %>% select(Qs_rel, all_of(top5_model_features))
+  }
+
   if (FALSE) {
 
     # filter further 6 variables with little importance
@@ -37,9 +41,6 @@ if (TRUE) {
       select(-c(drilling_method, aquifer_coverage, quality.NO3, diameter,
                 quality.DO, quality.TSS))
   }
-
-  # retransform n_rehab into integer variable
-  df <- df %>% mutate(n_rehab = as.integer(n_rehab))
 
 
   # split / resample data, can be moved to data preparation
@@ -117,11 +118,11 @@ if (FALSE) {
     fit(Qs_rel ~ well_age_years + time_since_rehab_years + n_rehab + well_gallery + volume_m3_d.cv, data = df_training)
 
   # all variables
-  lm_fit <- linear_model %>% fit(Qs_rel ~ ., data = df_training_prep)
+  lm_fit <- linear_model %>% fit(Qs_rel ~ ., data = df_training)
 
 
   # Make predictions ---
-  predictions <- predict(lm_fit, df_test_prep)
+  predictions <- predict(lm_fit, df_test)
 
 
   # Evaluate model performance ---
@@ -132,22 +133,8 @@ if (FALSE) {
     rename(Qs_rel_pred = .pred)
 
 
-  # error metrics
-  a <- df_pred %>% rmse(truth = Qs_rel, estimate = Qs_rel_pred)
-  b <- df_pred %>% rsq(truth = Qs_rel, estimate = Qs_rel_pred)
-
   # scatter plot
-  ggplot(df_pred, aes(x = Qs_rel, y = Qs_rel_pred)) +
-    geom_point() +
-    geom_abline(color = 'blue', linetype = 2) +
-    scale_x_continuous(lim = c(0, 100), labels = paste_percent) +
-    scale_y_continuous(lim = c(0, 100), labels = paste_percent) +
-    labs(x = "observations", y = "predictions") +
-    sema.berlin.utils::my_theme() +
-    annotate("text", x = 100, y = 5, hjust = 1, col = "grey30", size = 3,
-             label = paste0("r² = ", sprintf("%.2f", b$.estimate), "\n",
-                            "RMSE = ", sprintf("%.1f", a$.estimate), "%"))
-
+  scatterplot(df_pred)
   ggsave("linear_model_26_vars.png", width = 3.5, height = 3)
 
 }
@@ -224,7 +211,7 @@ if (FALSE) {
 }
 
 
-# MAIN 3: Decision tree --------------------------------------------------------
+# MAIN 3a: Decision tree (Regression) ------------------------------------------
 
 if (FALSE) {
 
@@ -247,37 +234,22 @@ if (FALSE) {
     add_recipe(rec)
 
 
-  # Train model ---
+  # Train default model ---
 
   # Train the workflow
-  dt_wflow_fit <- dt_wflow %>%
+  dt_fit <- dt_wflow %>%
     last_fit(split = data_split)
 
   # Calculate performance metrics on test data
-  dt_wflow_fit %>%
-    collect_metrics()
+  dt_fit %>% collect_metrics()
 
   # Make predictions ---
-  df_pred <- dt_wflow_fit %>% collect_predictions()
+  df_pred <- dt_fit %>% collect_predictions()
 
   # Evaluate model performance ---
-  # error metrics
-  a <- df_pred %>% rmse(truth = Qs_rel, estimate = .pred)
-  b <- df_pred %>% rsq(truth = Qs_rel, estimate = .pred)
-
-  # scatter plot
-  ggplot(df_pred, aes(x = Qs_rel, y = .pred)) +
-    geom_point() +
-    geom_abline(color = 'blue', linetype = 2) +
-    scale_x_continuous(lim = c(0, 100), labels = paste_percent) +
-    scale_y_continuous(lim = c(0, 100), labels = paste_percent) +
-    labs(x = "observations", y = "predictions") +
-    sema.berlin.utils::my_theme() +
-    annotate("text", x = 100, y = 5, hjust = 1, col = "grey30", size = 3,
-             label = paste0("r² = ", sprintf("%.2f", b$.estimate), "\n",
-                            "RMSE = ", sprintf("%.1f", a$.estimate), "%"))
-
+  scatterplot(df_pred)
   ggsave("decision_tree_untuned.png", width = 3.5, height = 3)
+
 
   # Hyperparameter tuning ---
 
@@ -288,22 +260,24 @@ if (FALSE) {
   # Create custom metrics function
   my_metrics <- metric_set(rmse, rsq)
 
-  # Fit resamples
-  dt_rs <- dt_wflow %>%
-    fit_resamples(resamples = cv_folds, metrics = my_metrics)
+  if (FALSE) {
+    # Fit resamples for old (default) model
+    dt_rs <- dt_wflow %>%
+      fit_resamples(resamples = cv_folds, metrics = my_metrics)
 
-  # View performance metrics
-  dt_rs %>%
-    collect_metrics()
+    # View performance metrics for old (default) model
+    dt_rs %>%
+      collect_metrics()
+  }
 
-  # Hyperparameter tuning
+  # Define model with tuning parameters
   dt_tune_model <- decision_tree(cost_complexity = tune(),
                                  tree_depth = tune(),
                                  min_n = tune()) %>%
     set_engine('rpart') %>%
     set_mode('regression')
 
-
+  # update existing workflow
   dt_tune_wflow <- dt_wflow %>%
     update_model(dt_tune_model)
 
@@ -312,6 +286,9 @@ if (FALSE) {
   dt_grid <- grid_random(parameters(dt_tune_model), size = 100)
 
   #grid_regular(parameters(dt_tune_model), c(5,5,5))
+
+  # parallelisation
+  doParallel::registerDoParallel()
 
   # tune hyperparameters
   dt_tuning <- dt_tune_wflow %>%
@@ -340,11 +317,15 @@ if (FALSE) {
   best_dt_model <- dt_tuning %>%
     select_best(metric = 'rmse')
 
-  # update workflow
+  # save model
+  save_data(best_dt_model, getwd(), "tuned_dt_regression", "RData")
+
+
+  # update workflow with best model
   final_dt_wflow <- dt_tune_wflow %>%
     finalize_workflow(best_dt_model)
 
-  # Train finalized decision tree workflow
+  # Train and test tuned decision tree with all training and test data
   dt_final_fit <- final_dt_wflow %>%
     last_fit(split = data_split)
 
@@ -355,25 +336,11 @@ if (FALSE) {
   df_pred <- dt_final_fit %>% collect_predictions()
 
   # Evaluate model performance ---
-  # error metrics
-  a <- df_pred %>% rmse(truth = Qs_rel, estimate = .pred)
-  b <- df_pred %>% rsq(truth = Qs_rel, estimate = .pred)
-
-  # scatter plot
-  ggplot(df_pred, aes(x = Qs_rel, y = .pred)) +
-    geom_point() +
-    geom_abline(color = 'blue', linetype = 2) +
-    scale_x_continuous(lim = c(0, 100), labels = paste_percent) +
-    scale_y_continuous(lim = c(0, 100), labels = paste_percent) +
-    labs(x = "observations", y = "predictions") +
-    sema.berlin.utils::my_theme() +
-    annotate("text", x = 100, y = 5, hjust = 1, col = "grey30", size = 3,
-             label = paste0("r² = ", sprintf("%.2f", b$.estimate), "\n",
-                            "RMSE = ", sprintf("%.1f", a$.estimate), "%"))
-
+  scatterplot(df_pred)
   ggsave("decision_tree_tuned.png", width = 3.5, height = 3)
 
-  # plot the tree
+
+  # plot the tree ---
 
   # calculate importance ranking
   dt_final_fit <- final_dt_wflow %>%
@@ -382,13 +349,263 @@ if (FALSE) {
 
   p <- rpart.plot::rpart.plot(dt_final_fit$fit, roundint = FALSE)
 
-  ggplot(dt_final_fit$fit)
   ggsave("decision_tree_visualisation.png", p, dpi = 600, width = 20, height = 15)
 
   }
 
 
-# MAIN 4: Random Forest --------------------------------------------------------
+# MAIN 3b: Decision tree (classification) --------------------------------------
+
+if (FALSE) {
+
+
+  # Define recipe ---
+  rec <- recipe(Qs_rel ~ ., data = df_training_cat)
+
+  # Specifcy model to be tuned ---
+  dt_tune_model <- decision_tree(cost_complexity = tune(),
+                                 tree_depth = tune(),
+                                 min_n = tune()) %>%
+    set_engine('rpart') %>%
+    set_mode('classification')
+
+
+  # Create workflow ---
+  dt_tune_wflow <- workflow() %>%
+    # Include the model object
+    add_model(dt_tune_model) %>%
+    # Include the recipe object
+    add_recipe(rec)
+
+
+  # define cross validation procedure
+  cv_folds <- vfold_cv(df_training_cat, v = 5)
+
+  # parallelisation
+  doParallel::registerDoParallel()
+
+  # set up random grid
+  set.seed(214)
+  dt_grid <- grid_random(parameters(dt_tune_model), size = 100)
+
+  # tune hyperparameters
+  dt_tuning <- dt_tune_wflow %>%
+    tune_grid(resamples = cv_folds,
+              grid = dt_grid)
+
+  # show summarised metrics
+  dt_tuning %>% collect_metrics
+
+  # show best model
+  dt_tuning %>%
+    show_best(metric = 'roc_auc', n = 5)
+
+  # select best model
+  best_dt_model <- dt_tuning %>%
+    select_best(metric = 'roc_auc')
+
+  save_data(best_dt_model, getwd(), "tuned_dt_class", "RData")
+
+  # update workflow with best model
+  final_dt_wflow <- dt_tune_wflow %>%
+    finalize_workflow(best_dt_model)
+
+  # Train and test tuned decision tree with all training and test data
+  dt_final_fit <- final_dt_wflow %>%
+    last_fit(split = data_split_cat)
+
+  # View performance metrics
+  dt_final_fit %>% collect_metrics()
+
+  # Make predictions ---
+  df_pred <- dt_final_fit %>% collect_predictions()
+
+
+  # Evalulate model performance ---
+
+  # confusion matrix
+  matrix <- conf_mat(df_pred, truth = Qs_rel, estimate = .pred_class)
+
+  # performance metrics
+  metrics <- matrix %>% summary()
+
+  # mosaic plot
+  matrix %>% autoplot(type = 'mosaic') + labs(x = "Observation")
+  ggsave("decision_tree_class_mosaic_matrix_plot_split80.png", dpi = 600, width = 3.5, height = 3)
+
+  # roc curve
+  auc <- sprintf("%.2f", roc_auc(test_results, truth = Qs_rel, .pred_low)$.estimate)
+  roc_curve(test_results, truth = Qs_rel, .pred_low) %>% autoplot() +
+    annotate(x = 0, y = 1, geom = "text", label = paste("AUC =", auc),
+             hjust = 0, vjust = 1, size = 3)
+  ggsave("decision_tree_class_roc_curve_split80.png", dpi = 600, width = 4, height = 2.5)
+
+  save_data(matrix, getwd(), "decision_tree_class_matrix_split80", formats = "RData")
+  save_data(metrics, getwd(), "decision_tree_class_metrics_split80")
+
+  }
+
+
+# MAIN 4a: Random Forest (regression) ------------------------------------------
+
+if (FALSE) {
+
+  # Define recipe ---
+  rec <- recipe(Qs_rel ~ ., data = df_training)
+
+  # Specifcy model ---
+  rf_model <- rand_forest() %>%
+    # Specify the engine
+    set_engine('randomForest', trees = 500, mtry = 5, n_min = 10) %>%
+    # Specify the mode
+    set_mode('regression')
+
+
+  # Create workflow ---
+  rf_wflow <- workflow() %>%
+    # Include the model object
+    add_model(rf_model) %>%
+    # Include the recipe object
+    add_recipe(rec)
+
+
+  # Train model ---
+
+  # Train the workflow
+  set.seed(26)
+  rf_fit <- rf_wflow %>%
+    last_fit(split = data_split)
+
+  # Calculate performance metrics on test data
+  rf_fit %>% collect_metrics()
+
+  # get predictions
+  df_pred <- rf_fit %>% collect_predictions()
+
+  # Evalulate model performance ---
+
+  # scatterplots for numerics
+  scatterplot(df_pred)
+  ggsave("scatterplot_rf_numeric.png", dpi = 600, width = 3.5, height = 3)
+
+  # performance for classification
+  df_pred <- df_pred %>%
+    mutate(Qs_rel_class = classify_Qs(Qs_rel),
+           .pred_class = classify_Qs(.pred))
+
+  # confusion matrix
+  matrix <- conf_mat(df_pred, truth = Qs_rel_class, estimate = .pred_class)
+
+  # performance metrics
+  metrics <- matrix %>% summary()
+
+  # mosaic plot
+  matrix %>% autoplot(type = 'mosaic') + labs(x = "Observation")
+  ggsave("random_forest_class_tuned_mosaic_matrix_plot_split80.png", dpi = 600, width = 3.5, height = 3)
+
+  save_data(matrix, getwd(), "random_forest_numeric_to_class_matrix_split80", formats = "RData")
+  save_data(metrics, getwd(), "random_forest_numeric_to_class_metrics_split80")
+
+
+
+  # Hyperparameter tuning ---
+
+  rf_tune_model <- rand_forest(trees = 500, mtry = tune(), min_n = tune()) %>%
+    # Specify the engine
+    set_engine('randomForest') %>%
+    # Specify the mode
+    set_mode('regression')
+
+
+  # setup new workflow
+  rf_tune_wflow <- workflow() %>%
+    add_recipe(rec) %>%
+    add_model(rf_tune_model)
+
+  # define cross validation procedure
+  cv_folds <- vfold_cv(df_training, v = 5)
+
+  #rf_grid <- grid_random(parameters(rf_tune_model), size = 100)
+  #rf_grid <- grid_regular(parameters(rf_tune_model), c(5,5))
+
+  rf_grid <- grid_regular(mtry(range = c(3, 15)),
+                          min_n(range = c(1, 10)),
+                          levels = 10)
+
+  # set up random grid with 20 combinations for first screening
+  doParallel::registerDoParallel()
+
+  set.seed(345)
+  rf_tuning <- tune_grid(
+    rf_tune_wflow,
+    resamples = cv_folds,
+    #grid = 100
+    grid = rf_grid
+  )
+
+  # visualise results
+  df_save <- rf_tuning %>%
+    collect_metrics()
+  #save_data(df_save, getwd(), "metrics_tuning_rf_regression_random")
+  save_data(df_save, getwd(), "metrics_tuning_rf_regression_regular")
+
+  # visualise results
+  rf_tuning %>%
+    collect_metrics() %>%
+    filter(.metric == "rmse") %>%
+    select(mean, min_n, mtry) %>%
+    pivot_longer(min_n:mtry,
+                 values_to = "value",
+                 names_to = "parameter"
+    ) %>%
+    ggplot(aes(value, mean, color = parameter)) +
+    geom_point(show.legend = FALSE) +
+    facet_wrap(~parameter, scales = "free_x") +
+    labs(x = NULL, y = "RMSE [%]") +
+    sema.berlin.utils::my_theme()
+
+  ggsave("rf_regression_hyperparameter_tuning_plot_regular.png", width = 6, height = 3, dpi = 600)
+
+  # raster heatmap plot
+  rf_tuning %>%
+    collect_metrics() %>%
+    filter(.metric == "rmse") %>%
+    select(mean, min_n, mtry) %>%
+    ggplot(aes(x = min_n, y = mtry, fill = mean)) +
+    geom_raster()
+
+  # determine best model
+  best_rmse <- select_best(rf_tuning, "rmse")
+  save_data(best_rmse, getwd(), "rf_regression_best_model_regular", "RData")
+
+  final_rf <- finalize_model(
+    rf_tune_model,
+    best_rmse
+  )
+
+  rf_final_wflow <- workflow() %>%
+    add_recipe(rec) %>%
+    add_model(final_rf)
+
+  rf_final_fit <- rf_final_wflow %>%
+    last_fit(data_split)
+
+  rf_final_fit %>%
+    collect_metrics()
+
+  # Make predictions ---
+  df_pred <- rf_final_fit %>% collect_predictions()
+
+
+  # Evaluate model performance ---
+  scatterplot(df_pred)
+  ggsave("random_forest_regression_tuned_regular.png", width = 3.5, height = 3)
+
+}
+
+
+
+# MAIN 4b: Random Forest (classification) --------------------------------------
 
 if (FALSE) {
 
@@ -398,7 +615,7 @@ if (FALSE) {
   # Specifcy model ---
   rf_model <- rand_forest() %>%
     # Specify the engine
-    set_engine('randomForest', trees = 500, mtry = 5, n_min = 10) %>%
+    set_engine('randomForest', trees = 500, mtry = 3, n_min = 10) %>%
     # Specify the mode
     set_mode('classification')
 
@@ -414,12 +631,38 @@ if (FALSE) {
   # Train model ---
 
   # Train the workflow
-  rf_wflow_fit <- rf_wflow %>%
+  rf_fit <- rf_wflow %>%
     last_fit(split = data_split_cat)
 
+
+  # Evalulate model performance ---
+
   # Calculate performance metrics on test data
-  rf_wflow_fit %>%
-    collect_metrics()
+  rf_fit %>% collect_metrics()
+
+  # get predictions
+  df_pred <- rf_fit %>% collect_predictions()
+
+  # confusion matrix
+  matrix <- conf_mat(df_pred, truth = Qs_rel, estimate = .pred_class)
+
+  # performance metrics
+  metrics <- matrix %>% summary()
+
+  # mosaic plot
+  matrix %>% autoplot(type = 'mosaic') + labs(x = "Observation")
+  ggsave("random_forest_class_5vars_mosaic_matrix_plot_split80.png", dpi = 600, width = 3.5, height = 3)
+
+  # roc curve
+  auc <- sprintf("%.2f", roc_auc(df_pred, truth = Qs_rel, .pred_low)$.estimate)
+  roc_curve(df_pred, truth = Qs_rel, .pred_low) %>% autoplot() +
+    annotate(x = 0.2, y = 0.8, geom = "text", label = paste("AUC =", auc),
+             hjust = 0, vjust = 1, size = 3)
+  ggsave("random_forest_class_5vars_roc_curve_split80.png", dpi = 600, width = 4, height = 2.5)
+
+  save_data(matrix, getwd(), "random_forest_class_5var_matrix_split80", formats = "RData")
+  save_data(metrics, getwd(), "random_forest_class_5var_metrics_split80")
+
 
 
   # Hyperparameter tuning ---
@@ -436,26 +679,25 @@ if (FALSE) {
     add_recipe(rec) %>%
     add_model(rf_tune_model)
 
-  # alternative
-  #rf_tune_wflow <- rf_wflow %>%
-    #update_model(rf_tune_model)
-
-
   # define cross validation procedure
   cv_folds <- vfold_cv(df_training_cat, v = 5)
+
+  #rf_grid <- grid_random(parameters(rf_tune_model), size = 100)
+  #rf_grid <- grid_regular(parameters(rf_tune_model), c(5,5))
 
   # set up random grid with 20 combinations for first screening
    doParallel::registerDoParallel()
 
+  # 1 random grid
   set.seed(345)
-  tune_res <- tune_grid(
+  rf_tuning <- tune_grid(
     rf_tune_wflow,
     resamples = cv_folds,
     grid = 100
   )
 
   # visualise results
-  tune_res %>%
+  rf_tuning %>%
     collect_metrics() %>%
     filter(.metric == "roc_auc") %>%
     select(mean, min_n, mtry) %>%
@@ -469,53 +711,37 @@ if (FALSE) {
     labs(x = NULL, y = "AUC") +
     sema.berlin.utils::my_theme()
 
+  ggsave("rf_class_hyperparameter_tuning_plot.png", width = 6, height = 3, dpi = 600)
 
-  rf_grid <- grid_regular(
-    mtry(range = c(1, 26)),
-    min_n(range = c(1, 30)),
-    levels = 5
-  )
+  best_auc <- select_best(rf_tuning, "roc_auc")
 
-  rf_grid
-
-  set.seed(456)
-  regular_res <- tune_grid(
-    rf_tune_wflow,
-    resamples = cv_folds,
-    grid = rf_grid
-  )
-
-  regular_res %>%
-    collect_metrics() %>%
-    filter(.metric == "roc_auc") %>%
-    mutate(min_n = factor(min_n)) %>%
-    ggplot(aes(mtry, mean, color = min_n)) +
-    geom_line(alpha = 0.5, size = 1.5) +
-    geom_point() +
-    labs(y = "AUC") +
-    sema.berlin.utils::my_theme()
-
-  # determine best model
-  best_auc <- select_best(regular_res, "roc_auc")
+  # regular grid results could be plotted as heatmap, analysis not yet conducted
+  rf_grid <- grid_regular(mtry(range = c(2, 20)),
+                          min_n(range = c(2, 20)),
+                          levels = 19)
 
 
+  # select model with best results
   final_rf <- finalize_model(
     rf_tune_model,
     best_auc
   )
 
+  # create final workflow
   rf_final_wflow <- workflow() %>%
     add_recipe(rec) %>%
     add_model(final_rf)
 
-  final_res <- rf_final_wflow %>%
+
+  # train and test final model
+  rf_final_fit <- rf_final_wflow %>%
     last_fit(data_split_cat)
 
-  final_res %>%
-    collect_metrics()
+  # collect metrics
+  rf_final_fit %>%  collect_metrics()
 
-  # Make predictions ---
-  df_pred <- final_res %>% collect_predictions()
+  # get predictions
+  df_pred <- rf_final_fit %>% collect_predictions()
 
 
   # Evalulate model performance ---
@@ -528,17 +754,17 @@ if (FALSE) {
 
   # mosaic plot
   matrix %>% autoplot(type = 'mosaic') + labs(x = "Observation")
-  ggsave("random_forest_class_mosaic_matrix_plot_split80.png", dpi = 600, width = 3.5, height = 3)
+  ggsave("random_forest_class_tuned_mosaic_matrix_plot_split80.png", dpi = 600, width = 3.5, height = 3)
 
   # roc curve
   auc <- sprintf("%.2f", roc_auc(df_pred, truth = Qs_rel, .pred_low)$.estimate)
   roc_curve(df_pred, truth = Qs_rel, .pred_low) %>% autoplot() +
-    annotate(x = 0, y = 1, geom = "text", label = paste("AUC =", auc),
+    annotate(x = 0.2, y = 0.8, geom = "text", label = paste("AUC =", auc),
              hjust = 0, vjust = 1, size = 3)
-  ggsave("random_forest_class_roc_curve_split80.png", dpi = 600, width = 4, height = 2.5)
+  ggsave("random_forest_class_tuned_roc_curve_split80_v2.png", dpi = 600, width = 4, height = 2.5)
 
-  save_data(matrix, getwd(), "random_forest_matrix_split80", formats = "RData")
-  save_data(metrics, getwd(), "random_forest_metrics_split80")
+  save_data(matrix, getwd(), "random_forest_class_tuned_matrix_split80", formats = "RData")
+  save_data(metrics, getwd(), "random_forest_class_tuned_metrics_split80")
 
 }
 

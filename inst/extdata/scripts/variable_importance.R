@@ -8,6 +8,13 @@ source("inst/extdata/scripts/global.R")
 # delete columns like date and redundant columns in unit days instead of years
 df <- model_data %>% select(Qs_rel, all_of(model_features))
 
+# turn n_rehabs and n_screens into factor for correlation analysis
+df <- df %>%
+  dplyr::mutate(
+    n_rehab = as.factor(n_rehab) %>% tidy_factor(level_sorting = "alphabet"),
+    n_screens = as.factor(n_screens) %>% tidy_factor(level_sorting = "alphabet")
+  )
+
 
 # MAIN 1: Pearson correlation for numerical variables --------------------------
 

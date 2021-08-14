@@ -194,7 +194,7 @@ prepare_pump_test_data <- function(df_wells) {
                     )) %>%
     dplyr::filter(days_since_operational_start >= 0) %>%
     dplyr::group_by(well_id) %>%
-    dplyr::mutate(n_rehab = cumsum_no_na(well_rehab),
+    dplyr::mutate(n_rehab = as.integer(cumsum_no_na(well_rehab)),
                   n.substitute_pump = cumsum_no_na(substitute_pump),
                   n.pressure_sleeve = cumsum_no_na(pressure_sleeve),
                   n.comment_liner = cumsum_no_na(comment_liner)
@@ -208,8 +208,7 @@ prepare_pump_test_data <- function(df_wells) {
         n_rehab > 0,
         as.integer(date - last_rehab.date),
         days_since_operational_start
-      )) %>%
-    dplyr::mutate(n_rehab = as.factor(n_rehab))
+      ))
 
 
   # recalculate days since operational start and days since last rehab into
