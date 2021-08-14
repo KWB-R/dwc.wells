@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • dwc.wells</title>
+<title>scatterplot for comparing numeric predictions with observations — scatterplot • dwc.wells</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,8 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="scatterplot for comparing numeric predictions with observations — scatterplot" />
+<meta property="og:description" content="scatterplot for comparing numeric predictions with observations" />
 
 
 
@@ -58,7 +59,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -120,124 +121,35 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>scatterplot for comparing numeric predictions with observations</h1>
+    <small class="dont-index">Source: <a href='https://github.com/KWB-R/dwc.wells/blob/master/R/plotting_functions.R'><code>R/plotting_functions.R</code></a></small>
+    <div class="hidden name"><code>scatterplot.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>scatterplot for comparing numeric predictions with observations</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>scatterplot</span><span class='op'>(</span><span class='va'>df_pred</span>, lines_80perc <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span></pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-datasets" class="hasAnchor"><a href="#section-datasets" class="anchor"></a>Datasets</h2>
-          <p class="section-desc"><p>Datasets for predicting well capacity</p></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="model_data.html">model_data</a></code> </p>
-        </td>
-        <td><p>Data for well capacity prediction</p></td>
-      </tr>
-    </tbody><tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-visualise-results" class="hasAnchor"><a href="#section-visualise-results" class="anchor"></a>Visualise results</h2>
-          <p class="section-desc"><p>Functions for plotting</p></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="plot_distribution.html">plot_distribution()</a></code> </p>
-        </td>
-        <td><p>plot frequency distribution of numerical variable</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_frequencies.html">plot_frequencies()</a></code> </p>
-        </td>
-        <td><p>plot frequency distribution of factor variable</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="Qs_heatmap_plot.html">Qs_heatmap_plot()</a></code> </p>
-        </td>
-        <td><p>Heatmap / raster plot for Qs values over time with each well as one line</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="correlation_plot.html">correlation_plot()</a></code> </p>
-        </td>
-        <td><p>plots Qs_rel vs. input variable as box plot (categorical input variable)
-or scatterplot (numerical input variable)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="scatterplot.html">scatterplot()</a></code> </p>
-        </td>
-        <td><p>scatterplot for comparing numeric predictions with observations</p></td>
-      </tr>
-    </tbody><tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-export-data" class="hasAnchor"><a href="#section-export-data" class="anchor"></a>Export data</h2>
-          <p class="section-desc"><p>Functions for exporting data</p></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="save_data.html">save_data()</a></code> </p>
-        </td>
-        <td><p>Save data frame in different formats: csv, RData, rds</p></td>
-      </tr>
-    </tbody><tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-helper-functions" class="hasAnchor"><a href="#section-helper-functions" class="anchor"></a>Helper functions</h2>
-          <p class="section-desc"><p>Helper functions</p></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="interpolate_and_fill.html">interpolate_and_fill()</a></code> </p>
-        </td>
-        <td><p>Interpolate and fill up static water level</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>df_pred</th>
+      <td><p>data frame obtained with tidymodels::collect_predictions() with
+columns Qs_rel and .pred</p></td>
+    </tr>
+    <tr>
+      <th>lines_80perc</th>
+      <td><p>logical value; shout 80%-lines be drawn?; default = FALSE</p></td>
+    </tr>
     </table>
-  </div>
 
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
