@@ -1,14 +1,21 @@
-# prepare_pump_test_data -------------------------------------------------------
+# prepare_pump_test_data_1 -----------------------------------------------------
 
-# Title: prepare pump test data under consideration of rehab activities
-# df_wells: data frame with well characteristics and at least the
-# following columns: site_id, well_id, well_id_replaced, "construction_date,
-# operational_start.date, operational_start.Qs)
-#
-prepare_pump_test_data <- function(df_wells) {
+#' Prepare pump test data in wide format
+#' Steps: i) read, rename and clean data, ii) correct wrong pump test dates,
+#' iii) fill up missing pump test dates, iv) get information for replaced wells,
+#' v) calculate Qs and Qs_rel, vi) determine action type, vii) select columns
+#'
+#' @param path path to pump test data
+#' @param renamings list with renamings
+#' @param df_wells prepared data frame with well characteristics
+#'
+#' @export
+#'
+prepare_pump_test_data_1 <- function(path, renamings, df_wells) {
 
   # read, rename and clean data ---
-  df_pump_tests <- read_csv(paths$data_pump_tests, skip = 2) %>%
+
+  df_pump_tests <- read_csv(path, skip = 2) %>%
     select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
     # filter data for site id 11 (not unique, used for rehabilitated wells)
     dplyr::filter(site_id != 11) %>%
@@ -46,6 +53,7 @@ prepare_pump_test_data <- function(df_wells) {
 
 
   # fill up pump test dates and calculate action date --------------------------
+
   df_pump_tests <- df_pump_tests %>%
     # add date column not containing NAs (required for creating an "action_id")
     dplyr::mutate(
@@ -91,12 +99,13 @@ prepare_pump_test_data <- function(df_wells) {
 
   df_pump_tests[cond, "well_id"] <- df_pump_tests[cond, "well_id_replaced"]
 
-  # delete unrequired columns, further on use 'well_id' as join column
+  # delete unrequired columns, use 'well_id' as join column from now on
   df_pump_tests <- df_pump_tests %>%
     dplyr::select(-c("site_id", "well_id_replaced", "construction_date"))
 
 
   # calculate Qs and Qs rel ----------------------------------------------------
+
   df_wells_operational_start <- df_wells %>%
     dplyr::select("well_id", tidyselect::starts_with("operational_start."))
 
@@ -108,10 +117,10 @@ prepare_pump_test_data <- function(df_wells) {
     # calculate Qs and Qs_rel for pump tests 1 and 2
     dplyr::mutate(pump_test_1.Qs = pump_test_1.Q /
                     (pump_test_1.W_dynamic - pump_test_1.W_static),
-                  pump_test_1.Qs_rel =  pump_test_1.Qs / operational_start.Qs,
+                  pump_test_1.Qs_rel =  pump_test_1.Qs / operational_start.Qs * 100,
                   pump_test_2.Qs = pump_test_2.Q /
                     (pump_test_2.W_dynamic - pump_test_2.W_static),
-                  pump_test_2.Qs_rel =  pump_test_2.Qs / operational_start.Qs
+                  pump_test_2.Qs_rel =  pump_test_2.Qs / operational_start.Qs * 100
     )
 
 
@@ -133,6 +142,7 @@ prepare_pump_test_data <- function(df_wells) {
 
 
   # select relevant columns ----------------------------------------------------
+
   df_pump_tests <- df_pump_tests %>%
     # select important variables
     dplyr::select("well_id",
@@ -144,15 +154,31 @@ prepare_pump_test_data <- function(df_wells) {
                   #-tidyselect::ends_with(c("Q", "W_static", "W_dynamic"))
     )
 
+  df_pump_tests
+
+}
+
+
+# prepare_pump_test_data_2 -----------------------------------------------------
+
+#' reformats untidy pump test data from wide into long format
+#'
+#' @param df_pump_tests_untidy pump test data in wide format
+#' @param df_wells prepared data frame with well characteristics
+#'
+#' @export
+#'
+prepare_pump_test_data_2 <- function(df_pump_tests_untidy, df_wells) {
+
 
   # tidy data (to long format) -------------------------------------------------
 
-  cols_to_longer <- df_pump_tests %>%
+  cols_to_longer <- df_pump_tests_untidy %>%
     dplyr::ungroup() %>%
     dplyr::select(tidyr::starts_with(c("operational_start", "pump_test"))) %>%
     names()
 
-  df_pump_tests_tidy <- df_pump_tests %>%
+  df_pump_tests_tidy <- df_pump_tests_untidy %>%
     dplyr::ungroup() %>%
     dplyr::mutate(dplyr::across(tidyselect::everything(), as.character)) %>%
     tidyr::pivot_longer(cols = tidyselect::all_of(cols_to_longer),
@@ -179,13 +205,13 @@ prepare_pump_test_data <- function(df_wells) {
                                                date,
                                                action_date),
                   Qs_rel = dplyr::if_else(key == "operational_start",
-                                          1,
+                                          100,
                                           Qs_rel)
     ) %>%
     dplyr::arrange(well_id, action_id) %>%
 
     # join  dates of operational start to calculate time differences
-    dplyr::left_join(df_wells_operational_start %>%
+    dplyr::left_join(df_wells %>%
                        dplyr::select(well_id, operational_start.date),
                      by = "well_id") %>%
     dplyr::mutate(days_since_operational_start =
@@ -221,6 +247,24 @@ prepare_pump_test_data <- function(df_wells) {
   df_pump_tests_tidy %>%
     dplyr::select(pump_test_vars) %>%
     dplyr::filter(!is.na(Qs_rel)) %>%
-    dplyr::mutate(Qs_rel = Qs_rel * 100)
+    dplyr::ungroup()
+}
+
+
+# prepare_pump_test_data -------------------------------------------------------
+
+#' prepare pump test data with one row per Qs-measurement + rehab history
+#'
+#' @param path path to pump test data
+#' @param renamings list with renamings
+#' @param df_wells prepared data frame with well characteristics
+#'
+#' @export
+#'
+#'
+prepare_pump_test_data <- function(path, renamings, df_wells) {
+
+  prepare_pump_test_data_1(path, renamings, df_wells) %>%
+    prepare_pump_test_data_2(df_wells)
 
 }

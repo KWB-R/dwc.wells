@@ -1,10 +1,12 @@
 #' Get W_static measurement data from Neubaupumpversuche, Kurzpumpversuche and other sources
 #'
+#' @param path path to static water level data (csv-file)
+#' @param renamings list with renamings
 #' @param df_wells data frame with prepared well data
 #'
 #' @export
 #'
-get_W_static_data <- function(df_wells) {
+get_W_static_data <- function(path, renamings, df_wells) {
 
   # get static water level data from df_wells (Neubaupumpversuche)
   df_W_static_1 <- df_wells %>%
@@ -17,13 +19,10 @@ get_W_static_data <- function(df_wells) {
 
   # import other static water level data provided by Sebastian Schimmelpfennig
   # origin: H2O2-Messungen, Kurzpumpversuche, Ergiebigkeitsmessungen
-  df_W_static_2 <- read_csv(paths$data_W_static, skip = 30) %>%
+  df_W_static_2 <- read_csv(path, skip = 30) %>%
     select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
     dplyr::mutate(date = as.Date(date, format = "%Y-%m-%d")) %>%
     dplyr::select(site_id, well_id, origin, date, W_static)
-
-  names(df_W_static_2)
-  names(df_W_static_1)
 
   # combine both data sources
   df_W_static <- dplyr::bind_rows(list(df_W_static_1, df_W_static_2)) %>%
@@ -37,10 +36,11 @@ get_W_static_data <- function(df_wells) {
 
 # prepare_Q_monitoring_data ----------------------------------------------------
 
-prepare_Q_monitoring_data <- function(df_wells) {
+prepare_Q_monitoring_data <- function(df_wells, path_quantity,
+                                      path_W_static, renamings) {
 
   # read quantity measurement data
-  df_Q <- read_csv(paths$data_quantity, skip = 26) %>%
+  df_Q <- read_csv(path_quantity, skip = 26) %>%
     select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
     dplyr::mutate(date = as.Date(date)) %>%
     dplyr::mutate(date = dplyr::na_if(date, "1899-12-30 00:00:00")) %>%
@@ -48,7 +48,7 @@ prepare_Q_monitoring_data <- function(df_wells) {
     dplyr::distinct(.keep_all = TRUE)
 
   # get data for static water level measurements
-  df_W_static <- get_W_static_data(df_wells)
+  df_W_static <- get_W_static_data(path_W_static, renamings, df_wells)
 
   summary <- df_W_static %>% dplyr::group_by(well_id) %>%
     dplyr::summarise(n_valid = sum(!is.na(W_static))) %>%

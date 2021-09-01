@@ -1,7 +1,7 @@
-prepare_quality_data <- function() {
+prepare_quality_data <- function(path, renamings) {
 
   # read data
-  df_quality <- read_ms_access_mri(paths$db, "DB2LABOR_Daten") %>%
+  df_quality <- read_ms_access_mri(path, "DB2LABOR_Daten") %>%
     select_rename_cols(renamings$main, "old_name", "new_name_en")
 
 

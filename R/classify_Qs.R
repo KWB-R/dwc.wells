@@ -1,6 +1,6 @@
 # classify_Qs ------------------------------------------------------------------
 
-#' Transfor Qs_rel into binary factor with low and high specific capacity
+#' Transfer Qs_rel into binary factor with low and high specific capacity
 #'
 #' @param x vector of Qs_rel values
 #' @param split_point threshold for classifying numeric Qs_rel values, default: 80

@@ -2,7 +2,7 @@
 % Please edit documentation in R/classify_Qs.R
 \name{classify_Qs}
 \alias{classify_Qs}
-\title{Transfor Qs_rel into binary factor with low and high specific capacity}
+\title{Transfer Qs_rel into binary factor with low and high specific capacity}
 \usage{
 classify_Qs(x, split_point = 80, class_names = c("low", "high"))
 }
@@ -14,5 +14,5 @@ classify_Qs(x, split_point = 80, class_names = c("low", "high"))
 \item{class_names}{class names, default: c("low", "high")}
 }
 \description{
-Transfor Qs_rel into binary factor with low and high specific capacity
+Transfer Qs_rel into binary factor with low and high specific capacity
 }

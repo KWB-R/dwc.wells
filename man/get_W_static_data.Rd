@@ -4,9 +4,13 @@
 \alias{get_W_static_data}
 \title{Get W_static measurement data from Neubaupumpversuche, Kurzpumpversuche and other sources}
 \usage{
-get_W_static_data(df_wells)
+get_W_static_data(path, renamings, df_wells)
 }
 \arguments{
+\item{path}{path to static water level data (csv-file)}
+
+\item{renamings}{list with renamings}
+
 \item{df_wells}{data frame with prepared well data}
 }
 \description{

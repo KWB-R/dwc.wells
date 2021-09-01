@@ -1,11 +1,11 @@
 # prepare drilling data --------------------------------------------------------
 
-prepare_drilling_data <- function() {
+prepare_drilling_data <- function(path, renamings) {
 
 # read drilling data from csv
 # does not work with standard encoding
-df_drilling <- read.csv(file = paths$data_drilling, header = TRUE,
-                        skip = 2, dec = ".", sep = "\t", na.strings = "(null)") %>%
+df_drilling <- read.csv(file = path, header = TRUE, skip = 2, dec = ".",
+                        sep = "\t", na.strings = "(null)") %>%
   select_rename_cols(renamings$main, "old_name", "new_name_en")
 
 # adapt encoding for surface water name (otherwise umlaute will not be read)

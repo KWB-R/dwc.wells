@@ -1,9 +1,9 @@
 # prepare_drilling_tech_data ---------------------------------------------------
 
-prepare_drilling_tech_data <- function() {
+prepare_drilling_tech_data <- function(path, renamings) {
 
   # read drilling tech data from csv
-  df_drilling_tech <- read_csv(paths$data_drilling_tech) %>%
+  df_drilling_tech <- read_csv(path) %>%
     select_rename_cols(renamings$main,"old_name", "new_name_en")
 
   # remove NAs

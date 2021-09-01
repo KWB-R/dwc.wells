@@ -1,9 +1,9 @@
 # prepare well data ------------------------------------------------------------
 
-prepare_well_data  <- function() {
+prepare_well_data  <- function(path, renamings) {
 
   # read data from csv and filter Vertikalfilterbrunnen
-  df_wells <- read_csv(paths$data_wells, skip = 9) %>%
+  df_wells <- read_csv(path, skip = 9) %>%
     select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
     dplyr::filter(grepl("V$", well_name))
 
@@ -73,7 +73,6 @@ prepare_well_data  <- function() {
   for (var in vars) {
     df_wells[[var]] <- rename_values(df_wells[[var]], renamings[[var]])
   }
-
 
   # create new categorical variables
   df_wells <- df_wells %>%
