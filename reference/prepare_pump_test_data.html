@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Get W_static measurement data from Neubaupumpversuche, Kurzpumpversuche and other sources — get_W_static_data • dwc.wells</title>
+<title>prepare pump test data with one row per Qs-measurement + rehab history — prepare_pump_test_data • dwc.wells</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Get W_static measurement data from Neubaupumpversuche, Kurzpumpversuche and other sources — get_W_static_data" />
-<meta property="og:description" content="Get W_static measurement data from Neubaupumpversuche, Kurzpumpversuche and other sources" />
+<meta property="og:title" content="prepare pump test data with one row per Qs-measurement + rehab history — prepare_pump_test_data" />
+<meta property="og:description" content="prepare pump test data with one row per Qs-measurement + rehab history" />
 
 
 
@@ -123,23 +123,23 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Get W_static measurement data from Neubaupumpversuche, Kurzpumpversuche and other sources</h1>
-    <small class="dont-index">Source: <a href='https://github.com/KWB-R/dwc.wells/blob/master/R/prepare_Q_monitoring_data.R'><code>R/prepare_Q_monitoring_data.R</code></a></small>
-    <div class="hidden name"><code>get_W_static_data.Rd</code></div>
+    <h1>prepare pump test data with one row per Qs-measurement + rehab history</h1>
+    <small class="dont-index">Source: <a href='https://github.com/KWB-R/dwc.wells/blob/master/R/prepare_pump_test_data.R'><code>R/prepare_pump_test_data.R</code></a></small>
+    <div class="hidden name"><code>prepare_pump_test_data.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Get W_static measurement data from Neubaupumpversuche, Kurzpumpversuche and other sources</p>
+    <p>prepare pump test data with one row per Qs-measurement + rehab history</p>
     </div>
 
-    <pre class="usage"><span class='fu'>get_W_static_data</span><span class='op'>(</span><span class='va'>path</span>, <span class='va'>renamings</span>, <span class='va'>df_wells</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>prepare_pump_test_data</span><span class='op'>(</span><span class='va'>path</span>, <span class='va'>renamings</span>, <span class='va'>df_wells</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>path</th>
-      <td><p>path to static water level data (csv-file)</p></td>
+      <td><p>path to pump test data</p></td>
     </tr>
     <tr>
       <th>renamings</th>
@@ -147,7 +147,7 @@
     </tr>
     <tr>
       <th>df_wells</th>
-      <td><p>data frame with prepared well data</p></td>
+      <td><p>prepared data frame with well characteristics</p></td>
     </tr>
     </table>
 
