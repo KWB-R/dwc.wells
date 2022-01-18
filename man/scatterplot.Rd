@@ -4,7 +4,7 @@
 \alias{scatterplot}
 \title{scatterplot for comparing numeric predictions with observations}
 \usage{
-scatterplot(df_pred, lines_80perc = FALSE)
+scatterplot(df_pred, lines_80perc = FALSE, alpha = 1, pointsize = 1)
 }
 \arguments{
 \item{df_pred}{data frame obtained with tidymodels::collect_predictions() with

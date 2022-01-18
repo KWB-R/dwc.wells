@@ -235,7 +235,7 @@ Qs_heatmap_plot <- function(df, colours, dummy_labels, date_limits, title,
 #'
 #' @export
 #'
-scatterplot <- function(df_pred, lines_80perc = FALSE) {
+scatterplot <- function(df_pred, lines_80perc = FALSE, alpha = 1, pointsize = 1) {
 
   # error metrics
   a <- df_pred %>% rmse(truth = .data$Qs_rel, estimate = .data$.pred)
@@ -244,7 +244,7 @@ scatterplot <- function(df_pred, lines_80perc = FALSE) {
   legend_str <- sprintf("r2 = %.2f\nRMSE = %.1f%%", b$.estimate, a$.estimate)
 
   p <- ggplot(df_pred, aes(x = .data$Qs_rel, y = .data$.pred)) +
-    geom_point() +
+    geom_point(pch = 16, col = alpha("black", alpha), size = pointsize) +
     geom_abline(color = 'blue', linetype = 2) +
     scale_x_continuous(lim = c(0, 100), labels = paste_percent) +
     scale_y_continuous(lim = c(0, 100), labels = paste_percent) +
@@ -254,6 +254,8 @@ scatterplot <- function(df_pred, lines_80perc = FALSE) {
              label = legend_str)
 
   if (lines_80perc) {
+    # p + geom_rect(aes(xmin = 0, xmax = 80, ymin = 0, ymax = 80),
+    #                   colour = "red", fill = NA, lty = "dashed")
     p +  geom_hline(yintercept = 80, colour = "red", lty = "dashed") +
       geom_vline(xintercept = 80, colour = "red", lty = "dashed")
 
