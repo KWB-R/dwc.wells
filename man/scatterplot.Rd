@@ -10,7 +10,9 @@ scatterplot(df_pred, lines_80perc = FALSE, alpha = 1, pointsize = 1)
 \item{df_pred}{data frame obtained with tidymodels::collect_predictions() with
 columns Qs_rel and .pred}
 
-\item{lines_80perc}{logical value; shout 80\%-lines be drawn?; default = FALSE}
+\item{lines_80perc}{logical value; shout 80\%-lines be drawn?; default = FALSE
+@param alpha alpha value for point of colours, default: 1
+@param pointsize size value for points, default: 1}
 }
 \description{
 scatterplot for comparing numeric predictions with observations
