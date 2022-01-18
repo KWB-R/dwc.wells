@@ -73,7 +73,8 @@ reference:
 
 
   - title: Scripts
-  desc: > folder "scripts" contains all scripts for data preparation,
-  data analysis, ml modelling (mainly relying on functions from R package "tidymodels")
-  and plotting
+    desc: >
+      folder "scripts" contains all scripts for data preparation,
+      data analysis, ml modelling (mainly relying on functions from R package
+      "tidymodels") and plotting
 
