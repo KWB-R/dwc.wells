@@ -66,7 +66,7 @@ interpolate_and_fill <- function(df, x_col, y_col, group_by_col,
 
 # interpolate_Qs ---------------------------------------------------------------
 
-#' Title
+#' Interpolates Qs time series data to a given time interval
 #'
 #' @param df data frame with date and Qs measurements
 #' @param interval_days interval for interpolation

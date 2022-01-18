@@ -20,29 +20,50 @@ development:
 reference:
   - title: Datasets
     desc: >
-      Datasets for predicting well capacity
+      Datasets for statistical analysis and predicting well capacity
     contents:
-      - model_data
-
-  # - title: Perform predictions
-  #   desc: >
-  #     ...
-  #   contents:
-  #     - ...
-
-  # - title: Web-apps
-  #   desc: >
-  #     ...
-  #   contents:
-  #     - starts_with("opencpu_")
+      - ends_with("_data")
 
 
-  - title: Visualise results
+  - title: Data preparation
+    desc: >
+      Functions for preparing / cleaning data
+    contents:
+      - read_csv
+      - read_ms_access
+      - read_select_rename
+      - rename_values
+      - select_rename_cols
+      - classify_Qs
+      - extdata_file
+      - replace_na_with_median
+      - fill_up_na_with_median_from_lookup
+      - get_W_static_data
+      - interpolate_and_fill
+      - interpolate_Qs
+      - load_renamings_csv
+      - load_renamings_excel
+      - prepare_pump_test_data
+      - prepare_pump_test_data_1
+      - prepare_pump_test_data_2
+      - summarise_marginal_factor_levels
+      - tidy_factor
+
+  - title: Data analyis
+    desc: >
+      Functions for statistical analysis feature importance ranking
+    contents:
+      - chi2.CramersV.test
+      - frequency_table
+
+
+  - title: Data visualisation
     desc: >
       Functions for plotting
     contents:
-      - starts_with("plot")
-      - ends_with("plot")
+      - matches("plot")
+      - paste_percent
+
 
   - title: Export data
     desc: >
@@ -50,10 +71,9 @@ reference:
     contents:
       - save_data
 
-  - title: Helper functions
-    desc: >
-      Helper functions
-    contents:
-      - interpolate_and_fill
 
+  - title: Scripts
+  desc: > folder "scripts" contains all scripts for data preparation,
+  data analysis, ml modelling (mainly relying on functions from R package "tidymodels")
+  and plotting
 
