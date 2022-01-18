@@ -49,7 +49,7 @@ df_W_static_sd <- get_W_static_data(paths$data_W_static, renamings, df_wells) %>
 # MAIN 2: combine individual data sets -----------------------------------------
 
 # 1. well data + surface water + drilling + quality (-> feature table)
-df_well_features <- df_wells %>%
+well_feature_data <- df_wells %>%
   dplyr::left_join(df_drilling, by = "drilling_id") %>%
   dplyr::left_join(df_drilling_tech, by = "drilling_id") %>%
   dplyr::left_join(df_quality_agg, by = "well_id") %>%
@@ -62,7 +62,8 @@ df_well_features <- df_wells %>%
                 volume_m3_d.sd = replace_na_with_median(volume_m3_d.sd),
                 volume_m3_d.cv = replace_na_with_median(volume_m3_d.cv)) %>%
   droplevels()
-save_data(df_well_features, paths$data_prep_out, "well_feature_data")
+save_data(well_feature_data, paths$data_prep_out, "well_feature_data")
+usethis::use_data(well_feature_data, compress = "xz", overwrite = TRUE) # 180 kB
 
 
 # 2. combine pump test data and capacity measurements (virtual pump_tests)
@@ -74,7 +75,7 @@ df_pump_test_Q_monitoring <-
 
 
 # 3. combine Qs and well_features
-model_data <- dwc.wells:::combine_to_model_data(df_pump_tests_tidy, df_well_features)
+model_data <- dwc.wells:::combine_to_model_data(df_pump_tests_tidy, well_feature_data)
 save_data(model_data, paths$data_prep_out, "model_data")
 
 
