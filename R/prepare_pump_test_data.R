@@ -1,6 +1,7 @@
 # prepare_pump_test_data_1 -----------------------------------------------------
 
 #' Prepare pump test data in wide format
+#'
 #' Steps: i) read, rename and clean data, ii) correct wrong pump test dates,
 #' iii) fill up missing pump test dates, iv) get information for replaced wells,
 #' v) calculate Qs and Qs_rel, vi) determine action type, vii) select columns
