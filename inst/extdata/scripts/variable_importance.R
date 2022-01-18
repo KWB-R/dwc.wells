@@ -123,8 +123,8 @@ if (FALSE) {
 if (FALSE) {
 
   # not used as prediction model but for estimating variable importance
-  rf_model <- randomForest::randomForest(x = df %>% select(-Qs_rel),
-                                         y = df$Qs_rel,
+  rf_model <- randomForest::randomForest(x = df_training %>% select(-Qs_rel),
+                                         y = df_training$Qs_rel,
                                          mtry = 5,
                                          ntrees = 500,
                                          nodesize = 10,
@@ -153,12 +153,12 @@ if (FALSE) {
           axis.text.x = element_text(size = 13),
           axis.title.x = element_text(size = 13))
 
-  ggsave("purity_increase_26vars.png", dpi = 600, width = 8, height = 6)
+  ggsave("rf_purity_increase_25vars_v2.png", dpi = 600, width = 7, height = 5)
 
 
 }
 
-# MAIN 6: Random Forest,  recusive feature elimination -------------------------
+# MAIN 6: Random Forest, recusive feature elimination --------------------------
 
 if (FALSE) {
 

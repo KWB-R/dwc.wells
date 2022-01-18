@@ -12,6 +12,7 @@ classify_Qs_3classes <- function(x) {
 # read and prepare pump test, wide format ---
 df_wells <- dwc.wells:::prepare_well_data(paths$data_wells, renamings)
 df1 <- prepare_pump_test_data_1(paths$data_pump_tests, renamings, df_wells)
+save_data(df1, paths$data_prep_out, "pump_test_data_almost_raw")
 
 
 # prepare data for plotting ---

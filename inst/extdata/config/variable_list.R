@@ -41,7 +41,8 @@ well_features <- c(
   "quality.PO4",
   "quality.SO4",
   "quality.TSS",
-  "well_function"
+  "well_function",
+  "operational_state"
 )
 
 
