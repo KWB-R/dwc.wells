@@ -2,10 +2,7 @@
 % Please edit documentation in R/prepare_pump_test_data.R
 \name{prepare_pump_test_data_1}
 \alias{prepare_pump_test_data_1}
-\title{Prepare pump test data in wide format
-Steps: i) read, rename and clean data, ii) correct wrong pump test dates,
-iii) fill up missing pump test dates, iv) get information for replaced wells,
-v) calculate Qs and Qs_rel, vi) determine action type, vii) select columns}
+\title{Prepare pump test data in wide format}
 \usage{
 prepare_pump_test_data_1(path, renamings, df_wells)
 }
@@ -17,7 +14,6 @@ prepare_pump_test_data_1(path, renamings, df_wells)
 \item{df_wells}{prepared data frame with well characteristics}
 }
 \description{
-Prepare pump test data in wide format
 Steps: i) read, rename and clean data, ii) correct wrong pump test dates,
 iii) fill up missing pump test dates, iv) get information for replaced wells,
 v) calculate Qs and Qs_rel, vi) determine action type, vii) select columns

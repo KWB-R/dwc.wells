@@ -1,7 +1,7 @@
 # combine to model data --------------------------------------------------------
 
 combine_to_model_data <- function(df_Qs = df_pump_tests_tidy,
-                               df_well_features = df_well_features) {
+                               well_feature_data = well_feature_data) {
 
   # join with feature table
   df <- df_Qs %>%
