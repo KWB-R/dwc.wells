@@ -62,8 +62,6 @@ well_feature_data <- df_wells %>%
                 volume_m3_d.sd = replace_na_with_median(volume_m3_d.sd),
                 volume_m3_d.cv = replace_na_with_median(volume_m3_d.cv)) %>%
   droplevels()
-save_data(well_feature_data, paths$data_prep_out, "well_feature_data")
-usethis::use_data(well_feature_data, compress = "xz", overwrite = TRUE) # 180 kB
 
 
 # 2. combine pump test data and capacity measurements (virtual pump_tests)
