@@ -6,11 +6,11 @@ authors:
   DWC:
     href: https://www.kompetenz-wasser.de/en/forschung/projekte/dwc
     html: <img src='https://kompetenz-wasser.de/media/pages/forschung/projekte/dwc/6263c55e76-1639132760/dwc-rvb-grey.jpg'
-      height='24' />
+      alt='Project DWC' width='72' />
   Kompetenzzentrum Wasser Berlin gGmbH (KWB):
     href: https://www.kompetenz-wasser.de
     html: <img src='https://publications.kompetenz-wasser.de/img/KWB-Logo.svg'
-      height='24' />
+      alt='KWB' width='72' />
 template:
   params:
     bootswatch: cerulean
