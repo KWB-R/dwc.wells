@@ -1,3 +1,12 @@
+#' Prepare Quality Data
+#'
+#' @param path path
+#' @param renamings renamings
+#'
+#' @return prepared quality day
+#' @export
+#'
+#' @importFrom stats sd
 prepare_quality_data <- function(path, renamings) {
 
   # read data
@@ -37,7 +46,7 @@ prepare_quality_data <- function(path, renamings) {
     dplyr::mutate(quality.date = as.Date(quality.date, format = "%Y-%m-%d")) %>%
     dplyr::group_by(well_id, quality.parameter) %>%
     dplyr::summarise(quality.median = median(quality.value, na.rm = TRUE),
-                     quality.std_dev = sd(quality.value, na.rm = TRUE),
+                     quality.std_dev = stats::sd(quality.value, na.rm = TRUE),
                      quality.number = dplyr::n()) %>%
     dplyr::filter(quality.parameter != "LOI") %>%  # discard Gluehverlust data (only 11 wells with observations)
     dplyr::select(well_id, quality.parameter, quality.median) %>%

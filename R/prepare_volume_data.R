@@ -7,6 +7,16 @@
 # iv) negative volumes (well_id: 5010)
 
 
+#' Prepare Volume Data
+#'
+#' @param path path
+#' @param renamings renamings
+#' @param df_wells df_wells
+#'
+#' @return Prepared volume data
+#' @export
+#'
+#' @importFrom stats sd
 prepare_volume_data <- function(path, renamings, df_wells) {
 
   # load volume data
@@ -25,7 +35,7 @@ prepare_volume_data <- function(path, renamings, df_wells) {
     # aggregate data
     dplyr::group_by(well_id) %>%
     dplyr::summarise(volume_m3_d.mean = mean(volume_m3_d, na.rm = TRUE),
-                     volume_m3_d.sd = sd(volume_m3_d, na.rm = TRUE)) %>%
+                     volume_m3_d.sd = stats::sd(volume_m3_d, na.rm = TRUE)) %>%
     dplyr::mutate(volume_m3_d.cv = volume_m3_d.sd / volume_m3_d.mean) %>%
     dplyr::mutate(volume_m3_d.cv = tidyr::replace_na(volume_m3_d.cv, 0))
 

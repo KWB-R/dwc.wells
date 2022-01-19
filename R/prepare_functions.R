@@ -466,8 +466,8 @@ fill_up_na_with_median_from_lookup <- function(df, df_lookup, matching_id = "wel
 #'
 #' @param x vector, for which NA should be replaced
 #' @export
-#'
+#' @importFrom stats median
 replace_na_with_median <- function(x) {
-  x[is.na(x)] <- median(x, na.rm = TRUE)
+  x[is.na(x)] <- stats::median(x, na.rm = TRUE)
   x
 }
