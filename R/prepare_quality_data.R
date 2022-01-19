@@ -6,11 +6,12 @@
 #' @return prepared quality day
 #' @export
 #'
+#' @importFrom kwb.db hsGetTable
 #' @importFrom stats sd
 prepare_quality_data <- function(path, renamings) {
 
   # read data
-  df_quality <- read_ms_access_mri(path, "DB2LABOR_Daten") %>%
+  df_quality <- kwb.db::hsGetTable(path, "DB2LABOR_Daten") %>%
     select_rename_cols(renamings$main, "old_name", "new_name_en")
 
 
