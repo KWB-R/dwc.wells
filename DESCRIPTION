@@ -43,10 +43,20 @@ Imports:
     tidyselect,
     zoo
 Suggests: 
+    caret,
+    cowplot,
     covr,
+    doParallel,
     ggplot2,
     knitr,
-    rmarkdown
+    parallel,
+    plotly,
+    randomForest,
+    rpart.plot,
+    rmarkdown,
+    tidymodels,
+    usethis,
+    xgboost
 VignetteBuilder: 
     knitr
 Remotes:
