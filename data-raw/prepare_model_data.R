@@ -83,3 +83,41 @@ save_data(model_data, paths$data_prep_out, "model_data")
 #usethis::use_data(model_data, compress = "gzip", overwrite = TRUE) # 247 kB
 #usethis::use_data(model_data, compress = "bzip2", overwrite = TRUE) # 261 kB
 usethis::use_data(model_data, compress = "xz", overwrite = TRUE) # 180 kB
+
+
+
+# load data --------------------------------------------------------------------
+
+# load(file.path(paths$data_prep_out, "model_data.RData"))
+model_data_reduced <- model_data %>%
+  dplyr::select(.data$Qs_rel,
+                .data$well_id,
+                tidyselect::all_of(model_features))
+
+
+# refine variable selection ----------------------------------------------------
+
+
+# remove correlated and unimportant variables (see "inst/extdata/scripts/variable_importance.R")
+
+if (TRUE) {
+
+  # remove correlated variables
+  model_data_reduced  <- model_data_reduced  %>%
+    dplyr::select(-c(well_depth, quality.DR, quality.P_tot,
+              volume_m3_d.sd, waterworks, surface_water))
+
+  # remove unimportant variables
+  model_data_reduced  <- model_data_reduced  %>%
+    dplyr::select(-c(n_screens, filter_length, quality.Cu, inliner))
+
+  # remove well gallery (local variable which makes models not applicable
+  # to new sites or well galleries)
+  model_data_reduced <- model_data_reduced %>%
+    dplyr::select(-well_gallery)
+
+}
+
+usethis::use_data(model_data_reduced, compress = "xz", overwrite = TRUE) # 180 kB
+
+

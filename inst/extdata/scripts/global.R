@@ -1,6 +1,6 @@
 library(dwc.wells)
-library(dplyr)
-library(ggplot2)
+#library(dplyr)
+#library(ggplot2)
 source("inst/extdata/config/path_list.R")
 source("inst/extdata/config/variable_list.R")
 paths <- kwb.utils::resolve(path_list)

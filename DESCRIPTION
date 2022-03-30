@@ -47,6 +47,7 @@ Suggests:
     cowplot,
     covr,
     doParallel,
+    DT,
     ggplot2,
     knitr,
     parallel,
