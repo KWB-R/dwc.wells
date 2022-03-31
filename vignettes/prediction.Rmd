@@ -1,9 +1,9 @@
 ---
-title: "Random Forest Classification"
+title: "Random Forest"
 author: "Mathias Riechel, Michael Rustler"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Well capacity prediction}
+  %\VignetteIndexEntry{Random Forest}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -82,13 +82,14 @@ if (resampling == "by_well") {
 
 ```
 
+## Classification
 
-## Hyperparameter Tuning
+### Hyperparameter Tuning
 
-```{r hyperparameter_tuning}
+```{r classification_hyperparameter_tuning, eval = FALSE}
 
 # Specify model ----------------------------------------------------------------
-rf_tune_model <- parsnip::rand_forest(trees = 500,
+rf_class_tune_model <- parsnip::rand_forest(trees = 500,
                                       mtry = tune::tune(),
                                       min_n = tune::tune()) %>%
   # Specify the engine
@@ -102,29 +103,32 @@ rec <- recipes::recipe(Qs_rel ~ .,
                        data = df_training_cat)
 
 # setup new workflow
-rf_tune_wflow <- workflows::workflow() %>%
+rf_class_tune_wflow <- workflows::workflow() %>%
   workflows::add_recipe(rec) %>%
-  workflows::add_model(rf_tune_model)
+  workflows::add_model(rf_class_tune_model)
 
 # define cross validation procedure
 cv_folds <- rsample::vfold_cv(df_training_cat, v = 5)
 
-#rf_grid <- grid_random(parameters(rf_tune_model), size = 100)
-#rf_grid <- grid_regular(parameters(rf_tune_model), c(5,5))
+#rf_class_grid <- grid_random(parameters(rf_class_tune_model), size = 100)
+#rf_class_grid <- grid_regular(parameters(rf_class_tune_model), c(5,5))
+rf_class_grid <- dials::grid_regular(dials::mtry(range = c(2, 20)),
+                               dials::min_n(range = c(2, 20)),
+                               levels = 19)
 
 # set up random grid with 20 combinations for first screening
 doParallel::registerDoParallel()
 
 # 1 random grid
 set.seed(345)
-rf_tuning <- tune::tune_grid(
-  rf_tune_wflow,
+rf_class_tuning <- tune::tune_grid(
+  rf_class_tune_wflow,
   resamples = cv_folds,
-  grid = 100
+  grid = rf_class_grid
 )
 
 # get metrics
-metrics <- rf_tuning %>% tune::collect_metrics()
+metrics <- rf_class_tuning %>% tune::collect_metrics()
 
 # visualise results
 metrics %>%
@@ -145,41 +149,37 @@ ggplot2::ggsave("rf_class_hyperparameter_tuning_plot.png",
                 dpi = 600)
 ```
 
-## Best-Fit Model
+### Best-Fit Model
 
-```{r hyperparameter_tuning}
+```{r classification_bestfit, eval = FALSE}
 # Select and retrain best model ------------------------------------------------
 
-best_auc <- tune::select_best(rf_tuning, "roc_auc")
+best_auc <- tune::select_best(rf_class_tuning, "roc_auc")
 
-# regular grid results could be plotted as heatmap, analysis not yet conducted
-rf_grid <- dials::grid_regular(dials::mtry(range = c(2, 20)),
-                               dials::min_n(range = c(2, 20)),
-                               levels = 19)
 
 # select model with best results
 final_rf <- tune::finalize_model(
-  rf_tune_model,
+  rf_class_tune_model,
   best_auc
 )
 
 # create final workflow
-rf_final_wflow <- workflows::workflow() %>%
+rf_class_final_wflow <- workflows::workflow() %>%
   workflows::add_recipe(rec) %>%
   workflows::add_model(final_rf)
 
 # train and test final model
-rf_final_fit <- rf_final_wflow %>%
+rf_class_final_fit <- rf_class_final_wflow %>%
   tune::last_fit(data_split_cat)
 
 # collect metrics
-rf_final_fit %>%  tune::collect_metrics()
+rf_class_final_fit %>%  tune::collect_metrics()
 
 # get predictions
-df_pred <- rf_final_fit %>% tune::collect_predictions()
+df_pred <- rf_class_final_fit %>% tune::collect_predictions()
 
 
-# Evalulate model performance ---
+# Evaluate model performance
 
 # confusion matrix
 matrix <- yardstick::conf_mat(df_pred,
@@ -189,6 +189,11 @@ matrix
 # performance metrics
 metrics <- matrix %>% summary()
 metrics
+
+dwc.wells::save_data(metrics,
+                     path = getwd(),
+                     filename = "random_forest_class_tuned_metrics_split80")
+
 # mosaic plot
 matrix %>%
   ggplot2::autoplot(type = 'mosaic') +
@@ -202,7 +207,7 @@ ggplot2::ggsave("random_forest_class_tuned_mosaic_matrix_plot_split80.png",
 # roc curve
 auc <- sprintf("%.2f",
                yardstick::roc_auc(df_pred, truth = Qs_rel, .pred_low)$.estimate)
-yardstick::roc_curve(df_pred, truth = Qs_rel, .pred_low) %>%
+yardstick::roc_curve(df_pred, truth = Qs_rel, estimate = .pred_low) %>%
   ggplot2::autoplot() +
   ggplot2::annotate(x = 0.2,
                     y = 0.8,
@@ -216,9 +221,131 @@ ggplot2::ggsave("random_forest_class_tuned_roc_curve_split80_v2.png",
                 width = 4,
                 height = 2.5)
 
+```
 
-dwc.wells::save_data(metrics,
-                     path = getwd(),
-                     filename = "random_forest_class_tuned_metrics_split80")
+## Regression
+
+### Hyperparameter Tuning
+
+```{r regression_hyperparameter_tuning, eval = FALSE}
+
+
+# Specify model ----------------------------------------------------------------
+
+  # specify model
+rf_reg_tune_model <- parsnip::rand_forest(trees = 500, 
+                                          mtry = tune::tune(), 
+                                          min_n = tune::tune()) %>%
+  # Specify the engine
+  parsnip::set_engine('randomForest') %>%
+  # Specify the mode
+  parsnip::set_mode('regression')
+
+# specify recipe
+rec <- recipes::recipe(Qs_rel ~ ., data = df_training)
+
+# setup  workflow
+rf_reg_tune_wflow <- workflows::workflow() %>%
+  workflows::add_recipe(rec) %>%
+  workflows::add_model(rf_reg_tune_model)
+
+# define cross validation procedure
+cv_folds <- rsample::vfold_cv(df_training, v = 5)
+
+# define hyperparameter grid
+#rf_reg_grid <- grid_random(parameters(rf_reg_tune_model), size = 100)
+#rf_reg_grid <- grid_regular(parameters(rf_reg_tune_model), c(5,5))
+rf_reg_grid <- dials::grid_regular(dials::mtry(range = c(3, 15)),
+                                   dials::min_n(range = c(5, 15)),
+                                   levels = 13)
+
+# parallelisation and tuning
+doParallel::registerDoParallel()
+
+set.seed(345)
+rf_reg_tuning <- tune::tune_grid(
+  rf_reg_tune_wflow,
+  resamples = cv_folds,
+  grid = rf_reg_grid
+)
+
+# visualise results
+metrics <- rf_reg_tuning %>% tune::collect_metrics()
+dwc.wells::save_data(metrics, 
+                     path = getwd(), 
+                     filename = sprintf("rf-regression_tuning-grid_resampling-%s_metric",
+                                        resampling))
+
+# visualise results
+metrics %>%
+  dplyr::filter(.metric == "rmse") %>%
+  dplyr::select(mean, min_n, mtry) %>%
+  tidyr::pivot_longer(min_n:mtry,
+                      values_to = "value",
+                      names_to = "parameter") %>%
+  ggplot2::ggplot(ggplot2::aes(value, mean, color = parameter)) +
+  ggplot2::geom_point(show.legend = FALSE) +
+  ggplot2::scale_x_continuous(breaks = seq.int(1, 15, 2)) +
+  ggplot2::facet_wrap(~parameter, scales = "free_x") +
+  ggplot2::labs(x = NULL, y = "RMSE [%]") +
+  sema.berlin.utils::my_theme()
+
+ggplot2::ggsave("rf_reg_regression_hyperparameter_tuning_plot_regular_random_resampling.png",
+                width = 6, 
+                height = 3, 
+                dpi = 600)
+
+# raster heatmap plot
+metrics %>%
+  dplyr::filter(.metric == "rmse") %>%
+  dplyr::select(mean, min_n, mtry) %>%
+  ggplot2::ggplot(aes(x = min_n, y = mtry, fill = mean)) +
+  ggplot2::geom_raster() +
+  ggplot2::scale_x_continuous(breaks = seq.int(1, 15, 2)) +
+  ggplot2::scale_y_continuous(breaks = seq.int(1, 15, 2)) +
+  ggplot2::labs(fill = "RMSE [%]") +
+  sema.berlin.utils::my_theme()
+
+ggplot2::ggsave("rf_reg_regression_hyperparameter_tuning_plot_regular_random_resampling_heatmap.png",
+                width = 5, 
+                height = 3, 
+                dpi = 600)
+
+
+
+
 
 ```
+
+### Best-Fit Model
+
+```{r regression_bestfit, eval = FALSE}
+
+# determine best model
+best_rmse <- tune::select_best(rf_reg_tuning, "rmse")
+dwc.wells::save_data(best_rmse, 
+                     path = getwd(), 
+                     filename = "rf_reg_regression_best_model_regular", 
+                     "RData")
+final_rf_reg <- tune::finalize_model(rf_reg_tune_model, best_rmse)
+
+# update workflow
+rf_reg_final_wflow <- workflows::workflow() %>%
+   workflows::add_recipe(rec) %>%
+   workflows::add_model(final_rf_reg)
+
+# train and test model / workflow
+rf_reg_final_fit <- rf_reg_final_wflow %>% tune::last_fit(data_split)
+
+#get metrics
+rf_reg_final_fit %>%  tune::collect_metrics()
+
+# get predictions
+df_pred <- rf_reg_final_fit %>%  tune::collect_predictions()
+
+# Evaluate model performance ---
+ggplot2::scatterplot(df_pred)
+ggplot2::ggsave("random_forest_regression_tuned_regular.png", width = 3.5, height = 3)
+
+```
+
