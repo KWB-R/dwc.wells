@@ -13,7 +13,10 @@
     <loc>/articles/index.html</loc>
   </url>
   <url>
-    <loc>/articles/prediction.html</loc>
+    <loc>/articles/prediction_random-forest.html</loc>
+  </url>
+  <url>
+    <loc>/articles/prediction_xgboost.html</loc>
   </url>
   <url>
     <loc>/authors.html</loc>
