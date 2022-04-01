@@ -236,30 +236,35 @@ Qs_heatmap_plot <- function(df, colours, dummy_labels, date_limits, title,
 #'  @param pointsize size value for points, default: 1
 #'
 #' @export
-#'
+#' @import ggplot2
+#' @importFrom yardstick rmse rsq
+#' @importFrom sema.berlin.utils my_theme
 scatterplot <- function(df_pred, lines_80perc = FALSE, alpha = 1, pointsize = 1) {
 
   # error metrics
-  a <- df_pred %>% rmse(truth = .data$Qs_rel, estimate = .data$.pred)
-  b <- df_pred %>% rsq(truth = .data$Qs_rel, estimate = .data$.pred)
+  a <- df_pred %>% yardstick::rmse(truth = .data$Qs_rel, estimate = .data$.pred)
+  b <- df_pred %>% yardstick::rsq(truth = .data$Qs_rel, estimate = .data$.pred)
 
   legend_str <- sprintf("r2 = %.2f\nRMSE = %.1f%%", b$.estimate, a$.estimate)
 
-  p <- ggplot(df_pred, aes(x = .data$Qs_rel, y = .data$.pred)) +
-    geom_point(pch = 16, col = alpha("black", alpha), size = pointsize) +
-    geom_abline(color = 'blue', linetype = 2) +
-    scale_x_continuous(lim = c(0, 100), labels = paste_percent) +
-    scale_y_continuous(lim = c(0, 100), labels = paste_percent) +
-    labs(x = "observations", y = "predictions") +
+  p <- ggplot2::ggplot(df_pred, ggplot2::aes(x = .data$Qs_rel, y = .data$.pred)) +
+    ggplot2::geom_point(pch = 16,
+                        col = ggplot2::alpha("black", alpha),
+                        size = pointsize) +
+    ggplot2::geom_abline(color = 'blue', linetype = 2) +
+    ggplot2::scale_x_continuous(lim = c(0, 100), labels = paste_percent) +
+    ggplot2::scale_y_continuous(lim = c(0, 100), labels = paste_percent) +
+    ggplot2::labs(x = "observations", y = "predictions") +
     sema.berlin.utils::my_theme() +
-    annotate("text", x = 100, y = 5, hjust = 1, col = "grey30", size = 3,
+    ggplot2::annotate("text", x = 100, y = 5, hjust = 1, col = "grey30", size = 3,
              label = legend_str)
 
   if (lines_80perc) {
     # p + geom_rect(aes(xmin = 0, xmax = 80, ymin = 0, ymax = 80),
     #                   colour = "red", fill = NA, lty = "dashed")
-    p +  geom_hline(yintercept = 80, colour = "red", lty = "dashed") +
-      geom_vline(xintercept = 80, colour = "red", lty = "dashed")
+    p +
+    ggplot2::geom_hline(yintercept = 80, colour = "red", lty = "dashed") +
+    ggplot2::geom_vline(xintercept = 80, colour = "red", lty = "dashed")
 
   } else {
     p

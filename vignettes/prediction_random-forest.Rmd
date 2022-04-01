@@ -42,20 +42,6 @@ if (resampling == "random") {
   df_training <- data_split %>% rsample::training()
   df_test <- data_split %>% rsample::testing()
 
-  # for classification
-  df_training_cat <- df_training %>%
-    dplyr::mutate(Qs_rel = dwc.wells::classify_Qs(Qs_rel))
-
-  df_test_cat <- df_test %>%
-    dplyr::mutate(Qs_rel = dwc.wells::classify_Qs(Qs_rel))
-
-  data_split_cat <- rsample::initial_split(
-    df %>%
-      dplyr::mutate(Qs_rel = dwc.wells::classify_Qs(Qs_rel)) %>%
-      dplyr::select(-well_id),
-    prop = 0.8,
-    strata = Qs_rel
-  )
 }
 
 
@@ -72,13 +58,11 @@ if (resampling == "by_well") {
   df_test <- df %>%
     dplyr::filter(well_id %in% test_ids) %>%
     dplyr::select(-well_id)
-
-  df_training_cat <- df_training %>%
-    dplyr::mutate(Qs_rel = dwc.wells::classify_Qs(Qs_rel))
-  df_test_cat <- df_test %>%
-    dplyr::mutate(Qs_rel = dwc.wells::classify_Qs(Qs_rel))
-
+  
 }
+
+tibble::as_tibble(df_training)
+tibble::as_tibble(df_test)
 
 ```
 
@@ -313,14 +297,6 @@ ggplot2::ggsave("rf_reg_regression_hyperparameter_tuning_plot_regular_random_res
 
 
 
-
-
-```
-
-### Best-Fit Model
-
-```{r regression_bestfit, eval = FALSE}
-
 # determine best model
 best_rmse <- tune::select_best(rf_reg_tuning, "rmse")
 dwc.wells::save_data(best_rmse, 
@@ -346,6 +322,76 @@ df_pred <- rf_reg_final_fit %>%  tune::collect_predictions()
 # Evaluate model performance ---
 ggplot2::scatterplot(df_pred)
 ggplot2::ggsave("random_forest_regression_tuned_regular.png", width = 3.5, height = 3)
+
+
+
+```
+
+### Best-Fit Model
+
+```{r regression_bestfit}
+rf_reg_model <- parsnip::rand_forest(trees = 500,
+                                     mtry = 6, 
+                                     min_n = 10) %>%
+  # Specify the engine
+  parsnip::set_engine('randomForest') %>%
+  # Specify the mode
+  parsnip::set_mode('regression')
+
+# Model training and assessment (regression) -----------------------------------
+
+# Train model
+set.seed(26)
+rf_reg_fit <- rf_reg_model %>% parsnip::fit(Qs_rel ~ ., data = df_training)
+
+# Make predictions
+predictions <- predict(rf_reg_fit, df_test)
+
+# Evaluate model performance
+df_pred <- df_test %>% 
+  dplyr::select(Qs_rel) %>% 
+  dplyr::bind_cols(predictions)
+
+yardstick::rmse(df_pred, truth = Qs_rel, estimate = .pred)
+yardstick::rsq(df_pred, truth = Qs_rel, estimate = .pred)
+
+# scatter plot
+dwc.wells::scatterplot(df_pred, 
+                       lines_80perc = FALSE, 
+                       alpha = 1, 
+                       pointsize = 0.9)
+ggplot2::ggsave("scatterplot_rf-regression_numeric.png",
+                dpi = 600,
+                width = 3.5,
+                height = 3)
+
+
+```
+
+## Classification
+
+```{r classification}
+# classification performance ---------------------------------------------------
+
+# classify Qs data
+df_pred <- df_pred %>%
+  dplyr::mutate(Qs_rel_class = dwc.wells::classify_Qs(Qs_rel),
+                .pred_class = dwc.wells::classify_Qs(.pred))
+
+# confusion matrix
+matrix <- yardstick::conf_mat(df_pred, 
+                              truth = Qs_rel_class, 
+                              estimate = .pred_class)
+matrix 
+
+# performance metrics
+metrics <- summary(matrix)
+metrics
+
+dwc.wells::save_data(matrix, 
+                     path = getwd(), 
+                     filename = "rf_numeric_to_class_matrix_split80",
+                     formats = "RData")
 
 ```
 

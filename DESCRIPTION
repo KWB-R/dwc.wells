@@ -27,6 +27,7 @@ Imports:
     corrplot,
     dplyr,
     forcats,
+    ggplot2,
     kwb.db,
     kwb.utils,
     lsr,
@@ -41,6 +42,7 @@ Imports:
     stringr,
     tidyr,
     tidyselect,
+    yardstick,
     zoo
 Suggests: 
     caret,
@@ -48,7 +50,6 @@ Suggests:
     covr,
     doParallel,
     DT,
-    ggplot2,
     knitr,
     parallel,
     plotly,
