@@ -85,8 +85,8 @@
 <h2 id="input-dataset">Input Dataset<a class="anchor" aria-label="anchor" href="#input-dataset"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"> <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/KWB-R/dwc.wells" class="external-link">dwc.wells</a></span><span class="op">)</span> 
- <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/KWB-R/dwc.wells" class="external-link">dwc.wells</a></span><span class="op">)</span> 
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span>
 <span class="co">#&gt; ── <span style="font-weight: bold;">Attaching packages</span> ────────────────────────────────────── tidymodels 0.2.0 ──</span>
 <span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">broom       </span> 0.7.12     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">recipes     </span> 0.2.0 </span>
 <span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dials       </span> 0.1.0      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">rsample     </span> 0.1.1 </span>
@@ -102,8 +102,8 @@
 <span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">lag()</span>     masks <span style="color: #0000BB;">stats</span>::lag()</span>
 <span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">recipes</span>::<span style="color: #00BB00;">step()</span>  masks <span style="color: #0000BB;">stats</span>::step()</span>
 <span class="co">#&gt; <span style="color: #0000BB;">•</span> Dig deeper into tidy modeling with R at <span style="color: #00BB00;">https://www.tmwr.org</span></span>
- <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">dwc.wells</span><span class="fu">::</span><span class="va">model_data_reduced</span>
- <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span>
+<span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">dwc.wells</span><span class="fu">::</span><span class="va">model_data_reduced</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span>
 <span class="co">#&gt; 'data.frame':    6308 obs. of  27 variables:</span>
 <span class="co">#&gt;  $ Qs_rel                : num  100 97.8 75.1 78.5 52.2 ...</span>
 <span class="co">#&gt;  $ well_id               : int  162 162 162 162 162 162 162 162 162 162 ...</span>
@@ -151,20 +151,6 @@
   <span class="va">df_training</span> <span class="op">&lt;-</span> <span class="va">data_split</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html" class="external-link">training</a></span><span class="op">(</span><span class="op">)</span>
   <span class="va">df_test</span> <span class="op">&lt;-</span> <span class="va">data_split</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html" class="external-link">testing</a></span><span class="op">(</span><span class="op">)</span>
 
-  <span class="co"># for classification</span>
-  <span class="va">df_training_cat</span> <span class="op">&lt;-</span> <span class="va">df_training</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Qs_rel <span class="op">=</span> <span class="fu">dwc.wells</span><span class="fu">::</span><span class="fu"><a href="../reference/classify_Qs.html">classify_Qs</a></span><span class="op">(</span><span class="va">Qs_rel</span><span class="op">)</span><span class="op">)</span>
-
-  <span class="va">df_test_cat</span> <span class="op">&lt;-</span> <span class="va">df_test</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Qs_rel <span class="op">=</span> <span class="fu">dwc.wells</span><span class="fu">::</span><span class="fu"><a href="../reference/classify_Qs.html">classify_Qs</a></span><span class="op">(</span><span class="va">Qs_rel</span><span class="op">)</span><span class="op">)</span>
-
-  <span class="va">data_split_cat</span> <span class="op">&lt;-</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html" class="external-link">initial_split</a></span><span class="op">(</span>
-    <span class="va">df</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Qs_rel <span class="op">=</span> <span class="fu">dwc.wells</span><span class="fu">::</span><span class="fu"><a href="../reference/classify_Qs.html">classify_Qs</a></span><span class="op">(</span><span class="va">Qs_rel</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-      <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">well_id</span><span class="op">)</span>,
-    prop <span class="op">=</span> <span class="fl">0.8</span>,
-    strata <span class="op">=</span> <span class="va">Qs_rel</span>
-  <span class="op">)</span>
 <span class="op">}</span>
 
 
@@ -181,13 +167,51 @@
   <span class="va">df_test</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
     <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">well_id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">test_ids</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
     <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">well_id</span><span class="op">)</span>
+  
+<span class="op">}</span>
 
-  <span class="va">df_training_cat</span> <span class="op">&lt;-</span> <span class="va">df_training</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Qs_rel <span class="op">=</span> <span class="fu">dwc.wells</span><span class="fu">::</span><span class="fu"><a href="../reference/classify_Qs.html">classify_Qs</a></span><span class="op">(</span><span class="va">Qs_rel</span><span class="op">)</span><span class="op">)</span>
-  <span class="va">df_test_cat</span> <span class="op">&lt;-</span> <span class="va">df_test</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Qs_rel <span class="op">=</span> <span class="fu">dwc.wells</span><span class="fu">::</span><span class="fu"><a href="../reference/classify_Qs.html">classify_Qs</a></span><span class="op">(</span><span class="va">Qs_rel</span><span class="op">)</span><span class="op">)</span>
-
-<span class="op">}</span></code></pre></div>
+<span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="va">df_training</span><span class="op">)</span>
+<span class="co">#&gt; <span style="color: #949494;"># A tibble: 5,044 × 26</span></span>
+<span class="co">#&gt;    Qs_rel well_age_years construction_year screen_material diameter</span>
+<span class="co">#&gt;     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   31.5           42.3              <span style="text-decoration: underline;">1</span>970 Unbekannt            300</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   20.7           44.2              <span style="text-decoration: underline;">1</span>970 Unbekannt            300</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   16.3           47.9              <span style="text-decoration: underline;">1</span>970 Unbekannt            300</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   22.4           47.9              <span style="text-decoration: underline;">1</span>970 Unbekannt            300</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   25.6           25.8              <span style="text-decoration: underline;">1</span>993 Stahl                393</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   19.0           16.2              <span style="text-decoration: underline;">1</span>993 Stahl                393</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   28.9           16.3              <span style="text-decoration: underline;">1</span>993 Stahl                393</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   37.5           15.9              <span style="text-decoration: underline;">1</span>993 Stahl                393</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   35.1           24.4              <span style="text-decoration: underline;">1</span>993 Stahl                393</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   30.4           20.7              <span style="text-decoration: underline;">1</span>993 Stahl                393</span>
+<span class="co">#&gt; <span style="color: #949494;"># … with 5,034 more rows, and 21 more variables: drilling_method &lt;fct&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   admissible_discharge &lt;dbl&gt;, operational_start.Qs &lt;dbl&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   aquifer_coverage &lt;fct&gt;, W_static.sd &lt;dbl&gt;, surface_water.distance &lt;fct&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   n_rehab &lt;int&gt;, time_since_rehab_years &lt;dbl&gt;, volume_m3_d.mean &lt;dbl&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   volume_m3_d.cv &lt;dbl&gt;, quality.EC &lt;dbl&gt;, quality.DO &lt;dbl&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   quality.Temp &lt;dbl&gt;, quality.pH &lt;dbl&gt;, quality.Redox &lt;dbl&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   quality.Fe_tot &lt;dbl&gt;, quality.Mn &lt;dbl&gt;, quality.NO3 &lt;dbl&gt;, …</span></span>
+<span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="va">df_test</span><span class="op">)</span>
+<span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,264 × 26</span></span>
+<span class="co">#&gt;    Qs_rel well_age_years construction_year screen_material diameter</span>
+<span class="co">#&gt;     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   97.8          23.2               <span style="text-decoration: underline;">1</span>970 Unbekannt            300</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   78.5          29.5               <span style="text-decoration: underline;">1</span>970 Unbekannt            300</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   52.2          35.0               <span style="text-decoration: underline;">1</span>970 Unbekannt            300</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   27.2          42.9               <span style="text-decoration: underline;">1</span>970 Unbekannt            300</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   35.1          20.9               <span style="text-decoration: underline;">1</span>993 Stahl                393</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   82.7           6.07              <span style="text-decoration: underline;">1</span>993 Stahl                393</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   26.8          20.9               <span style="text-decoration: underline;">1</span>993 Stahl                393</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   16.9          24.4               <span style="text-decoration: underline;">1</span>993 Stahl                393</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   56.1          16.5               <span style="text-decoration: underline;">1</span>993 Stahl                393</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   68.5           6.11              <span style="text-decoration: underline;">1</span>993 Stahl                393</span>
+<span class="co">#&gt; <span style="color: #949494;"># … with 1,254 more rows, and 21 more variables: drilling_method &lt;fct&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   admissible_discharge &lt;dbl&gt;, operational_start.Qs &lt;dbl&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   aquifer_coverage &lt;fct&gt;, W_static.sd &lt;dbl&gt;, surface_water.distance &lt;fct&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   n_rehab &lt;int&gt;, time_since_rehab_years &lt;dbl&gt;, volume_m3_d.mean &lt;dbl&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   volume_m3_d.cv &lt;dbl&gt;, quality.EC &lt;dbl&gt;, quality.DO &lt;dbl&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   quality.Temp &lt;dbl&gt;, quality.pH &lt;dbl&gt;, quality.Redox &lt;dbl&gt;,</span></span>
+<span class="co">#&gt; <span style="color: #949494;">#   quality.Fe_tot &lt;dbl&gt;, quality.Mn &lt;dbl&gt;, quality.NO3 &lt;dbl&gt;, …</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="regression">Regression<a class="anchor" aria-label="anchor" href="#regression"></a>
@@ -195,158 +219,195 @@
 <div class="section level3">
 <h3 id="hyperparameter-tuning">Hyperparameter Tuning<a class="anchor" aria-label="anchor" href="#hyperparameter-tuning"></a>
 </h3>
+<p>1</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># Hyperparameter tuning --------------------------------------------------------</span></span>
 <span id="cb3-2"><a href="#cb3-2"></a></span>
 <span id="cb3-3"><a href="#cb3-3"></a> <span class="co"># specify model</span></span>
-<span id="cb3-4"><a href="#cb3-4"></a>  xgb_model &lt;-<span class="st"> </span><span class="kw">boost_tree</span>(</span>
+<span id="cb3-4"><a href="#cb3-4"></a>  xgb_model &lt;-<span class="st"> </span>parsnip<span class="op">::</span><span class="kw">boost_tree</span>(</span>
 <span id="cb3-5"><a href="#cb3-5"></a>    <span class="dt">trees =</span> <span class="dv">500</span>,</span>
-<span id="cb3-6"><a href="#cb3-6"></a>    <span class="dt">tree_depth =</span> <span class="kw">tune</span>(), <span class="dt">min_n =</span> <span class="kw">tune</span>(),</span>
-<span id="cb3-7"><a href="#cb3-7"></a>    <span class="dt">loss_reduction =</span> <span class="kw">tune</span>(),                     <span class="co">## first three: model complexity</span></span>
-<span id="cb3-8"><a href="#cb3-8"></a>    <span class="dt">sample_size =</span> <span class="kw">tune</span>(), <span class="dt">mtry =</span> <span class="kw">tune</span>(),         <span class="co">## randomness</span></span>
-<span id="cb3-9"><a href="#cb3-9"></a>    <span class="dt">learn_rate =</span> <span class="kw">tune</span>(),                         <span class="co">## step size</span></span>
-<span id="cb3-10"><a href="#cb3-10"></a>  ) <span class="op">%&gt;%</span></span>
-<span id="cb3-11"><a href="#cb3-11"></a><span class="st">    </span><span class="kw">set_engine</span>(<span class="st">"xgboost"</span>) <span class="op">%&gt;%</span></span>
-<span id="cb3-12"><a href="#cb3-12"></a><span class="st">    </span><span class="kw">set_mode</span>(<span class="st">"regression"</span>)</span>
-<span id="cb3-13"><a href="#cb3-13"></a></span>
-<span id="cb3-14"><a href="#cb3-14"></a>  <span class="co"># set up workflow</span></span>
-<span id="cb3-15"><a href="#cb3-15"></a>  xgb_wf &lt;-<span class="st"> </span><span class="kw">workflow</span>() <span class="op">%&gt;%</span></span>
-<span id="cb3-16"><a href="#cb3-16"></a><span class="st">    </span><span class="kw">add_formula</span>(Qs_rel <span class="op">~</span><span class="st"> </span>.) <span class="op">%&gt;%</span></span>
-<span id="cb3-17"><a href="#cb3-17"></a><span class="st">    </span><span class="kw">add_model</span>(xgb_model)</span>
-<span id="cb3-18"><a href="#cb3-18"></a></span>
-<span id="cb3-19"><a href="#cb3-19"></a>  <span class="co"># hyperparameter sampling v1</span></span>
-<span id="cb3-20"><a href="#cb3-20"></a>  xgb_grid &lt;-<span class="st"> </span><span class="kw">grid_random</span>(<span class="kw">tree_depth</span>(),</span>
-<span id="cb3-21"><a href="#cb3-21"></a>                          <span class="kw">min_n</span>(),</span>
-<span id="cb3-22"><a href="#cb3-22"></a>                          <span class="kw">loss_reduction</span>(),</span>
-<span id="cb3-23"><a href="#cb3-23"></a>                          <span class="dt">sample_size =</span> <span class="kw">sample_prop</span>(),</span>
-<span id="cb3-24"><a href="#cb3-24"></a>                          <span class="kw">finalize</span>(<span class="kw">mtry</span>(), df_training),</span>
-<span id="cb3-25"><a href="#cb3-25"></a>                          <span class="kw">learn_rate</span>(<span class="dt">range =</span> <span class="kw">c</span>(<span class="fl">0.01</span>, <span class="fl">0.1</span>), <span class="dt">trans =</span> <span class="ot">NULL</span>),</span>
-<span id="cb3-26"><a href="#cb3-26"></a>                          <span class="dt">size =</span> <span class="dv">1000</span>)</span>
-<span id="cb3-27"><a href="#cb3-27"></a></span>
-<span id="cb3-28"><a href="#cb3-28"></a>    <span class="co"># hyperparameter sampling v2</span></span>
-<span id="cb3-29"><a href="#cb3-29"></a>  xgb_grid &lt;-<span class="st"> </span><span class="kw">grid_latin_hypercube</span>(</span>
-<span id="cb3-30"><a href="#cb3-30"></a>    <span class="kw">tree_depth</span>(),</span>
-<span id="cb3-31"><a href="#cb3-31"></a>    <span class="kw">min_n</span>(),</span>
-<span id="cb3-32"><a href="#cb3-32"></a>    <span class="kw">loss_reduction</span>(),</span>
-<span id="cb3-33"><a href="#cb3-33"></a>    <span class="dt">sample_size =</span> <span class="kw">sample_prop</span>(),</span>
-<span id="cb3-34"><a href="#cb3-34"></a>    <span class="kw">finalize</span>(<span class="kw">mtry</span>(), df_training),</span>
-<span id="cb3-35"><a href="#cb3-35"></a>    <span class="kw">learn_rate</span>(),</span>
-<span id="cb3-36"><a href="#cb3-36"></a>    <span class="dt">size =</span> <span class="dv">500</span></span>
-<span id="cb3-37"><a href="#cb3-37"></a>  )</span>
-<span id="cb3-38"><a href="#cb3-38"></a></span>
-<span id="cb3-39"><a href="#cb3-39"></a>  <span class="co"># define cross validation procedure</span></span>
-<span id="cb3-40"><a href="#cb3-40"></a>  cv_folds &lt;-<span class="st"> </span><span class="kw">vfold_cv</span>(df_training, <span class="dt">v =</span> <span class="dv">5</span>)</span>
+<span id="cb3-6"><a href="#cb3-6"></a>    <span class="dt">tree_depth =</span> tune<span class="op">::</span><span class="kw">tune</span>(), <span class="co">## model complexity</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a>    <span class="dt">min_n =</span> tune<span class="op">::</span><span class="kw">tune</span>(), <span class="co">## model complexity</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a>    <span class="dt">loss_reduction =</span> tune<span class="op">::</span><span class="kw">tune</span>(), <span class="co">## model complexity</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a>    <span class="dt">sample_size =</span> tune<span class="op">::</span><span class="kw">tune</span>(), <span class="co">## randomness</span></span>
+<span id="cb3-10"><a href="#cb3-10"></a>    <span class="dt">mtry =</span> tune<span class="op">::</span><span class="kw">tune</span>(), <span class="co">## randomness</span></span>
+<span id="cb3-11"><a href="#cb3-11"></a>    <span class="dt">learn_rate =</span> tune<span class="op">::</span><span class="kw">tune</span>(), <span class="co">## step size</span></span>
+<span id="cb3-12"><a href="#cb3-12"></a>  ) <span class="op">%&gt;%</span></span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="st">    </span>parsnip<span class="op">::</span><span class="kw">set_engine</span>(<span class="st">"xgboost"</span>) <span class="op">%&gt;%</span></span>
+<span id="cb3-14"><a href="#cb3-14"></a><span class="st">    </span>parsnip<span class="op">::</span><span class="kw">set_mode</span>(<span class="st">"regression"</span>)</span>
+<span id="cb3-15"><a href="#cb3-15"></a></span>
+<span id="cb3-16"><a href="#cb3-16"></a>  <span class="co"># set up workflow</span></span>
+<span id="cb3-17"><a href="#cb3-17"></a>  xgb_wf &lt;-<span class="st"> </span>workflows<span class="op">::</span><span class="kw">workflow</span>() <span class="op">%&gt;%</span></span>
+<span id="cb3-18"><a href="#cb3-18"></a><span class="st">    </span>workflows<span class="op">::</span><span class="kw">add_formula</span>(Qs_rel <span class="op">~</span><span class="st"> </span>.) <span class="op">%&gt;%</span></span>
+<span id="cb3-19"><a href="#cb3-19"></a><span class="st">    </span>workflows<span class="op">::</span><span class="kw">add_model</span>(xgb_model)</span>
+<span id="cb3-20"><a href="#cb3-20"></a></span>
+<span id="cb3-21"><a href="#cb3-21"></a>  <span class="co"># hyperparameter sampling v1</span></span>
+<span id="cb3-22"><a href="#cb3-22"></a>  <span class="co"># xgb_grid &lt;- dials::grid_random(dials::tree_depth(),</span></span>
+<span id="cb3-23"><a href="#cb3-23"></a>  <span class="co">#                                dials::min_n(),</span></span>
+<span id="cb3-24"><a href="#cb3-24"></a>  <span class="co">#                                dials::loss_reduction(),</span></span>
+<span id="cb3-25"><a href="#cb3-25"></a>  <span class="co">#                                sample_size = dials::sample_prop(),</span></span>
+<span id="cb3-26"><a href="#cb3-26"></a>  <span class="co">#                                dials::finalize(dials::mtry(), df_training),</span></span>
+<span id="cb3-27"><a href="#cb3-27"></a>  <span class="co">#                                dials::learn_rate(range = c(0.01, 0.1), </span></span>
+<span id="cb3-28"><a href="#cb3-28"></a>  <span class="co">#                                                  trans = NULL),</span></span>
+<span id="cb3-29"><a href="#cb3-29"></a>  <span class="co">#                                size = 1000)</span></span>
+<span id="cb3-30"><a href="#cb3-30"></a></span>
+<span id="cb3-31"><a href="#cb3-31"></a>    <span class="co"># hyperparameter sampling v2</span></span>
+<span id="cb3-32"><a href="#cb3-32"></a>  xgb_grid &lt;-<span class="st"> </span>dials<span class="op">::</span><span class="kw">grid_latin_hypercube</span>(</span>
+<span id="cb3-33"><a href="#cb3-33"></a>    dials<span class="op">:::</span><span class="kw">tree_depth</span>(),</span>
+<span id="cb3-34"><a href="#cb3-34"></a>    dials<span class="op">::</span><span class="kw">min_n</span>(),</span>
+<span id="cb3-35"><a href="#cb3-35"></a>    dials<span class="op">::</span><span class="kw">loss_reduction</span>(),</span>
+<span id="cb3-36"><a href="#cb3-36"></a>    <span class="dt">sample_size =</span> dials<span class="op">::</span><span class="kw">sample_prop</span>(),</span>
+<span id="cb3-37"><a href="#cb3-37"></a>    dials<span class="op">::</span><span class="kw">finalize</span>(dials<span class="op">::</span><span class="kw">mtry</span>(), df_training),</span>
+<span id="cb3-38"><a href="#cb3-38"></a>    dials<span class="op">::</span><span class="kw">learn_rate</span>(),</span>
+<span id="cb3-39"><a href="#cb3-39"></a>    <span class="dt">size =</span> <span class="dv">500</span></span>
+<span id="cb3-40"><a href="#cb3-40"></a>  )</span>
 <span id="cb3-41"><a href="#cb3-41"></a></span>
-<span id="cb3-42"><a href="#cb3-42"></a>  <span class="co"># set up random grid with 20 combinations for first screening</span></span>
-<span id="cb3-43"><a href="#cb3-43"></a>  doParallel<span class="op">::</span><span class="kw">registerDoParallel</span>()</span>
+<span id="cb3-42"><a href="#cb3-42"></a>  <span class="co"># define cross validation procedure</span></span>
+<span id="cb3-43"><a href="#cb3-43"></a>  cv_folds &lt;-<span class="st"> </span>rsample<span class="op">::</span><span class="kw">vfold_cv</span>(df_training, <span class="dt">v =</span> <span class="dv">5</span>)</span>
 <span id="cb3-44"><a href="#cb3-44"></a></span>
-<span id="cb3-45"><a href="#cb3-45"></a>  <span class="co"># test different hyperparameters via cross validation on training data</span></span>
-<span id="cb3-46"><a href="#cb3-46"></a>  <span class="kw">set.seed</span>(<span class="dv">234</span>)</span>
-<span id="cb3-47"><a href="#cb3-47"></a>  xgb_tuning &lt;-<span class="st"> </span><span class="kw">tune_grid</span>(</span>
-<span id="cb3-48"><a href="#cb3-48"></a>    xgb_wf,</span>
-<span id="cb3-49"><a href="#cb3-49"></a>    <span class="dt">resamples =</span> cv_folds,</span>
-<span id="cb3-50"><a href="#cb3-50"></a>    <span class="dt">grid =</span> xgb_grid,</span>
-<span id="cb3-51"><a href="#cb3-51"></a>    <span class="dt">control =</span> <span class="kw">control_grid</span>(<span class="dt">save_pred =</span> <span class="ot">TRUE</span>)</span>
-<span id="cb3-52"><a href="#cb3-52"></a>  )</span>
-<span id="cb3-53"><a href="#cb3-53"></a></span>
-<span id="cb3-54"><a href="#cb3-54"></a>  <span class="co"># get assessment metrics</span></span>
-<span id="cb3-55"><a href="#cb3-55"></a>  metrics &lt;-<span class="st"> </span>xgb_tuning <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">collect_metrics</span>()</span>
-<span id="cb3-56"><a href="#cb3-56"></a>  <span class="kw">save_data</span>(metrics, <span class="kw">getwd</span>(), <span class="st">"metrics_tuning_xgb_random_resampling"</span>)</span>
-<span id="cb3-57"><a href="#cb3-57"></a></span>
-<span id="cb3-58"><a href="#cb3-58"></a>  <span class="co"># visualise results</span></span>
-<span id="cb3-59"><a href="#cb3-59"></a>  metrics <span class="op">%&gt;%</span></span>
-<span id="cb3-60"><a href="#cb3-60"></a><span class="st">    </span><span class="co">#filter(learn_rate &gt; 0.01) %&gt;%</span></span>
-<span id="cb3-61"><a href="#cb3-61"></a><span class="st">    </span><span class="kw">filter</span>(.metric <span class="op">==</span><span class="st"> "rmse"</span>) <span class="op">%&gt;%</span></span>
-<span id="cb3-62"><a href="#cb3-62"></a><span class="st">    </span><span class="kw">select</span>(mean, min_n, mtry, tree_depth, learn_rate, loss_reduction, sample_size) <span class="op">%&gt;%</span></span>
-<span id="cb3-63"><a href="#cb3-63"></a><span class="st">    </span><span class="kw">pivot_longer</span>(<span class="kw">c</span>(min_n, mtry, tree_depth, learn_rate, loss_reduction, sample_size),</span>
-<span id="cb3-64"><a href="#cb3-64"></a>                 <span class="dt">values_to =</span> <span class="st">"value"</span>,</span>
-<span id="cb3-65"><a href="#cb3-65"></a>                 <span class="dt">names_to =</span> <span class="st">"parameter"</span></span>
-<span id="cb3-66"><a href="#cb3-66"></a>    ) <span class="op">%&gt;%</span></span>
-<span id="cb3-67"><a href="#cb3-67"></a><span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(value, mean, <span class="dt">color =</span> parameter)) <span class="op">+</span></span>
-<span id="cb3-68"><a href="#cb3-68"></a><span class="st">    </span><span class="kw">geom_point</span>(<span class="dt">show.legend =</span> <span class="ot">FALSE</span>, <span class="dt">size =</span> <span class="fl">0.5</span>) <span class="op">+</span></span>
-<span id="cb3-69"><a href="#cb3-69"></a><span class="st">    </span><span class="kw">facet_wrap</span>(<span class="op">~</span>parameter, <span class="dt">scales =</span> <span class="st">"free"</span>) <span class="op">+</span></span>
-<span id="cb3-70"><a href="#cb3-70"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="ot">NULL</span>, <span class="dt">y =</span> <span class="st">"RMSE [%]"</span>) <span class="op">+</span></span>
-<span id="cb3-71"><a href="#cb3-71"></a><span class="st">    </span>sema.berlin.utils<span class="op">::</span><span class="kw">my_theme</span>()</span>
-<span id="cb3-72"><a href="#cb3-72"></a></span>
-<span id="cb3-73"><a href="#cb3-73"></a>  <span class="kw">ggsave</span>(<span class="st">"xgb_regression_hyperparameter_tuning_plot_random_resampling_1000_v2.png"</span>, <span class="dt">width =</span> <span class="dv">8</span>, <span class="dt">height =</span> <span class="dv">4</span>, <span class="dt">dpi =</span> <span class="dv">600</span>)</span>
-<span id="cb3-74"><a href="#cb3-74"></a></span>
-<span id="cb3-75"><a href="#cb3-75"></a>  <span class="co"># after example from https://juliasilge.com/blog/xgboost-tune-volleyball/</span></span>
-<span id="cb3-76"><a href="#cb3-76"></a></span>
-<span id="cb3-77"><a href="#cb3-77"></a><span class="er">}</span></span></code></pre></div>
+<span id="cb3-45"><a href="#cb3-45"></a>  <span class="co"># set up random grid with 20 combinations for first screening</span></span>
+<span id="cb3-46"><a href="#cb3-46"></a>  doParallel<span class="op">::</span><span class="kw">registerDoParallel</span>()</span>
+<span id="cb3-47"><a href="#cb3-47"></a></span>
+<span id="cb3-48"><a href="#cb3-48"></a>  <span class="co"># test different hyperparameters via cross validation on training data</span></span>
+<span id="cb3-49"><a href="#cb3-49"></a>  <span class="kw">set.seed</span>(<span class="dv">234</span>)</span>
+<span id="cb3-50"><a href="#cb3-50"></a>  xgb_tuning &lt;-<span class="st"> </span>tune<span class="op">::</span><span class="kw">tune_grid</span>(</span>
+<span id="cb3-51"><a href="#cb3-51"></a>    xgb_wf,</span>
+<span id="cb3-52"><a href="#cb3-52"></a>    <span class="dt">resamples =</span> cv_folds,</span>
+<span id="cb3-53"><a href="#cb3-53"></a>    <span class="dt">grid =</span> xgb_grid,</span>
+<span id="cb3-54"><a href="#cb3-54"></a>    <span class="dt">control =</span> tune<span class="op">::</span><span class="kw">control_grid</span>(<span class="dt">save_pred =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb3-55"><a href="#cb3-55"></a>  )</span>
+<span id="cb3-56"><a href="#cb3-56"></a></span>
+<span id="cb3-57"><a href="#cb3-57"></a>  <span class="co"># get assessment metrics</span></span>
+<span id="cb3-58"><a href="#cb3-58"></a>  metrics &lt;-<span class="st"> </span><span class="kw">collect_metrics</span>(xgb_tuning)</span>
+<span id="cb3-59"><a href="#cb3-59"></a>  </span>
+<span id="cb3-60"><a href="#cb3-60"></a>  dwc.wells<span class="op">::</span><span class="kw">save_data</span>(metrics, </span>
+<span id="cb3-61"><a href="#cb3-61"></a>                       <span class="dt">path =</span> <span class="kw">getwd</span>(), </span>
+<span id="cb3-62"><a href="#cb3-62"></a>                       <span class="dt">filename =</span> <span class="st">"metrics_tuning_xgb_random_resampling"</span>)</span>
+<span id="cb3-63"><a href="#cb3-63"></a></span>
+<span id="cb3-64"><a href="#cb3-64"></a>  <span class="co"># visualise results</span></span>
+<span id="cb3-65"><a href="#cb3-65"></a>  metrics <span class="op">%&gt;%</span></span>
+<span id="cb3-66"><a href="#cb3-66"></a><span class="st">    </span><span class="co">#filter(learn_rate &gt; 0.01) %&gt;%</span></span>
+<span id="cb3-67"><a href="#cb3-67"></a><span class="st">    </span>dplyr<span class="op">::</span><span class="kw">filter</span>(.metric <span class="op">==</span><span class="st"> "rmse"</span>) <span class="op">%&gt;%</span></span>
+<span id="cb3-68"><a href="#cb3-68"></a><span class="st">    </span>dplyr<span class="op">::</span><span class="kw">select</span>(mean, min_n, mtry, tree_depth, learn_rate, loss_reduction, sample_size) <span class="op">%&gt;%</span></span>
+<span id="cb3-69"><a href="#cb3-69"></a><span class="st">    </span>tidyr<span class="op">::</span><span class="kw">pivot_longer</span>(<span class="kw">c</span>(min_n, mtry, tree_depth, learn_rate, loss_reduction, sample_size),</span>
+<span id="cb3-70"><a href="#cb3-70"></a>                        <span class="dt">values_to =</span> <span class="st">"value"</span>,</span>
+<span id="cb3-71"><a href="#cb3-71"></a>                        <span class="dt">names_to =</span> <span class="st">"parameter"</span>) <span class="op">%&gt;%</span></span>
+<span id="cb3-72"><a href="#cb3-72"></a><span class="st">    </span>ggplot2<span class="op">::</span><span class="kw">ggplot</span>(ggplot2<span class="op">::</span><span class="kw">aes</span>(value, mean, <span class="dt">color =</span> parameter)) <span class="op">+</span></span>
+<span id="cb3-73"><a href="#cb3-73"></a><span class="st">    </span>ggplot2<span class="op">::</span><span class="kw">geom_point</span>(<span class="dt">show.legend =</span> <span class="ot">FALSE</span>, <span class="dt">size =</span> <span class="fl">0.5</span>) <span class="op">+</span></span>
+<span id="cb3-74"><a href="#cb3-74"></a><span class="st">    </span>ggplot2<span class="op">::</span><span class="kw">facet_wrap</span>(<span class="op">~</span>parameter, <span class="dt">scales =</span> <span class="st">"free"</span>) <span class="op">+</span></span>
+<span id="cb3-75"><a href="#cb3-75"></a><span class="st">    </span>ggplot2<span class="op">::</span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="ot">NULL</span>, <span class="dt">y =</span> <span class="st">"RMSE [%]"</span>) <span class="op">+</span></span>
+<span id="cb3-76"><a href="#cb3-76"></a><span class="st">    </span>sema.berlin.utils<span class="op">::</span><span class="kw">my_theme</span>()</span>
+<span id="cb3-77"><a href="#cb3-77"></a></span>
+<span id="cb3-78"><a href="#cb3-78"></a>ggplot2<span class="op">::</span><span class="kw">ggsave</span>(<span class="st">"xgb_regression_hyperparameter_tuning_plot_random_resampling_1000_v2.png"</span>, </span>
+<span id="cb3-79"><a href="#cb3-79"></a>                <span class="dt">width =</span> <span class="dv">8</span>, </span>
+<span id="cb3-80"><a href="#cb3-80"></a>                <span class="dt">height =</span> <span class="dv">4</span>, </span>
+<span id="cb3-81"><a href="#cb3-81"></a>                <span class="dt">dpi =</span> <span class="dv">600</span>)</span>
+<span id="cb3-82"><a href="#cb3-82"></a></span>
+<span id="cb3-83"><a href="#cb3-83"></a>  <span class="co"># after example from https://juliasilge.com/blog/xgboost-tune-volleyball/</span></span>
+<span id="cb3-84"><a href="#cb3-84"></a></span>
+<span id="cb3-85"><a href="#cb3-85"></a><span class="er">}</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="best-fit-model">Best-Fit Model<a class="anchor" aria-label="anchor" href="#best-fit-model"></a>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Specify model ----------------------------------------------------------------</span>
-
-<span class="va">xgb_model</span> <span class="op">&lt;-</span> <span class="fu">boost_tree</span><span class="op">(</span>mtry <span class="op">=</span> <span class="fl">6</span>,
-                        min_n <span class="op">=</span> <span class="fl">10</span>,
-                        trees <span class="op">=</span> <span class="fl">500</span>,
-                        tree_depth <span class="op">=</span> <span class="fl">7</span>,
-                        loss_reduction <span class="op">=</span> <span class="fl">10</span>,
-                        learn_rate <span class="op">=</span> <span class="fl">0.1</span>,
-                        sample_size <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"xgboost"</span>, nthreads <span class="op">=</span> <span class="fu">parallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/parallel/detectCores.html" class="external-link">detectCores</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span>
+<span class="va">xgb_model</span> <span class="op">&lt;-</span> <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/boost_tree.html" class="external-link">boost_tree</a></span><span class="op">(</span>mtry <span class="op">=</span> <span class="fl">6</span>,
+                                 min_n <span class="op">=</span> <span class="fl">10</span>,
+                                 trees <span class="op">=</span> <span class="fl">500</span>,
+                                 tree_depth <span class="op">=</span> <span class="fl">7</span>,
+                                 loss_reduction <span class="op">=</span> <span class="fl">10</span>,
+                                 learn_rate <span class="op">=</span> <span class="fl">0.1</span>,
+                                 sample_size <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
+  <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"xgboost"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
+  <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_args.html" class="external-link">set_mode</a></span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span>
 
 
 <span class="co"># Model training and assessment (regression) -----------------------------------</span>
 
 <span class="co"># Train model</span>
 <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">26</span><span class="op">)</span>
-<span class="va">xgb_fit</span> <span class="op">&lt;-</span> <span class="va">xgb_model</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">fit</span><span class="op">(</span><span class="va">Qs_rel</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">df_training</span><span class="op">)</span>
-<span class="co">#&gt; [16:29:20] WARNING: amalgamation/../src/learner.cc:576: </span>
-<span class="co">#&gt; Parameters: { "nthreads" } might not be used.</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt;   This could be a false alarm, with some parameters getting used by language bindings but</span>
-<span class="co">#&gt;   then being mistakenly passed down to XGBoost core, or some parameter actually being used</span>
-<span class="co">#&gt;   but getting flagged wrongly here. Please open an issue if you find any such cases.</span>
+<span class="va">xgb_fit</span> <span class="op">&lt;-</span> <span class="va">xgb_model</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">Qs_rel</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">df_training</span><span class="op">)</span>
 <span class="co">#usethis::use_data(xgb_fit, compress = "xz", overwrite = TRUE)</span>
 
 <span class="co"># Make predictions</span>
 <span class="va">predictions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">xgb_fit</span>, <span class="va">df_test</span><span class="op">)</span>
 
 <span class="co"># Evaluate model performance</span>
-<span class="va">df_pred</span> <span class="op">&lt;-</span> <span class="va">df_test</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">select</span><span class="op">(</span><span class="va">Qs_rel</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">bind_cols</span><span class="op">(</span><span class="va">predictions</span><span class="op">)</span>
-<span class="fu">rmse</span><span class="op">(</span><span class="va">df_pred</span>, truth <span class="op">=</span> <span class="va">Qs_rel</span>, estimate <span class="op">=</span> <span class="va">.pred</span><span class="op">)</span>
+<span class="va">df_pred</span> <span class="op">&lt;-</span> <span class="va">df_test</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> 
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Qs_rel</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> 
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind.html" class="external-link">bind_cols</a></span><span class="op">(</span><span class="va">predictions</span><span class="op">)</span>
+
+<span class="fu">yardstick</span><span class="fu">::</span><span class="fu"><a href="https://yardstick.tidymodels.org/reference/rmse.html" class="external-link">rmse</a></span><span class="op">(</span><span class="va">df_pred</span>, truth <span class="op">=</span> <span class="va">Qs_rel</span>, estimate <span class="op">=</span> <span class="va">.pred</span><span class="op">)</span>
 <span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 3</span></span>
 <span class="co">#&gt;   .metric .estimator .estimate</span>
 <span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="co">#&gt; <span style="color: #BCBCBC;">1</span> rmse    standard        14.4</span>
-<span class="fu">rsq</span><span class="op">(</span><span class="va">df_pred</span>, truth <span class="op">=</span> <span class="va">Qs_rel</span>, estimate <span class="op">=</span> <span class="va">.pred</span><span class="op">)</span>
+<span class="fu">yardstick</span><span class="fu">::</span><span class="fu"><a href="https://yardstick.tidymodels.org/reference/rsq.html" class="external-link">rsq</a></span><span class="op">(</span><span class="va">df_pred</span>, truth <span class="op">=</span> <span class="va">Qs_rel</span>, estimate <span class="op">=</span> <span class="va">.pred</span><span class="op">)</span>
 <span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 3</span></span>
 <span class="co">#&gt;   .metric .estimator .estimate</span>
 <span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="co">#&gt; <span style="color: #BCBCBC;">1</span> rsq     standard       0.795</span>
 
 <span class="co"># scatter plot</span>
-<span class="fu"><a href="../reference/scatterplot.html">scatterplot</a></span><span class="op">(</span><span class="va">df_pred</span>, lines_80perc <span class="op">=</span> <span class="cn">FALSE</span>, alpha <span class="op">=</span> <span class="fl">1</span>, pointsize <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span>
+<span class="fu">dwc.wells</span><span class="fu">::</span><span class="fu"><a href="../reference/scatterplot.html">scatterplot</a></span><span class="op">(</span><span class="va">df_pred</span>, 
+                       lines_80perc <span class="op">=</span> <span class="cn">FALSE</span>, 
+                       alpha <span class="op">=</span> <span class="fl">1</span>, 
+                       pointsize <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span>
 <span class="co">#&gt; Warning: Removed 218 rows containing missing values (geom_point).</span></code></pre></div>
 <p><img src="prediction_xgboost_files/figure-html/bestmodel-1.png" width="700"></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">ggsave</span><span class="op">(</span><span class="st">"scatterplot_xgb_numeric.png"</span>, dpi <span class="op">=</span> <span class="fl">600</span>, width <span class="op">=</span> <span class="fl">3.5</span>, height <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>
+<code class="sourceCode R"><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave</a></span><span class="op">(</span><span class="st">"scatterplot_xgb_numeric.png"</span>,
+                dpi <span class="op">=</span> <span class="fl">600</span>,
+                width <span class="op">=</span> <span class="fl">3.5</span>,
+                height <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>
 <span class="co">#&gt; Warning: Removed 218 rows containing missing values (geom_point).</span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="classification-performance">Classification Performance<a class="anchor" aria-label="anchor" href="#classification-performance"></a>
-</h3>
+</div>
+<div class="section level2">
+<h2 id="classification">Classification<a class="anchor" aria-label="anchor" href="#classification"></a>
+</h2>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># classification performance ---------------------------------------------------</span>
 
 <span class="co"># classify Qs data</span>
 <span class="va">df_pred</span> <span class="op">&lt;-</span> <span class="va">df_pred</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-  <span class="fu">mutate</span><span class="op">(</span>Qs_rel_class <span class="op">=</span> <span class="fu"><a href="../reference/classify_Qs.html">classify_Qs</a></span><span class="op">(</span><span class="va">Qs_rel</span><span class="op">)</span>,
-         .pred_class <span class="op">=</span> <span class="fu"><a href="../reference/classify_Qs.html">classify_Qs</a></span><span class="op">(</span><span class="va">.pred</span><span class="op">)</span><span class="op">)</span>
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Qs_rel_class <span class="op">=</span> <span class="fu">dwc.wells</span><span class="fu">::</span><span class="fu"><a href="../reference/classify_Qs.html">classify_Qs</a></span><span class="op">(</span><span class="va">Qs_rel</span><span class="op">)</span>,
+                .pred_class <span class="op">=</span> <span class="fu">dwc.wells</span><span class="fu">::</span><span class="fu"><a href="../reference/classify_Qs.html">classify_Qs</a></span><span class="op">(</span><span class="va">.pred</span><span class="op">)</span><span class="op">)</span>
 
 <span class="co"># confusion matrix</span>
-<span class="va">matrix</span> <span class="op">&lt;-</span> <span class="fu">conf_mat</span><span class="op">(</span><span class="va">df_pred</span>, truth <span class="op">=</span> <span class="va">Qs_rel_class</span>, estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span>
+<span class="va">matrix</span> <span class="op">&lt;-</span> <span class="fu">yardstick</span><span class="fu">::</span><span class="fu"><a href="https://yardstick.tidymodels.org/reference/conf_mat.html" class="external-link">conf_mat</a></span><span class="op">(</span><span class="va">df_pred</span>, 
+                              truth <span class="op">=</span> <span class="va">Qs_rel_class</span>, 
+                              estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span>
+<span class="va">matrix</span> 
+<span class="co">#&gt;           Truth</span>
+<span class="co">#&gt; Prediction low high</span>
+<span class="co">#&gt;       low  723   94</span>
+<span class="co">#&gt;       high  47  400</span>
 
 <span class="co"># performance metrics</span>
-<span class="va">metrics</span> <span class="op">&lt;-</span> <span class="va">matrix</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="op">)</span>
+<span class="va">metrics</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">matrix</span><span class="op">)</span>
+<span class="va">metrics</span>
+<span class="co">#&gt; <span style="color: #949494;"># A tibble: 13 × 3</span></span>
+<span class="co">#&gt;    .metric              .estimator .estimate</span>
+<span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> accuracy             binary         0.888</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> kap                  binary         0.762</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> sens                 binary         0.939</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> spec                 binary         0.810</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> ppv                  binary         0.885</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> npv                  binary         0.895</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> mcc                  binary         0.764</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> j_index              binary         0.749</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> bal_accuracy         binary         0.874</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">10</span> detection_prevalence binary         0.646</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">11</span> precision            binary         0.885</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">12</span> recall               binary         0.939</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">13</span> f_meas               binary         0.911</span>
 
-<span class="fu"><a href="../reference/save_data.html">save_data</a></span><span class="op">(</span><span class="va">matrix</span>, <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"xgb_numeric_to_class_matrix_split80"</span>, formats <span class="op">=</span> <span class="st">"RData"</span><span class="op">)</span>
-<span class="fu"><a href="../reference/save_data.html">save_data</a></span><span class="op">(</span><span class="va">metrics</span>, <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"xgb_numeric_to_class_metrics_split80"</span><span class="op">)</span></code></pre></div>
-</div>
+<span class="fu">dwc.wells</span><span class="fu">::</span><span class="fu"><a href="../reference/save_data.html">save_data</a></span><span class="op">(</span><span class="va">matrix</span>, 
+                     path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>, 
+                     filename <span class="op">=</span> <span class="st">"xgb_numeric_to_class_matrix_split80"</span>,
+                     formats <span class="op">=</span> <span class="st">"RData"</span><span class="op">)</span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
