@@ -114,7 +114,12 @@ if (TRUE) {
   # remove well gallery (local variable which makes models not applicable
   # to new sites or well galleries)
   model_data_reduced <- model_data_reduced %>%
-    dplyr::select(-well_gallery)
+    dplyr::select(-well_gallery) %>%
+    ### remove non ASCII character
+    dplyr::mutate(drilling_method = ifelse(grepl(pattern = "^Sp.*bohrung$",
+                                                x = .data$drilling_method),
+                                           "Spuehlbohrung",
+                                           .data$drilling_method))
 
 }
 
