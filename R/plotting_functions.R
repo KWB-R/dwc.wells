@@ -232,9 +232,8 @@ Qs_heatmap_plot <- function(df, colours, dummy_labels, date_limits, title,
 #' @param df_pred data frame obtained with tidymodels::collect_predictions() with
 #' columns Qs_rel and .pred
 #' @param lines_80perc logical value; shout 80%-lines be drawn?; default = FALSE
-#'  @param alpha alpha value for point of colours, default: 1
-#'  @param pointsize size value for points, default: 1
-#'
+#' @param alpha alpha value for point of colours, default: 1
+#' @param pointsize size value for points, default: 1
 #' @export
 #' @import ggplot2
 #' @importFrom yardstick rmse rsq
