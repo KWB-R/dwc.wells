@@ -3,7 +3,7 @@
 prepare_drilling_tech_data <- function(path, renamings) {
 
   # read drilling tech data from csv
-  df_drilling_tech <- read_csv(path) %>%
+  df_drilling_tech <- readr::read_csv(path) %>%
     select_rename_cols(renamings$main,"old_name", "new_name_en")
 
   # remove NAs
@@ -17,7 +17,7 @@ df_drilling_tech$drilling_method
   # regroup and tidy surface waters
   df_drilling_tech <- df_drilling_tech %>%
     dplyr::mutate(drilling_method =
-                    rename_values(drilling_method, renamings$drilling_method) %>%
+                    rename_values(.data$drilling_method, renamings$drilling_method) %>%
                     tidy_factor)
 
 

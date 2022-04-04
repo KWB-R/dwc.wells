@@ -17,15 +17,15 @@ prepare_quality_data <- function(path, renamings) {
 
   # Select and rename quality parameter given in renamings file 'quality.csv'
   df_quality <- df_quality %>%
-    dplyr::filter(quality.parameter %in% renamings$quality$old_name) %>%
-    dplyr::mutate(quality.parameter = rename_values(quality.parameter,
+    dplyr::filter(.data$quality.parameter %in% renamings$quality$old_name) %>%
+    dplyr::mutate(quality.parameter = rename_values(.data$quality.parameter,
                                                     renamings$quality,
                                                     old_name_col = "old_name",
                                                     new_name_col = "new_name_en"))
 
   # adapt date format
   df_quality <- df_quality %>%
-    dplyr::mutate(quality.date = as.Date(quality.date, format = "%Y-%m-%d"))
+    dplyr::mutate(quality.date = as.Date(.data$quality.date, format = "%Y-%m-%d"))
 
   # transform concentration units from "mµg/l" to "mg/l"
   indices <- df_quality$quality.unit == "\u00B5g/l"
@@ -34,8 +34,8 @@ prepare_quality_data <- function(path, renamings) {
 
   # delete measurements in unit "mg/kg"
   df_quality <- df_quality %>%
-    dplyr::filter(quality.unit != "mg/kg") %>%
-    dplyr::filter(! (quality.parameter == "DR" & quality.unit == "%"))
+    dplyr::filter(.data$quality.unit != "mg/kg") %>%
+    dplyr::filter(! (.data$quality.parameter == "DR" & .data$quality.unit == "%"))
 
   # overview quality data: parameters and units
   cat("Overview of quality data (data count per parameter and unit):\n\n")
@@ -44,15 +44,15 @@ prepare_quality_data <- function(path, renamings) {
 
   # aggregate / clean data
   df_quality_agg <- df_quality %>%
-    dplyr::mutate(quality.date = as.Date(quality.date, format = "%Y-%m-%d")) %>%
-    dplyr::group_by(well_id, quality.parameter) %>%
-    dplyr::summarise(quality.median = median(quality.value, na.rm = TRUE),
-                     quality.std_dev = stats::sd(quality.value, na.rm = TRUE),
+    dplyr::mutate(quality.date = as.Date(.data$quality.date, format = "%Y-%m-%d")) %>%
+    dplyr::group_by(.data$well_id, .data$quality.parameter) %>%
+    dplyr::summarise(quality.median = median(.data$quality.value, na.rm = TRUE),
+                     quality.std_dev = stats::sd(.data$quality.value, na.rm = TRUE),
                      quality.number = dplyr::n()) %>%
-    dplyr::filter(quality.parameter != "LOI") %>%  # discard Gluehverlust data (only 11 wells with observations)
-    dplyr::select(well_id, quality.parameter, quality.median) %>%
-    tidyr::pivot_wider(names_from = quality.parameter,
-                       values_from = quality.median,
+    dplyr::filter(.data$quality.parameter != "LOI") %>%  # discard Gluehverlust data (only 11 wells with observations)
+    dplyr::select(.data$well_id, .data$quality.parameter, .data$quality.median) %>%
+    tidyr::pivot_wider(names_from = .data$quality.parameter,
+                       values_from = .data$quality.median,
                        id_cols = "well_id") %>%
     data.frame()
 
@@ -70,8 +70,8 @@ check_n_parameters_and_units <- function(df_quality) {
 
   # check if only one unit per parameter is used
   if (FALSE) {
-    df_quality %>% dplyr::group_by(quality.parameter) %>%
-      dplyr::summarise(length(unique(quality.unit)))
+    df_quality %>% dplyr::group_by(.data$quality.parameter) %>%
+      dplyr::summarise(length(unique(.data$quality.unit)))
   }
 
 a <- list()
@@ -79,10 +79,10 @@ pars <- unique(df_quality$quality.parameter)
 
 for (par in pars) {
   a[[par]] <- df_quality %>%
-    dplyr::filter(quality.parameter == par) %>%
-    dplyr::pull(quality.unit) %>%
+    dplyr::filter(.data$quality.parameter == par) %>%
+    dplyr::pull(.data$quality.unit) %>%
     frequency_table() %>%
-    dplyr::rename(unit = value)
+    dplyr::rename(unit = .data$value)
 }
 
 data.frame(par = pars, dplyr::bind_rows(a))

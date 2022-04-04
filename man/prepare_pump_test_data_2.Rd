@@ -4,12 +4,18 @@
 \alias{prepare_pump_test_data_2}
 \title{reformats untidy pump test data from wide into long format}
 \usage{
-prepare_pump_test_data_2(df_pump_tests_untidy, df_wells)
+prepare_pump_test_data_2(
+  df_pump_tests_untidy,
+  df_wells,
+  pump_test_vars = get_pump_test_vars()
+)
 }
 \arguments{
 \item{df_pump_tests_untidy}{pump test data in wide format}
 
 \item{df_wells}{prepared data frame with well characteristics}
+
+\item{pump_test_vars}{default: \code{\link{get_pump_test_vars}}}
 }
 \description{
 reformats untidy pump test data from wide into long format

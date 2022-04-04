@@ -15,14 +15,14 @@ Encoding(df_drilling$surface_water) <- "UTF-8"
 # regroup and tidy surface waters
 df_drilling <- df_drilling %>%
   dplyr::mutate(surface_water =
-                  rename_values(surface_water, renamings$surface_water) %>%
+                  rename_values(.data$surface_water, renamings$surface_water) %>%
                   tidy_factor)
 
 
 # tidy distance to surface water
 df_drilling <- df_drilling %>%
   dplyr::mutate(surface_water.distance =
-                  tidy_factor(surface_water.distance) %>%
+                  tidy_factor(.data$surface_water.distance) %>%
                   factor(levels = c("0-25", "25-50", "50-100", "100-200",
                                     "200-500", "500-1000", ">1000", "Unbekannt"))
   )

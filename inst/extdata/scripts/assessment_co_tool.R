@@ -1,4 +1,4 @@
-path <- file.path("//medusa/projekte$/SUW_Department/Projects",
+path <- file.path("//<servername>/projekte$/SUW_Department/Projects",
                     "DWC/Data-Work-packages/WP2_Performance/T232_WellPlanning")
 #filename <- "Modellguete_CO_HSc.csv"
 filename <- "20211119_Modellguete_CO-Daten_HSc.csv"

@@ -35,4 +35,5 @@
 #'   \item{quality.SO4}{water quality: SO4 (mg/l)}
 #'   \item{quality.TSS}{water quality: Total Suspended Solids (mg/l)}
 #' }
+#' @import parsnip tibble rsample
 "model_data_reduced"

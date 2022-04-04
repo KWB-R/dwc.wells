@@ -38,8 +38,10 @@ correlation_plot <- function(df, x, y = "Qs_rel", title = gsub("_", " ", x)) {
 # plot_Qs_over_time -------------------------------------------------------------
 plot_Qs_over_time <- function(df, xmax = 40, legend_position = "top") {
 
-  p <- ggplot2::ggplot(df, ggplot2::aes(x = well_age_years, y = Qs_rel,
-                                   col = n_rehab, shape = key2)) +
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$well_age_years,
+                                        y = .data$Qs_rel,
+                                        col = .data$n_rehab,
+                                        shape = .data$key2)) +
     ggplot2::geom_point() +
     ggplot2::geom_line(ggplot2::aes(group = "all")) +
     ggplot2::scale_color_manual(values = rev(RColorBrewer::brewer.pal(length(levels(df$n_rehab)), "RdYlGn"))) +

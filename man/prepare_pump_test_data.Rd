@@ -4,7 +4,7 @@
 \alias{prepare_pump_test_data}
 \title{prepare pump test data with one row per Qs-measurement + rehab history}
 \usage{
-prepare_pump_test_data(path, renamings, df_wells)
+prepare_pump_test_data(path, renamings, df_wells, pump_test_vars)
 }
 \arguments{
 \item{path}{path to pump test data}
@@ -12,6 +12,8 @@ prepare_pump_test_data(path, renamings, df_wells)
 \item{renamings}{list with renamings}
 
 \item{df_wells}{prepared data frame with well characteristics}
+
+\item{pump_test_vars}{default: \code{\link{get_pump_test_vars}}}
 }
 \description{
 prepare pump test data with one row per Qs-measurement + rehab history
