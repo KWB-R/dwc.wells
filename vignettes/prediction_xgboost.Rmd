@@ -15,14 +15,14 @@ knitr::opts_chunk$set(
 )
 ```
 
-
 ## Input Dataset
 
 ```{r input_dataset}
- library(dwc.wells) 
- df <- dwc.wells::model_data_reduced
- str(df)
- DT::datatable(head)
+library(dwc.wells)
+library(tidymodels)
+df <- dwc.wells::model_data_reduced
+str(df)
+
 ```
 
 ## Resampling
@@ -42,20 +42,6 @@ if (resampling == "random") {
   df_training <- data_split %>% rsample::training()
   df_test <- data_split %>% rsample::testing()
 
-  # for classification
-  df_training_cat <- df_training %>%
-    dplyr::mutate(Qs_rel = dwc.wells::classify_Qs(Qs_rel))
-
-  df_test_cat <- df_test %>%
-    dplyr::mutate(Qs_rel = dwc.wells::classify_Qs(Qs_rel))
-
-  data_split_cat <- rsample::initial_split(
-    df %>%
-      dplyr::mutate(Qs_rel = dwc.wells::classify_Qs(Qs_rel)) %>%
-      dplyr::select(-well_id),
-    prop = 0.8,
-    strata = Qs_rel
-  )
 }
 
 
@@ -72,13 +58,11 @@ if (resampling == "by_well") {
   df_test <- df %>%
     dplyr::filter(well_id %in% test_ids) %>%
     dplyr::select(-well_id)
-
-  df_training_cat <- df_training %>%
-    dplyr::mutate(Qs_rel = dwc.wells::classify_Qs(Qs_rel))
-  df_test_cat <- df_test %>%
-    dplyr::mutate(Qs_rel = dwc.wells::classify_Qs(Qs_rel))
-
+  
 }
+
+tibble::as_tibble(df_training)
+tibble::as_tibble(df_test)
 
 ```
 
@@ -108,7 +92,7 @@ if (resampling == "by_well") {
     workflows::add_model(xgb_model)
 
   # hyperparameter sampling v1
-  # xgb_grid <- dails::grid_random(dials::tree_depth(),
+  # xgb_grid <- dials::grid_random(dials::tree_depth(),
   #                                dials::min_n(),
   #                                dials::loss_reduction(),
   #                                sample_size = dials::sample_prop(),
@@ -118,13 +102,13 @@ if (resampling == "by_well") {
   #                                size = 1000)
 
     # hyperparameter sampling v2
-  xgb_grid <- dails::grid_latin_hypercube(
-    dails::tree_depth(),
-    dails::min_n(),
-    dails::loss_reduction(),
-    sample_size = dails::sample_prop(),
-    dails::finalize(dails::mtry(), df_training),
-    dails::learn_rate(),
+  xgb_grid <- dials::grid_latin_hypercube(
+    dials::tree_depth(),
+    dials::min_n(),
+    dials::loss_reduction(),
+    sample_size = dials::sample_prop(),
+    dials::finalize(dials::mtry(), df_training),
+    dials::learn_rate(),
     size = 500
   )
 
@@ -144,7 +128,7 @@ if (resampling == "by_well") {
   )
 
   # get assessment metrics
-  metrics <- collect_metrics(xgb_tuning)
+  metrics <- tune::collect_metrics(xgb_tuning)
   
   dwc.wells::save_data(metrics, 
                        path = getwd(), 
@@ -242,6 +226,7 @@ metrics
 
 dwc.wells::save_data(matrix, 
                      path = getwd(), 
-                     filename = "xgb_numeric_to_class_matrix_split80")
+                     filename = "xgb_numeric_to_class_matrix_split80",
+                     formats = "RData")
 
 ```
