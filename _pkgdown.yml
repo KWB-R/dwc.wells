@@ -30,7 +30,7 @@ reference:
     desc: >
       Datasets for statistical analysis and predicting well capacity
     contents:
-      - ends_with("_data")
+      - model_data_reduced
 
 
   - title: Data preparation
@@ -46,6 +46,7 @@ reference:
       - extdata_file
       - replace_na_with_median
       - fill_up_na_with_median_from_lookup
+      - get_pump_test_vars
       - get_W_static_data
       - interpolate_and_fill
       - interpolate_Qs
