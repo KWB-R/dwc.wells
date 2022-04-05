@@ -43,6 +43,7 @@ reference:
       - rename_values
       - select_rename_cols
       - classify_Qs
+      - combine_pump_test_and_Q_monitoring_data
       - extdata_file
       - replace_na_with_median
       - fill_up_na_with_median_from_lookup
@@ -52,9 +53,7 @@ reference:
       - interpolate_Qs
       - load_renamings_csv
       - load_renamings_excel
-      - prepare_pump_test_data
-      - prepare_pump_test_data_1
-      - prepare_pump_test_data_2
+      - starts_with("prepare_")
       - summarise_marginal_factor_levels
       - tidy_factor
 
