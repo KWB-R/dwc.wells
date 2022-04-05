@@ -32,6 +32,7 @@ install.packages('dwc.wells')
 
 ```{r input_dataset}
 library(dwc.wells)
+library(tidymodels)
 df <- dwc.wells::model_data_reduced
 str(df)
 
