@@ -37,6 +37,9 @@
     <loc>/reference/classify_Qs.html</loc>
   </url>
   <url>
+    <loc>/reference/combine_pump_test_and_Q_monitoring_data.html</loc>
+  </url>
+  <url>
     <loc>/reference/correlation_plot.html</loc>
   </url>
   <url>
@@ -50,6 +53,9 @@
   </url>
   <url>
     <loc>/reference/get_W_static_data.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_pump_test_vars.html</loc>
   </url>
   <url>
     <loc>/reference/index.html</loc>
@@ -67,7 +73,7 @@
     <loc>/reference/load_renamings_excel.html</loc>
   </url>
   <url>
-    <loc>/reference/model_data.html</loc>
+    <loc>/reference/model_data_reduced.html</loc>
   </url>
   <url>
     <loc>/reference/paste_percent.html</loc>
