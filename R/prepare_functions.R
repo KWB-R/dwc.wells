@@ -8,6 +8,8 @@
 #' @param group_by_col grouping variable within which interpolation is done
 #' @param origin_col already existing or to be created column with type of value
 #'
+#'@importFrom stats approx
+#'
 #' @export
 #'
 interpolate_and_fill <- function(df, x_col, y_col, group_by_col,
@@ -25,7 +27,7 @@ interpolate_and_fill <- function(df, x_col, y_col, group_by_col,
     dplyr::group_by(.data[[group_by_col]]) %>%
     dplyr::filter(sum(!is.na(.data[[y_col]])) == 1) %>%
     dplyr::mutate(y_new = .data[[y_col]]) %>%
-    tidyr::fill(y_new, .direction = "updown") %>%
+    tidyr::fill(.data$y_new, .direction = "updown") %>%
     dplyr::mutate(origin = dplyr::if_else(is.na(.data[[y_col]]), "filled up", origin_col)) %>%
     as.data.frame()
 
@@ -37,11 +39,13 @@ interpolate_and_fill <- function(df, x_col, y_col, group_by_col,
     dplyr::mutate(y_new = approx(
       .data[[x_col]], .data[[y_col]], .data[[x_col]], rule = 1)$y) %>%
     dplyr::mutate(origin = dplyr::case_when(
-      is.na(.data[[y_col]]) & !is.na(y_new) ~ "interpolated",
-      is.na(.data[[y_col]]) & is.na(y_new) ~ "filled up"
+      is.na(.data[[y_col]]) & !is.na(.data$y_new) ~ "interpolated",
+      is.na(.data[[y_col]]) & is.na(.data$y_new) ~ "filled up"
     )) %>%
-    dplyr::mutate(origin = ifelse(!is.na(.data[[y_col]]), origin_col, origin)) %>%
-    tidyr::fill(y_new, .direction = "updown") %>%
+    dplyr::mutate(origin = ifelse(!is.na(.data[[y_col]]),
+                                  origin_col,
+                                  .data$origin)) %>%
+    tidyr::fill(.data$y_new, .direction = "updown") %>%
     as.data.frame()
 
   # combine the two datasets again and calculate Qs
@@ -55,7 +59,7 @@ interpolate_and_fill <- function(df, x_col, y_col, group_by_col,
 
 
   # delete temporary columns
-  df <- df %>% dplyr::select(-c(y_new, origin, origin_col))
+  df <- df %>% dplyr::select(-c(.data$y_new, .data$origin, origin_col))
 
   df
 
@@ -64,20 +68,23 @@ interpolate_and_fill <- function(df, x_col, y_col, group_by_col,
 
 # interpolate_Qs ---------------------------------------------------------------
 
-#' Title
+#' Interpolates Qs time series data to a given time interval
 #'
 #' @param df data frame with date and Qs measurements
 #' @param interval_days interval for interpolation
 #' @export
-#'
+#' @importFrom zoo na.approx
+#' @importFrom dplyr bind_rows full_join summarise
 interpolate_Qs <- function(df, interval_days = 1) {
 
   # get min and max dates per well
-  min_max_dates <- df %>% group_by(well_id) %>%
-    summarise(from = min(date), to = max(date))
+  min_max_dates <- df %>%
+    dplyr::group_by(.data$well_id) %>%
+    dplyr::summarise(from = min(.data$date),
+                     to = max(.data$date))
 
   # create list with one data frame per well with complete date vector
-  dates <- lapply(a$well_id, function(x) {
+  dates <- lapply(min_max_dates$well_id, function(x) {
     data.frame(well_id = x,
                date = seq(min_max_dates$from[min_max_dates$well_id == x],
                           min_max_dates$to[min_max_dates$well_id == x],
@@ -86,14 +93,14 @@ interpolate_Qs <- function(df, interval_days = 1) {
   })
 
   # bind back to data frame
-  dates_df <- bind_rows(dates)
+  dates_df <- dplyr::bind_rows(dates)
 
   # join and interpolate
   df_interpol <- dates_df %>%
-    full_join(df[, c("well_id", "date", "Qs_rel")],
-              by = c("well_id", "date")) %>%
-    mutate(Qs_rel = zoo::na.approx(Qs_rel)) %>%
-    mutate(well_id = as.character(well_id))
+    dplyr::full_join(df[, c("well_id", "date", "Qs_rel")],
+                     by = c("well_id", "date")) %>%
+    dplyr::mutate(Qs_rel = zoo::na.approx(.data$Qs_rel)) %>%
+    dplyr::mutate(well_id = as.character(.data$well_id))
 
   df_interpol
 }
@@ -108,6 +115,9 @@ interpolate_Qs <- function(df, interval_days = 1) {
 #' @param old_name_col name of column with original variable names
 #' @param new_name_col name of column with new variable names
 #' @importFrom rlang .data
+#' @importFrom tidyr drop_na
+#' @importFrom dplyr rename
+#' @importFrom  readxl read_excel
 #' @export
 #'
 load_renamings_excel <- function(infile,
@@ -132,7 +142,7 @@ load_renamings_excel <- function(infile,
 #' @export
 #'
 load_renamings_csv <- function(infile) {
-  read.csv(file = infile, sep = ";", stringsAsFactors = FALSE, na.strings=c(""))
+  utils::read.csv(file = infile, sep = ";", stringsAsFactors = FALSE, na.strings=c(""))
 }
 
 # read_csv ---------------------------------------------------------------------
@@ -154,7 +164,7 @@ read_csv <- function(file, header = TRUE, fileEncoding = "UTF-8",
                      skip = 2, dec = ".", sep = "\t",
                      na.strings = "(null)") {
 
-  read.csv(file = file, header = header, fileEncoding = fileEncoding,
+  utils::read.csv(file = file, header = header, fileEncoding = fileEncoding,
            skip = skip, dec = dec, sep = sep, na.strings = na.strings)
 }
 
@@ -297,7 +307,7 @@ rename_values <- function(x,
 #' @param perc_threshold percentage threshold under which levels will be summarised
 #' @param marginal_name for new summary factor level
 #' @export
-#'
+#' @importFrom forcats fct_lump_prop
 summarise_marginal_factor_levels <- function(x, perc_threshold, marginal_name) {
 
   forcats::fct_lump_prop(x,
@@ -380,22 +390,22 @@ handle_inliner <- function(df) {
   # handle inliner (but keep them)
   df <- df %>%
     # filter inliner with unknown inliner date
-    dplyr::filter(!((screen_material == "Inliner" | inliner == "Yes") &
-                      is.na(inliner.date))) %>%
+    dplyr::filter(!((.data$screen_material == "Inliner" | .data$inliner == "Yes") &
+                      is.na(.data$inliner.date))) %>%
     # # set screen material to 'Unbekannt' for date < inliner.date
     # dplyr::mutate(screen_material = replace(
     #   screen_material, date < inliner.date, "Unbekannt"
     # ) %>% forcats::fct_drop()) %>%
     # set screen material to 'Unbekannt' if liner (inliner column will be used)
     dplyr::mutate(screen_material = replace(
-      screen_material, screen_material == "Inliner", "Unbekannt"
+      .data$screen_material, .data$screen_material == "Inliner", "Unbekannt"
     ) %>% forcats::fct_drop()) %>%
     # set inliner to 'Yes' if date > inliner.date, otherwise to 'No'
-    dplyr::mutate(inliner = dplyr::if_else(
-      date > inliner.date & !is.na(date) & !is.na(inliner.date),
-      "Yes", "No")
+    dplyr::mutate(inliner = factor(dplyr::if_else(
+      .data$date > .data$inliner.date & !is.na(.data$date) & !is.na(.data$inliner.date),
+      "Yes", "No"), levels = c("Yes", "No"))
     ) %>%
-    dplyr::select(-inliner.date) %>%
+    dplyr::select(-.data$inliner.date) %>%
     as.data.frame()
 
   df
@@ -409,14 +419,24 @@ handle_inliner <- function(df) {
 #' @param Data data frame
 #' @param path out path for saving data
 #' @param filename core of file name
+#' @param formats export formats: "csv", "RData", "rds" or several using 'c'
 #'
 #' @export
 #'
-save_data <- function(Data, path, filename) {
-  write.table(Data, file = file.path(path, sprintf("%s.csv", filename)),
-              dec = ".", sep = ";", row.names = FALSE)
-  save(Data, file = file.path(path, sprintf("%s.RData", filename)))
-  saveRDS(Data, file = file.path(path, sprintf("%s.rds", filename)))
+save_data <- function(Data, path, filename, formats = c("csv", "RData", "rds")) {
+
+  if ("csv" %in% formats) {
+    write.table(Data, file = file.path(path, sprintf("%s.csv", filename)),
+                dec = ".", sep = ";", row.names = FALSE)
+  }
+
+  if ("RData" %in% formats) {
+    save(Data, file = file.path(path, sprintf("%s.RData", filename)))
+  }
+
+  if ("rds" %in% formats) {
+    saveRDS(Data, file = file.path(path, sprintf("%s.rds", filename)))
+  }
 }
 
 
@@ -431,7 +451,7 @@ save_data <- function(Data, path, filename) {
 #' @export
 #'
 
-fill_up_na_with_median <- function(df, df_lookup, matching_id = "well_id") {
+fill_up_na_with_median_from_lookup <- function(df, df_lookup, matching_id = "well_id") {
 
   na_colnames <- setdiff(names(which(colSums(is.na(df)) > 0)), "well_id_replaced")
   lookup_indices <- df_lookup[, matching_id] %in% df[, matching_id]
@@ -446,4 +466,16 @@ fill_up_na_with_median <- function(df, df_lookup, matching_id = "well_id") {
   }
 
   df
+}
+
+# replace_na_with_median -------------------------------------------------------
+
+#' Replace NAs with median
+#'
+#' @param x vector, for which NA should be replaced
+#' @export
+#' @importFrom stats median
+replace_na_with_median <- function(x) {
+  x[is.na(x)] <- stats::median(x, na.rm = TRUE)
+  x
 }

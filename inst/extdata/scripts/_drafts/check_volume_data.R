@@ -1,10 +1,32 @@
 # load volume data
-df_volumes <- dwc.wells:::read_ms_access_mri(paths$db, "WV_GMS_TBL_MENGENTABELLE") %>%
+df_volumes <- read_ms_access_mri(paths$db, "WV_GMS_TBL_MENGENTABELLE") %>%
   select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
-  dplyr::select(well_id, date, abstracted_volume) %>%
+  #dplyr::select(well_id, date, abstracted_volume) %>%
   dplyr::mutate(date = as.Date(date))
 
-save_data(df_volumes, paths$data_out, "volume_data")
+library(dplyr)
+df_volumes_agg <- df_volumes %>%
+  mutate(vol_m3_d = abstracted_volume / interval) %>%
+  group_by(well_id) %>%
+  summarise(vol_m3_d_sd = sd(vol_m3_d, na.rm = TRUE),
+            vol_m3_d_median = median(vol_m3_d, na.rm = TRUE)
+            )
+
+
+
+df_model_data <- Data
+df_model_data <- df_model_data %>% left_join(df_volumes_agg) %>%
+  mutate(vol_m3_d_sd = replace_na_with_median_(vol_m3_d_sd),
+         vol_m3_d_median = replace_na_with_median_(vol_m3_d_median))
+
+
+replace_na_with_median_ <- function(x) {
+  x[is.na(x)] <- median(x, na.rm = TRUE)
+  x
+}
+
+save_data(df_volumes, paths$data_prep_out, "volume_data")
+filter(df_volumes, well_id == 11653)
 
 # aggregate volume data
 df_volume_year <- df_volumes %>%
@@ -105,4 +127,4 @@ b <- df_volumes %>% dplyr::group_by(well_id) %>%
 c <- dplyr::left_join(a, b, by = "well_id")
 
 sum(c$date_start_Qs < c$date_start_vol, na.rm = TRUE)
-save_data(c, paths$data_out, "comparison_volume")
+save_data(c, paths$data_prep_out, "comparison_volume")

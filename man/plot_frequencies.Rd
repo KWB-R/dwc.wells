@@ -9,6 +9,7 @@ plot_frequencies(
   variable,
   title = variable,
   offset_perc_labels = 0.1,
+  size_perc_labels = 3,
   vertical_x_axis_labels = TRUE
 )
 }
@@ -20,6 +21,8 @@ plot_frequencies(
 \item{title}{plot title}
 
 \item{offset_perc_labels}{distance of labels from bars}
+
+\item{size_perc_labels}{size of percent labels}
 
 \item{vertical_x_axis_labels}{should x-axis labels be ploted vertically (TRUE / FALSE)}
 }

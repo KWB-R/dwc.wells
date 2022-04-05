@@ -2,7 +2,7 @@
 % Please edit documentation in R/prepare_functions.R
 \name{interpolate_Qs}
 \alias{interpolate_Qs}
-\title{Title}
+\title{Interpolates Qs time series data to a given time interval}
 \usage{
 interpolate_Qs(df, interval_days = 1)
 }
@@ -12,5 +12,5 @@ interpolate_Qs(df, interval_days = 1)
 \item{interval_days}{interval for interpolation}
 }
 \description{
-Title
+Interpolates Qs time series data to a given time interval
 }

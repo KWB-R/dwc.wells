@@ -4,7 +4,7 @@
 \alias{save_data}
 \title{Save data frame in different formats: csv, RData, rds}
 \usage{
-save_data(Data, path, filename)
+save_data(Data, path, filename, formats = c("csv", "RData", "rds"))
 }
 \arguments{
 \item{Data}{data frame}
@@ -12,6 +12,8 @@ save_data(Data, path, filename)
 \item{path}{out path for saving data}
 
 \item{filename}{core of file name}
+
+\item{formats}{export formats: "csv", "RData", "rds" or several using 'c'}
 }
 \description{
 Save data frame in different formats: csv, RData, rds

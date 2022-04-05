@@ -1,0 +1,269 @@
+---
+title: "Random Forest"
+author: "Mathias Riechel, Michael Rustler"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Random Forest}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## Install R Package
+
+```{r install_r_package, eval = FALSE}
+# Enable KWB-R universe
+
+options(repos = c(
+  kwbr = 'https://kwb-r.r-universe.dev',
+  CRAN = 'https://cloud.r-project.org'))
+
+# Install R package "dwc.wells"
+install.packages('dwc.wells')
+```
+
+## Input Dataset
+
+```{r input_dataset}
+library(dwc.wells)
+df <- dwc.wells::model_data_reduced
+str(df)
+```
+
+## Resampling
+
+```{r input_resampling}
+
+resampling <- "random"
+#resampling <- "by_well"
+set.seed(1)
+
+if (resampling == "random") {
+
+  # for regression
+  data_split <- rsample::initial_split(df %>% dplyr::select(-well_id),
+                                       prop = 0.8,
+                                       strata = Qs_rel)
+  df_training <- data_split %>% rsample::training()
+  df_test <- data_split %>% rsample::testing()
+
+}
+
+
+# version 2: splitting per well ids
+
+if (resampling == "by_well") {
+
+  well_ids <- unique(df$well_id)
+  train_ids <- sample(well_ids, 0.8 * length(well_ids))
+  test_ids <- setdiff(well_ids, train_ids)
+  df_training <- df %>%
+    dplyr::filter(well_id %in% train_ids) %>%
+    dplyr::select(-well_id)
+  df_test <- df %>%
+    dplyr::filter(well_id %in% test_ids) %>%
+    dplyr::select(-well_id)
+  
+}
+
+tibble::as_tibble(df_training)
+tibble::as_tibble(df_test)
+
+```
+
+
+## Regression
+
+### Hyperparameter Tuning
+
+```{r regression_hyperparameter_tuning, eval = FALSE}
+
+
+# Specify model ----------------------------------------------------------------
+
+  # specify model
+rf_reg_tune_model <- parsnip::rand_forest(trees = 500, 
+                                          mtry = tune::tune(), 
+                                          min_n = tune::tune()) %>%
+  # Specify the engine
+  parsnip::set_engine('randomForest') %>%
+  # Specify the mode
+  parsnip::set_mode('regression')
+
+# specify recipe
+rec <- recipes::recipe(Qs_rel ~ ., data = df_training)
+
+# setup  workflow
+rf_reg_tune_wflow <- workflows::workflow() %>%
+  workflows::add_recipe(rec) %>%
+  workflows::add_model(rf_reg_tune_model)
+
+# define cross validation procedure
+cv_folds <- rsample::vfold_cv(df_training, v = 5)
+
+# define hyperparameter grid
+#rf_reg_grid <- grid_random(parameters(rf_reg_tune_model), size = 100)
+#rf_reg_grid <- grid_regular(parameters(rf_reg_tune_model), c(5,5))
+rf_reg_grid <- dials::grid_regular(dials::mtry(range = c(3, 15)),
+                                   dials::min_n(range = c(5, 15)),
+                                   levels = 13)
+
+# parallelisation and tuning
+doParallel::registerDoParallel()
+
+set.seed(345)
+rf_reg_tuning <- tune::tune_grid(
+  rf_reg_tune_wflow,
+  resamples = cv_folds,
+  grid = rf_reg_grid
+)
+
+# visualise results
+metrics <- rf_reg_tuning %>% tune::collect_metrics()
+dwc.wells::save_data(metrics, 
+                     path = getwd(), 
+                     filename = sprintf("rf-regression_tuning-grid_resampling-%s_metric",
+                                        resampling))
+
+# visualise results
+metrics %>%
+  dplyr::filter(.metric == "rmse") %>%
+  dplyr::select(mean, min_n, mtry) %>%
+  tidyr::pivot_longer(min_n:mtry,
+                      values_to = "value",
+                      names_to = "parameter") %>%
+  ggplot2::ggplot(ggplot2::aes(value, mean, color = parameter)) +
+  ggplot2::geom_point(show.legend = FALSE) +
+  ggplot2::scale_x_continuous(breaks = seq.int(1, 15, 2)) +
+  ggplot2::facet_wrap(~parameter, scales = "free_x") +
+  ggplot2::labs(x = NULL, y = "RMSE [%]") +
+  sema.berlin.utils::my_theme()
+
+ggplot2::ggsave("rf_reg_regression_hyperparameter_tuning_plot_regular_random_resampling.png",
+                width = 6, 
+                height = 3, 
+                dpi = 600)
+
+# raster heatmap plot
+metrics %>%
+  dplyr::filter(.metric == "rmse") %>%
+  dplyr::select(mean, min_n, mtry) %>%
+  ggplot2::ggplot(aes(x = min_n, y = mtry, fill = mean)) +
+  ggplot2::geom_raster() +
+  ggplot2::scale_x_continuous(breaks = seq.int(1, 15, 2)) +
+  ggplot2::scale_y_continuous(breaks = seq.int(1, 15, 2)) +
+  ggplot2::labs(fill = "RMSE [%]") +
+  sema.berlin.utils::my_theme()
+
+ggplot2::ggsave("rf_reg_regression_hyperparameter_tuning_plot_regular_random_resampling_heatmap.png",
+                width = 5, 
+                height = 3, 
+                dpi = 600)
+
+
+
+# determine best model
+best_rmse <- tune::select_best(rf_reg_tuning, "rmse")
+dwc.wells::save_data(best_rmse, 
+                     path = getwd(), 
+                     filename = "rf_reg_regression_best_model_regular", 
+                     "RData")
+final_rf_reg <- tune::finalize_model(rf_reg_tune_model, best_rmse)
+
+# update workflow
+rf_reg_final_wflow <- workflows::workflow() %>%
+   workflows::add_recipe(rec) %>%
+   workflows::add_model(final_rf_reg)
+
+# train and test model / workflow
+rf_reg_final_fit <- rf_reg_final_wflow %>% tune::last_fit(data_split)
+
+#get metrics
+rf_reg_final_fit %>%  tune::collect_metrics()
+
+# get predictions
+df_pred <- rf_reg_final_fit %>%  tune::collect_predictions()
+
+# Evaluate model performance ---
+ggplot2::scatterplot(df_pred)
+ggplot2::ggsave("random_forest_regression_tuned_regular.png", width = 3.5, height = 3)
+
+
+
+```
+
+### Best-Fit Model
+
+```{r regression_bestfit}
+rf_reg_model <- parsnip::rand_forest(trees = 500,
+                                     mtry = 6, 
+                                     min_n = 10) %>%
+  # Specify the engine
+  parsnip::set_engine('randomForest') %>%
+  # Specify the mode
+  parsnip::set_mode('regression')
+
+# Model training and assessment (regression) -----------------------------------
+
+# Train model
+set.seed(26)
+rf_reg_fit <- rf_reg_model %>% parsnip::fit(Qs_rel ~ ., data = df_training)
+
+# Make predictions
+predictions <- predict(rf_reg_fit, df_test)
+
+# Evaluate model performance
+df_pred <- df_test %>% 
+  dplyr::select(Qs_rel) %>% 
+  dplyr::bind_cols(predictions)
+
+yardstick::rmse(df_pred, truth = Qs_rel, estimate = .pred)
+yardstick::rsq(df_pred, truth = Qs_rel, estimate = .pred)
+
+# scatter plot
+dwc.wells::scatterplot(df_pred, 
+                       lines_80perc = FALSE, 
+                       alpha = 1, 
+                       pointsize = 0.9)
+ggplot2::ggsave("scatterplot_rf-regression_numeric.png",
+                dpi = 600,
+                width = 3.5,
+                height = 3)
+
+
+```
+
+## Classification
+
+```{r classification}
+# classification performance ---------------------------------------------------
+
+# classify Qs data
+df_pred <- df_pred %>%
+  dplyr::mutate(Qs_rel_class = dwc.wells::classify_Qs(Qs_rel),
+                .pred_class = dwc.wells::classify_Qs(.pred))
+
+# confusion matrix
+matrix <- yardstick::conf_mat(df_pred, 
+                              truth = Qs_rel_class, 
+                              estimate = .pred_class)
+matrix 
+
+# performance metrics
+metrics <- summary(matrix)
+metrics
+
+dwc.wells::save_data(matrix, 
+                     path = getwd(), 
+                     filename = "rf_numeric_to_class_matrix_split80",
+                     formats = "RData")
+
+```
+

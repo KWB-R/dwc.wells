@@ -1,17 +1,88 @@
 authors:
   Mathias Riechel:
-    href: https://www.kompetenz-wasser.de/en/ueber-uns/team-2/?search-employee-grid=Mathias%20Riechel
+    href: https://github.com/mriech
+  Michael Rustler:
+    href: https://mrustl.de
   DWC:
-    href: https://www.kompetenz-wasser.de/en/project/dwc/
-    html: <img src='https://www.kompetenz-wasser.de/wp-content/uploads/2019/09/dwc-rvb-grey-516x244.jpg'
-      height='24' />
+    href: https://www.kompetenz-wasser.de/en/forschung/projekte/dwc
+    html: <img src='https://kompetenz-wasser.de/media/pages/forschung/projekte/dwc/6263c55e76-1639132760/dwc-rvb-grey.jpg'
+      alt='Project DWC' width='72' />
   Kompetenzzentrum Wasser Berlin gGmbH (KWB):
     href: https://www.kompetenz-wasser.de
-    html: <img src='https://www.kompetenz-wasser.de/wp-content/uploads/2017/08/cropped-logo-kwb_klein-new.png'
-      height='24' />
+    html: <img src='https://publications.kompetenz-wasser.de/img/KWB-Logo.svg'
+      alt='KWB' width='72' />
+
 template:
-  params:
-    bootswatch: cerulean
+  bootstrap: 5
+  bootswatch: cerulean
+  bslib:
+    bg: "#ffffff"
+    fg: "#000000"
+    primary: "#007aff"
+    border-radius: 0.5rem
+    btn-border-radius: 0.25rem
+
 development:
   mode: auto
+
+reference:
+  - title: Datasets
+    desc: >
+      Datasets for statistical analysis and predicting well capacity
+    contents:
+      - model_data_reduced
+
+
+  - title: Data preparation
+    desc: >
+      Functions for preparing / cleaning data
+    contents:
+      - read_csv
+      - read_ms_access
+      - read_select_rename
+      - rename_values
+      - select_rename_cols
+      - classify_Qs
+      - combine_pump_test_and_Q_monitoring_data
+      - extdata_file
+      - replace_na_with_median
+      - fill_up_na_with_median_from_lookup
+      - get_pump_test_vars
+      - get_W_static_data
+      - interpolate_and_fill
+      - interpolate_Qs
+      - load_renamings_csv
+      - load_renamings_excel
+      - starts_with("prepare_")
+      - summarise_marginal_factor_levels
+      - tidy_factor
+
+  - title: Data analyis
+    desc: >
+      Functions for statistical analysis feature importance ranking
+    contents:
+      - chi2.CramersV.test
+      - frequency_table
+
+
+  - title: Data visualisation
+    desc: >
+      Functions for plotting
+    contents:
+      - matches("plot")
+      - paste_percent
+
+
+  - title: Export data
+    desc: >
+      Functions for exporting data
+    contents:
+      - save_data
+
+
+  - title: Scripts
+    desc: >
+      folder "scripts" contains all scripts for data preparation,
+      data analysis, ml modelling (mainly relying on functions from R package
+      "tidymodels") and plotting
 

@@ -1,0 +1,245 @@
+---
+title: "xgboost"
+author: "Mathias Riechel, Michael Rustler"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{xgboost}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Install R Package
+
+```{r install_r_package, eval = FALSE}
+# Enable KWB-R universe
+
+options(repos = c(
+  kwbr = 'https://kwb-r.r-universe.dev',
+  CRAN = 'https://cloud.r-project.org'))
+
+# Install R package "dwc.wells"
+install.packages('dwc.wells')
+```
+
+## Input Dataset
+
+```{r input_dataset}
+library(dwc.wells)
+library(tidymodels)
+df <- dwc.wells::model_data_reduced
+str(df)
+
+```
+
+## Resampling
+
+```{r input_resampling}
+
+resampling <- "random"
+#resampling <- "by_well"
+set.seed(1)
+
+if (resampling == "random") {
+
+  # for regression
+  data_split <- rsample::initial_split(df %>% dplyr::select(-well_id),
+                                       prop = 0.8,
+                                       strata = Qs_rel)
+  df_training <- data_split %>% rsample::training()
+  df_test <- data_split %>% rsample::testing()
+
+}
+
+
+# version 2: splitting per well ids
+
+if (resampling == "by_well") {
+
+  well_ids <- unique(df$well_id)
+  train_ids <- sample(well_ids, 0.8 * length(well_ids))
+  test_ids <- setdiff(well_ids, train_ids)
+  df_training <- df %>%
+    dplyr::filter(well_id %in% train_ids) %>%
+    dplyr::select(-well_id)
+  df_test <- df %>%
+    dplyr::filter(well_id %in% test_ids) %>%
+    dplyr::select(-well_id)
+  
+}
+
+tibble::as_tibble(df_training)
+tibble::as_tibble(df_test)
+
+```
+
+## Regression
+
+### Hyperparameter Tuning
+
+```{r regression_hyperparameter_tuning, eval = FALSE}
+# Hyperparameter tuning --------------------------------------------------------
+
+ # specify model
+  xgb_model <- parsnip::boost_tree(
+    trees = 500,
+    tree_depth = tune::tune(), ## model complexity
+    min_n = tune::tune(), ## model complexity
+    loss_reduction = tune::tune(), ## model complexity
+    sample_size = tune::tune(), ## randomness
+    mtry = tune::tune(), ## randomness
+    learn_rate = tune::tune(), ## step size
+  ) %>%
+    parsnip::set_engine("xgboost") %>%
+    parsnip::set_mode("regression")
+
+  # set up workflow
+  xgb_wf <- workflows::workflow() %>%
+    workflows::add_formula(Qs_rel ~ .) %>%
+    workflows::add_model(xgb_model)
+
+  # hyperparameter sampling v1
+  # xgb_grid <- dials::grid_random(dials::tree_depth(),
+  #                                dials::min_n(),
+  #                                dials::loss_reduction(),
+  #                                sample_size = dials::sample_prop(),
+  #                                dials::finalize(dials::mtry(), df_training),
+  #                                dials::learn_rate(range = c(0.01, 0.1), 
+  #                                                  trans = NULL),
+  #                                size = 1000)
+
+    # hyperparameter sampling v2
+  xgb_grid <- dials::grid_latin_hypercube(
+    dials::tree_depth(),
+    dials::min_n(),
+    dials::loss_reduction(),
+    sample_size = dials::sample_prop(),
+    dials::finalize(dials::mtry(), df_training),
+    dials::learn_rate(),
+    size = 500
+  )
+
+  # define cross validation procedure
+  cv_folds <- rsample::vfold_cv(df_training, v = 5)
+
+  # set up random grid with 20 combinations for first screening
+  doParallel::registerDoParallel()
+
+  # test different hyperparameters via cross validation on training data
+  set.seed(234)
+  xgb_tuning <- tune::tune_grid(
+    xgb_wf,
+    resamples = cv_folds,
+    grid = xgb_grid,
+    control = tune::control_grid(save_pred = TRUE)
+  )
+
+  # get assessment metrics
+  metrics <- tune::collect_metrics(xgb_tuning)
+  
+  dwc.wells::save_data(metrics, 
+                       path = getwd(), 
+                       filename = "metrics_tuning_xgb_random_resampling")
+
+  # visualise results
+  metrics %>%
+    #filter(learn_rate > 0.01) %>%
+    dplyr::filter(.metric == "rmse") %>%
+    dplyr::select(mean, min_n, mtry, tree_depth, learn_rate, loss_reduction, sample_size) %>%
+    tidyr::pivot_longer(c(min_n, mtry, tree_depth, learn_rate, loss_reduction, sample_size),
+                        values_to = "value",
+                        names_to = "parameter") %>%
+    ggplot2::ggplot(ggplot2::aes(value, mean, color = parameter)) +
+    ggplot2::geom_point(show.legend = FALSE, size = 0.5) +
+    ggplot2::facet_wrap(~parameter, scales = "free") +
+    ggplot2::labs(x = NULL, y = "RMSE [%]") +
+    sema.berlin.utils::my_theme()
+
+ggplot2::ggsave("xgb_regression_hyperparameter_tuning_plot_random_resampling_1000_v2.png", 
+                width = 8, 
+                height = 4, 
+                dpi = 600)
+
+  # after example from https://juliasilge.com/blog/xgboost-tune-volleyball/
+
+}
+```
+
+### Best-Fit Model 
+
+```{r bestmodel}
+# Specify model ----------------------------------------------------------------
+
+xgb_model <- parsnip::boost_tree(mtry = 6,
+                                 min_n = 10,
+                                 trees = 500,
+                                 tree_depth = 7,
+                                 loss_reduction = 10,
+                                 learn_rate = 0.1,
+                                 sample_size = 0.7) %>%
+  parsnip::set_engine("xgboost", 
+                      nthreads = parallel::detectCores()) %>%
+  parsnip::set_mode("regression")
+
+
+# Model training and assessment (regression) -----------------------------------
+
+# Train model
+set.seed(26)
+xgb_fit <- xgb_model %>% parsnip::fit(Qs_rel ~ ., data = df_training)
+#usethis::use_data(xgb_fit, compress = "xz", overwrite = TRUE)
+
+# Make predictions
+predictions <- predict(xgb_fit, df_test)
+
+# Evaluate model performance
+df_pred <- df_test %>% 
+  dplyr::select(Qs_rel) %>% 
+  dplyr::bind_cols(predictions)
+
+yardstick::rmse(df_pred, truth = Qs_rel, estimate = .pred)
+yardstick::rsq(df_pred, truth = Qs_rel, estimate = .pred)
+
+# scatter plot
+dwc.wells::scatterplot(df_pred, 
+                       lines_80perc = FALSE, 
+                       alpha = 1, 
+                       pointsize = 0.9)
+ggplot2::ggsave("scatterplot_xgb_numeric.png",
+                dpi = 600,
+                width = 3.5,
+                height = 3)
+```
+
+## Classification
+
+```{r classification}
+# classification performance ---------------------------------------------------
+
+# classify Qs data
+df_pred <- df_pred %>%
+  dplyr::mutate(Qs_rel_class = dwc.wells::classify_Qs(Qs_rel),
+                .pred_class = dwc.wells::classify_Qs(.pred))
+
+# confusion matrix
+matrix <- yardstick::conf_mat(df_pred, 
+                              truth = Qs_rel_class, 
+                              estimate = .pred_class)
+matrix 
+
+# performance metrics
+metrics <- summary(matrix)
+metrics
+
+dwc.wells::save_data(matrix, 
+                     path = getwd(), 
+                     filename = "xgb_numeric_to_class_matrix_split80",
+                     formats = "RData")
+
+```

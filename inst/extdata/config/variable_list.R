@@ -8,35 +8,41 @@ well_features <- c(
   "construction_year",
   "operational_start.date",
   "operational_start.year",
-  "waterworks",
-  "well_gallery",
-  "admissible_discharge",
-  "operational_start.Qs",
-  "aquifer_coverage",
   "screen_material",
-  "diameter",
   "n_screens",
+  "diameter",
   "filter_length",
   "well_depth",
   "drilling_method",
+  "admissible_discharge",
+  "operational_start.Qs",
+  "waterworks",
+  "well_gallery",
+  "aquifer_coverage",
   "surface_water",
   "surface_water.distance",
   "inliner",
   "inliner.date",
-  "quality.Cu",
+  "volume_m3_d.mean",
+  "volume_m3_d.sd",
+  "volume_m3_d.cv",
+  "W_static.sd",
   "quality.DR",
   "quality.EC",
   "quality.DO",
+  "quality.Temp",
+  "quality.pH",
+  "quality.Redox",
   "quality.Fe_tot",
   "quality.Mn",
+  "quality.Cu",
   "quality.NO3",
   "quality.P_tot",
-  "quality.pH",
   "quality.PO4",
-  "quality.Redox",
   "quality.SO4",
-  "quality.Temp",
-  "quality.TSS"
+  "quality.TSS",
+  "well_function",
+  "operational_state"
 )
 
 
@@ -52,8 +58,8 @@ pump_test_vars <- c(
   "well_age_years",
   "n_rehab",
   "last_rehab.date",
-  "days_since_last_rehab",
-  "years_since_last_rehab"
+  "time_since_rehab_days",
+  "time_since_rehab_years"
 )
 
 
@@ -61,9 +67,8 @@ pump_test_vars <- c(
 model_features_with_plot_names <- list(
 
   # well characteristics
-  "well_age_years" = "Well age in years",
+  "well_age_years" = "Well age [yrs]",
   "construction_year" = "Construction year",
-  "operational_start.year" = "Year of operational start",
   "screen_material" = "Filter material",
   "n_screens" = "Number of filter screens",
   "diameter" = "Diameter [mm]",
@@ -77,30 +82,46 @@ model_features_with_plot_names <- list(
   "waterworks" = "Waterworks",
   "well_gallery" = "Well gallery",
   "aquifer_coverage" = "Aquifer coverage",
+  "W_static.sd" = "Static water level, std-dev [m]",
   "surface_water" = "Surface water",
   "surface_water.distance" = "Distance to surface water [m]",
 
   # rehabilitation
   "n_rehab" = "Number of rehabs",
-  "years_since_last_rehab" = "Years since last rehab",
+  "time_since_rehab_years" = "Time since rehab [yrs]",
   "inliner" = "Inliner",
 
+  # operational information
+  "volume_m3_d.mean" = "Abstraction volume, mean [m³/d]",
+  "volume_m3_d.sd" = "Abstraction volume, std-dev [m³/d]",
+  "volume_m3_d.cv" = "Abstraction volume, cv [-]",
+
   # water quality
-  "quality.Cu" = "Cu concentration [mg/L]",
   "quality.DR" = "Dry residues [mg/L]",
   "quality.EC" = "Electrical conductivity [µS/cm]",
   "quality.DO" = "Dissolved oxygen [mg/L]",
+  "quality.Temp" = "Temperature [°C]",
+  "quality.pH" = "pH [-]",
+  "quality.Redox" = "Redox potential [mV]",
   #"quality.Fe_tot" = expression(paste("Fe"[tot], " concentration in mg/L")),
   "quality.Fe_tot" = "Fe (tot) concentration [mg/L]",
   "quality.Mn" = "Mn concentration [mg/L]",
+  "quality.Cu" = "Cu concentration [mg/L]",
   "quality.NO3" =  "NO3 concentration [mg/L]",
   "quality.P_tot" = "P (tot) concentration [mg/L]",
-  "quality.pH" = "pH",
   #"quality.PO4" = expression(paste("PO"[4], " concentration [mg/L]")),
   "quality.PO4" = "PO4 concentration [mg/L]",
-  "quality.Redox" = "Redox potential [mV]",
   "quality.SO4" = "SO4 concentration [mg/L]",
-  "quality.Temp" = "Temperature [°C]",
-  "quality.TSS" = "TSS concentration [mg/L]")
+  "quality.TSS" = "TSS concentration [mg/L]"
+
+  #"well_function" = "Brunnenfunktion"
+
+  )
 
 model_features <- names(model_features_with_plot_names)
+
+top5_model_features <- c("well_age_years",
+                         "time_since_rehab_years",
+                         "well_gallery",
+                         "n_rehab",
+                         "volume_m3_d.cv")
