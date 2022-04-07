@@ -114,7 +114,7 @@
 <span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">filter()</span>  masks <span style="color: #0000BB;">stats</span>::filter()</span>
 <span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">lag()</span>     masks <span style="color: #0000BB;">stats</span>::lag()</span>
 <span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">recipes</span>::<span style="color: #00BB00;">step()</span>  masks <span style="color: #0000BB;">stats</span>::step()</span>
-<span class="co">#&gt; <span style="color: #0000BB;">•</span> Use <span style="color: #00BB00;">tidymodels_prefer()</span> to resolve common conflicts.</span>
+<span class="co">#&gt; <span style="color: #0000BB;">•</span> Search for functions across packages at <span style="color: #00BB00;">https://www.tidymodels.org/find/</span></span>
 <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">dwc.wells</span><span class="fu">::</span><span class="va"><a href="../reference/model_data_reduced.html">model_data_reduced</a></span>
 <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span>
 <span class="co">#&gt; 'data.frame':    6308 obs. of  27 variables:</span>
@@ -341,7 +341,7 @@
 <span class="co"># Train model</span>
 <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">26</span><span class="op">)</span>
 <span class="va">xgb_fit</span> <span class="op">&lt;-</span> <span class="va">xgb_model</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">Qs_rel</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">df_training</span><span class="op">)</span>
-<span class="co">#&gt; [09:34:08] WARNING: amalgamation/../src/learner.cc:576: </span>
+<span class="co">#&gt; [09:49:57] WARNING: amalgamation/../src/learner.cc:576: </span>
 <span class="co">#&gt; Parameters: { "nthreads" } might not be used.</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;   This could be a false alarm, with some parameters getting used by language bindings but</span>
