@@ -1,4 +1,14 @@
-# dwc.wells 0.1.0
+# [dwc.wells 0.1.0](https://github.com/KWB-R/kwb.pkgstatus/releases/tag/v0.1.0) <small>2022-04-07</small>
+
+* ML machine learning for predicting Qs for production wells completed added 
+documentation/workflow for the two best models:
+
+  - [xgboost](../articles/prediction_xgboost.html)
+  
+  - [randomForest](../articles/prediction_random-forest.html)
+
+
+# dwc.wells 0.0.0.9000
 
 First milestone: data preparation finished 
 
