@@ -130,6 +130,26 @@ if (TRUE) {
 
    model_data_reduced$drilling_method <- as.factor(model_data_reduced$drilling_method)
 
+   model_data_reduced$aquifer_coverage <- kwb.utils::multiSubstitute(
+     strings = model_data_reduced$aquifer_coverage,
+     replacements = list(`bedeckt` = "confined",
+                         `unbedeckt` = "unconfined",
+                         `Unbekannt` = "unknown",
+                         `bedeckt` = "confined",
+                         `randlich` = "edges",
+                         `teilweise` = "partly")
+     )
+
+   anonymize <- function(x, algo="crc32"){
+
+     unq_hashes <- vapply(unique(x), function(object) digest::digest(object, algo=algo), FUN.VALUE="", USE.NAMES=TRUE)
+
+     unname(unq_hashes[x])
+   }
+
+   model_data_reduced$well_id <- anonymize(model_data_reduced$well_id)
+   model_data_reduced$screen_material <- anonymize(model_data_reduced$screen_material)
+   model_data_reduced$drilling_method <- anonymize(model_data_reduced$drilling_method)
 
 }
 
