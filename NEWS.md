@@ -1,4 +1,8 @@
-# [dwc.wells 0.1.0](https://github.com/KWB-R/kwb.pkgstatus/releases/tag/v0.1.0) <small>2022-04-07</small>
+# [dwc.wells 0.2.0](https://github.com/KWB-R/dwc.wells/releases/tag/v0.2.0) <small>2022-07-12</small>
+
+* Added example dataset for reproducing ML machine learning algorithms
+
+# [dwc.wells 0.1.0](https://github.com/KWB-R/dwc.wells/releases/tag/v0.1.0) <small>2022-04-07</small>
 
 * ML machine learning for predicting Qs for production wells completed added 
 documentation/workflow for the two best models:
