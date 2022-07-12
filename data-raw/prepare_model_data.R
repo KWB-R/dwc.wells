@@ -138,18 +138,36 @@ if (TRUE) {
                          `bedeckt` = "confined",
                          `randlich` = "edges",
                          `teilweise` = "partly")
-     )
+     ) %>%
+     as.factor()
 
-   anonymize <- function(x, algo="crc32"){
+   anonymize_hash <- function(x, algo="crc32"){
 
-     unq_hashes <- vapply(unique(x), function(object) digest::digest(object, algo=algo), FUN.VALUE="", USE.NAMES=TRUE)
+     unq_hashes <- vapply(unique(x),
+                          function(object) digest::digest(object, algo=algo),
+                          FUN.VALUE="",
+                          USE.NAMES=TRUE)
 
      unname(unq_hashes[x])
    }
 
-   model_data_reduced$well_id <- anonymize(model_data_reduced$well_id)
-   model_data_reduced$screen_material <- anonymize(model_data_reduced$screen_material)
-   model_data_reduced$drilling_method <- anonymize(model_data_reduced$drilling_method)
+   anonymize_int <- function(x, n_values = 1000000){
+
+     values <- x
+     unique_values <- unique(values)
+     n_unique_values <- as.integer(length(unique_values))
+     random_values <- sample.int(n = n_values,
+                                 size = n_unique_values,
+                                 replace = FALSE)
+
+     ### https://stackoverflow.com/a/50898859
+     as.integer(as.character(factor(values, unique_values, random_values)))
+   }
+
+   set.seed(1)
+   model_data_reduced$well_id <- anonymize_int(model_data_reduced$well_id)
+   model_data_reduced$screen_material <- as.factor(anonymize_hash(model_data_reduced$screen_material))
+   model_data_reduced$drilling_method <- as.factor(anonymize_hash(model_data_reduced$drilling_method))
 
 }
 

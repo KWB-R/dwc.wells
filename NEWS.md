@@ -2,6 +2,9 @@
 
 * Added example dataset for reproducing ML machine learning algorithms
 
+* Update workflows to also install `Suggests` R packages required for running 
+vignettes
+
 # [dwc.wells 0.1.0](https://github.com/KWB-R/dwc.wells/releases/tag/v0.1.0) <small>2022-04-07</small>
 
 * ML machine learning for predicting Qs for production wells completed added 

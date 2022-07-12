@@ -1,21 +1,14 @@
 Package: dwc.wells
 Title: A Package for Condition Predictions for Drinking Water Wells
 Version: 0.2.0
-Authors@R: 
-    c(person(given = "Mathias",
-             family = "Riechel",
-             role = "aut",
-             email = "mathias.riechel@kompetenz-wasser.de",
-             comment = c(ORCID = "0000-0002-1191-5877")),
-      person(given = "Michael",
-             family = "Rustler",
-             role = c("ctb", "cre"),
-             email = "michael.rustler@kompetenz-wasser.de",
-             comment = c(ORCID = "0000-0003-0647-7726")),
-      person(given = "DWC",
-             role = "fnd"),
-      person(given = "Kompetenzzentrum Wasser Berlin gGmbH (KWB)",
-             role = "cph"))
+Authors@R: c(
+    person("Mathias", "Riechel", , "mathias.riechel@kompetenz-wasser.de", role = "aut",
+           comment = c(ORCID = "0000-0002-1191-5877")),
+    person("Michael", "Rustler", , "michael.rustler@kompetenz-wasser.de", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-0647-7726")),
+    person("DWC", role = "fnd"),
+    person("Kompetenzzentrum Wasser Berlin gGmbH (KWB)", role = "cph")
+  )
 Description: This package allows to predict the condition of a drinking
     water well based on ML models. The models are trained with results
     from pump tests and a large set of input variables e.g.  the well
@@ -23,6 +16,8 @@ Description: This package allows to predict the condition of a drinking
 License: MIT + file LICENSE
 URL: https://github.com/KWB-R/dwc.wells
 BugReports: https://github.com/KWB-R/dwc.wells/issues
+Depends: 
+    R (>= 3.50)
 Imports:
     corrplot,
     dplyr,
@@ -50,16 +45,16 @@ Imports:
     zoo
 Suggests: 
     caret,
-    cowplot,
     covr,
+    cowplot,
     doParallel,
     DT,
     knitr,
     parallel,
     plotly,
     randomForest,
-    rpart.plot,
     rmarkdown,
+    rpart.plot,
     tidymodels,
     usethis,
     xgboost
@@ -72,6 +67,4 @@ Remotes:
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
-Depends: 
-    R (>= 3.50)
+RoxygenNote: 7.2.0
