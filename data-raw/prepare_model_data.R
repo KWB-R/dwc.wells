@@ -143,7 +143,10 @@ if (TRUE) {
 
    anonymize_hash <- function(x, algo="crc32"){
 
-     unq_hashes <- vapply(unique(x), function(object) digest::digest(object, algo=algo), FUN.VALUE="", USE.NAMES=TRUE)
+     unq_hashes <- vapply(unique(x),
+                          function(object) digest::digest(object, algo=algo),
+                          FUN.VALUE="",
+                          USE.NAMES=TRUE)
 
      unname(unq_hashes[x])
    }
