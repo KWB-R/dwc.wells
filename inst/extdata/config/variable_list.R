@@ -75,8 +75,8 @@ model_features_with_plot_names <- list(
   "filter_length" = "Filter length [m]",
   "well_depth" = "Well depth [m]",
   "drilling_method" = "Drilling method",
-  "admissible_discharge" = "Admissible discharge [m³/h]",
-  "operational_start.Qs" = "Initial specific capacity [m³/(h, m)]",
+  "admissible_discharge" = "Admissible discharge [m\u00B3/h]",
+  "operational_start.Qs" = "Initial specific capacity [m\u00B3/(h, m)]",
 
   # site properties
   "waterworks" = "Waterworks",
@@ -92,15 +92,15 @@ model_features_with_plot_names <- list(
   "inliner" = "Inliner",
 
   # operational information
-  "volume_m3_d.mean" = "Abstraction volume, mean [m³/d]",
-  "volume_m3_d.sd" = "Abstraction volume, std-dev [m³/d]",
+  "volume_m3_d.mean" = "Abstraction volume, mean [m\u00B3/d]",
+  "volume_m3_d.sd" = "Abstraction volume, std-dev [m\u00B3/d]",
   "volume_m3_d.cv" = "Abstraction volume, cv [-]",
 
   # water quality
   "quality.DR" = "Dry residues [mg/L]",
-  "quality.EC" = "Electrical conductivity [µS/cm]",
+  "quality.EC" = "Electrical conductivity [\u00B5S/cm]",
   "quality.DO" = "Dissolved oxygen [mg/L]",
-  "quality.Temp" = "Temperature [°C]",
+  "quality.Temp" = "Temperature [\u00B0C]",
   "quality.pH" = "pH [-]",
   "quality.Redox" = "Redox potential [mV]",
   #"quality.Fe_tot" = expression(paste("Fe"[tot], " concentration in mg/L")),
