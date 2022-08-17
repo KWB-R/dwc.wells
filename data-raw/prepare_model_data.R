@@ -35,15 +35,15 @@ df_Q_monitoring <- dwc.wells:::prepare_Q_monitoring_data(
 save_data(df_Q_monitoring, paths$data_prep_out, "Q_monitoring_data")
 
 # 7. pump test and rehab data
-df_pump_tests_tidy <- prepare_pump_test_data(
-  paths$data_pump_tests, renamings, df_wells, pump_test_vars
+df_pump_tests_tidy <- dwc.wells::prepare_pump_test_data(
+  paths$data_pump_tests, renamings, df_wells
   )
 save_data(df_pump_tests_tidy, paths$data_prep_out, "pump_test_data")
 
 # 8. get standard deviation in static water level measurements
 df_W_static_sd <- get_W_static_data(paths$data_W_static, renamings, df_wells) %>%
-  group_by(well_id) %>%
-  summarise(W_static.sd = sd(W_static, na.rm = TRUE))
+  dplyr:::group_by(well_id) %>%
+  dplyr::summarise(W_static.sd = sd(W_static, na.rm = TRUE))
 
 
 # MAIN 2: combine individual data sets -----------------------------------------
@@ -66,10 +66,9 @@ well_feature_data <- df_wells %>%
 
 # 2. combine pump test data and capacity measurements (virtual pump_tests)
 df_pump_test_Q_monitoring <-
-  dwc.wells::combine_pump_test_and_Q_monitoring_data(
+  dwc.wells:::combine_pump_test_and_Q_monitoring_data(
     df_pump_tests_tidy,
-    df_Q_monitoring,
-    pump_test_vars
+    df_Q_monitoring
   )
 
 
