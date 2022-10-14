@@ -141,8 +141,17 @@ load_renamings_excel <- function(infile,
 #' @importFrom utils read.csv
 #' @export
 #'
-load_renamings_csv <- function(infile) {
-  utils::read.csv(file = infile, sep = ";", stringsAsFactors = FALSE, na.strings=c(""))
+load_renamings_csv <- function(infile, fileEncoding = "WINDOWS-1252") {
+  #utils::read.csv(file = infile, sep = ";", stringsAsFactors = FALSE, na.strings=c(""))
+  con <- file(infile, open = "rt", encoding = fileEncoding)
+  on.exit(close(con))
+
+  utils::read.csv(
+    file = con,
+    sep = ";",
+    stringsAsFactors = FALSE,
+    na.strings = ""
+  )
 }
 
 # read_csv ---------------------------------------------------------------------
@@ -165,7 +174,7 @@ read_csv <- function(file, header = TRUE, fileEncoding = "UTF-8",
                      na.strings = "(null)") {
 
   utils::read.csv(file = file, header = header, fileEncoding = fileEncoding,
-           skip = skip, dec = dec, sep = sep, na.strings = na.strings)
+                  skip = skip, dec = dec, sep = sep, na.strings = na.strings)
 }
 
 
@@ -291,10 +300,10 @@ rename_values <- function(x,
                           new_name_col = "new_name") {
 
 
-    old_names <- renamings[, old_name_col]
-    new_names <- renamings[, new_name_col]
+  old_names <- renamings[, old_name_col]
+  new_names <- renamings[, new_name_col]
 
-    new_names[match(x, old_names)]
+  new_names[match(x, old_names)]
 
 }
 
@@ -345,7 +354,7 @@ tidy_factor <- function(x, level_sorting = c("frequency", "alphabet")[1]) {
 
   # put "Andere" to end
   if ("Andere" %in% levels(x)) {
-  x <- forcats::fct_relevel(x, "Andere", after = Inf)
+    x <- forcats::fct_relevel(x, "Andere", after = Inf)
   }
 
   # put "Unbekannt" to end
@@ -377,8 +386,8 @@ frequency_table <- function(x, perc_digits = 1, sort_freq = FALSE) {
   if (sort_freq) {
     df %>% dplyr::arrange(-.data[["n"]])
   } else {
-      df
-    }
+    df
+  }
 
 }
 

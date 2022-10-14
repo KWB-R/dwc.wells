@@ -4,7 +4,7 @@
 \alias{load_renamings_csv}
 \title{load renaming table from original excel file}
 \usage{
-load_renamings_csv(infile)
+load_renamings_csv(infile, fileEncoding = "WINDOWS-1252")
 }
 \arguments{
 \item{infile}{full path to excel file}
