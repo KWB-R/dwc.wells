@@ -11,7 +11,7 @@
 prepare_quality_data <- function(path, renamings) {
 
   # read data
-  df_quality <- kwb.db::hsGetTable(path, "DB2LABOR_Daten") %>%
+  df_quality <- kwb.db::hsGetTable(path, "DB2LABOR_Daten", use2007Driver = TRUE) %>%
     select_rename_cols(renamings$main, "old_name", "new_name_en")
 
 

@@ -2,8 +2,9 @@
 
 prepare_drilling_tech_data <- function(path, renamings) {
 
-  # read drilling tech data from csv
-  df_drilling_tech <- readr::read_csv(path) %>%
+  # read drilling tech data from tsv
+  df_drilling_tech <- read_csv(path, skip = 2) %>%
+    remove_column_with_duplicated_name() %>%
     select_rename_cols(renamings$main,"old_name", "new_name_en")
 
   # remove NAs

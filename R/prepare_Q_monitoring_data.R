@@ -5,7 +5,6 @@
 #' @param df_wells data frame with prepared well data
 #'
 #' @export
-#' @importFrom readr read_csv
 #' @importFrom dplyr select mutate filter
 #' @importFrom tidyr pivot_longer
 get_W_static_data <- function(path, renamings, df_wells) {
@@ -26,7 +25,8 @@ get_W_static_data <- function(path, renamings, df_wells) {
 
   # import other static water level data provided by Sebastian Schimmelpfennig
   # origin: H2O2-Messungen, Kurzpumpversuche, Ergiebigkeitsmessungen
-  df_W_static_2 <- readr::read_csv(path, skip = 30) %>%
+  df_W_static_2 <- read_csv(path, skip = 30) %>%
+    remove_column_with_duplicated_name() %>%
     select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
     dplyr::mutate(date = as.Date(.data$date, format = "%Y-%m-%d")) %>%
     dplyr::select(.data$site_id,
@@ -54,7 +54,8 @@ prepare_Q_monitoring_data <- function(df_wells, path_quantity,
                                       path_W_static, renamings) {
 
   # read quantity measurement data
-  df_Q <- readr::read_csv(path_quantity, skip = 26) %>%
+  df_Q <- read_csv(path_quantity, skip = 26) %>%
+    remove_column_with_duplicated_name() %>%
     select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
     dplyr::mutate(date = as.Date(.data$date)) %>%
     dplyr::mutate(date = dplyr::na_if(.data$date, "1899-12-30 00:00:00")) %>%
@@ -82,7 +83,7 @@ prepare_Q_monitoring_data <- function(df_wells, path_quantity,
   frequency_table(duplicated((df_Q_W[, c("site_id", "date")])))
   a <- df_Q_W[duplicated(df_Q_W[, c("site_id", "date")]), ]
 
-  print(frequency_table(df_Q_W[!is.na(df_Q_W$W_static), "W_static.origin"]))
+  print(frequency_table(df_Q_W$W_static.origin[!is.na(df_Q_W$W_static)]))
 
   # remove rows for wells with no static water level data at all
   df_Q_W <- df_Q_W %>%
@@ -108,7 +109,7 @@ prepare_Q_monitoring_data <- function(df_wells, path_quantity,
   )
 
   # show origin of data
-  frequency_table(df_Q_W_new[!is.na(df_Q_W_new$W_static), "W_static.origin"])
+  frequency_table(df_Q_W_new$W_static.origin[!is.na(df_Q_W_new$W_static)])
 
   # group types for W_static
   df_Q_W_new <- df_Q_W_new %>%

@@ -21,7 +21,7 @@
 prepare_volume_data <- function(path, renamings, df_wells) {
 
   # load volume data
-  kwb.db::hsGetTable(path, "WV_GMS_TBL_MENGENTABELLE") %>%
+  kwb.db::hsGetTable(path, "WV_GMS_TBL_MENGENTABELLE", use2007Driver = TRUE) %>%
     select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
     dplyr::mutate(date = as.Date(.data$date)) %>%
     dplyr::arrange(.data$well_id, .data$date) %>%

@@ -10,7 +10,8 @@
 #'
 combine_pump_test_and_Q_monitoring_data <- function(df_pump_tests_tidy,
                                                     df_Q_monitoring,
-                                                    pump_test_vars) {
+                                                    pump_test_vars = get_pump_test_vars()
+                                                    ) {
 
   df_Qs_all <- df_pump_tests_tidy %>%
     dplyr::bind_rows(df_Q_monitoring) %>%

@@ -1,9 +1,21 @@
 # prepare well data ------------------------------------------------------------
 
+#' Prepare Well Data
+#'
+#' @param path path
+#' @param renamings renamings
+#'
+#' @return prepared well data
+#' @keywords internal
+#' @noMd
+#' @noRd
+#' @importFrom dplyr across all_of filter mutate na_if
+#' @importFrom tidyr starts_with
 prepare_well_data  <- function(path, renamings) {
 
-  # read data from csv and filter Vertikalfilterbrunnen
-  df_wells <- readr::read_csv(path, skip = 9) %>%
+  # read data from tsv and filter Vertikalfilterbrunnen
+  df_wells <- read_csv(path, skip = 9) %>%
+    remove_column_with_duplicated_name() %>%
     select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
     dplyr::filter(grepl("V$", .data$well_name))
 

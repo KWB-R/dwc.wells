@@ -6,6 +6,7 @@ prepare_drilling_data <- function(path, renamings) {
 # does not work with standard encoding
 df_drilling <- read.csv(file = path, header = TRUE, skip = 2, dec = ".",
                         sep = "\t", na.strings = "(null)") %>%
+  remove_column_with_duplicated_name() %>%
   select_rename_cols(renamings$main, "old_name", "new_name_en")
 
 # adapt encoding for surface water name (otherwise umlaute will not be read)

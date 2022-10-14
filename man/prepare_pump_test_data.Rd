@@ -4,7 +4,12 @@
 \alias{prepare_pump_test_data}
 \title{prepare pump test data with one row per Qs-measurement + rehab history}
 \usage{
-prepare_pump_test_data(path, renamings, df_wells, pump_test_vars)
+prepare_pump_test_data(
+  path,
+  renamings,
+  df_wells,
+  pump_test_vars = get_pump_test_vars()
+)
 }
 \arguments{
 \item{path}{path to pump test data}

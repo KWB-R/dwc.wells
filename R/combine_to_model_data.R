@@ -17,7 +17,7 @@ combine_to_model_data <- function(df_pump_tests_tidy,
   df <- df %>% dplyr::select(- c(.data$construction_date, .data$operational_start.date))
 
   # fill up NA values
-  df <- fill_up_na_with_median_from_lookup(df, .data$well_feature_data)
+  df <- fill_up_na_with_median_from_lookup(df, well_feature_data)
 
   df %>% droplevels()
 }

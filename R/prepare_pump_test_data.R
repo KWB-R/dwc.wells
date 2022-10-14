@@ -11,14 +11,14 @@
 #' @param df_wells prepared data frame with well characteristics
 #'
 #' @export
-#' @importFrom readr read_csv
 #' @importFrom rlang .data
 #' @importFrom dplyr distinct_at
 prepare_pump_test_data_1 <- function(path, renamings, df_wells) {
 
   # read, rename and clean data ---
 
-  df_pump_tests <- readr::read_csv(path, skip = 2) %>%
+  df_pump_tests <- read_csv(path, skip = 2) %>%
+    remove_column_with_duplicated_name() %>%
     select_rename_cols(renamings$main, "old_name", "new_name_en") %>%
     # filter data for site id 11 (not unique, used for rehabilitated wells)
     dplyr::filter(.data$site_id != 11) %>%
@@ -260,7 +260,7 @@ prepare_pump_test_data_2 <- function(df_pump_tests_untidy,
                   time_since_rehab_years = .data$time_since_rehab_days / 365.25)
 
   df_pump_tests_tidy %>%
-    dplyr::select(pump_test_vars) %>%
+    dplyr::select(dplyr::all_of(pump_test_vars)) %>%
     dplyr::filter(!is.na(.data$Qs_rel)) %>%
     dplyr::ungroup()
 }
@@ -278,7 +278,7 @@ prepare_pump_test_data_2 <- function(df_pump_tests_untidy,
 #'
 #'
 prepare_pump_test_data <- function(path, renamings, df_wells,
-                                   pump_test_vars) {
+                                   pump_test_vars =  get_pump_test_vars()) {
 
   prepare_pump_test_data_1(path, renamings, df_wells) %>%
     prepare_pump_test_data_2(df_wells, pump_test_vars)
