@@ -135,22 +135,24 @@ load_renamings_excel <- function(infile,
 
 # load_renamings_csv -----------------------------------------------------------
 
-#' load renaming table from original excel file
+#' Load renaming table from CSV file
 #'
-#' @param infile full path to excel file
+#' @param infile full path to CSV file
+#' @param fileEncoding Encoding in which the CSV file is given. Passed to
+#'   \code{\link{read.table}}. Defaut: "WINDOWS-1252"
+#' @param \dots further arguments passed to \code{\link{read.table}}
 #' @importFrom utils read.csv
 #' @export
 #'
-load_renamings_csv <- function(infile, fileEncoding = "WINDOWS-1252") {
-  #utils::read.csv(file = infile, sep = ";", stringsAsFactors = FALSE, na.strings=c(""))
-  con <- file(infile, open = "rt", encoding = fileEncoding)
-  on.exit(close(con))
-
+load_renamings_csv <- function(infile, fileEncoding = "WINDOWS-1252", ...)
+{
   utils::read.csv(
-    file = con,
+    file = infile,
     sep = ";",
     stringsAsFactors = FALSE,
-    na.strings = ""
+    na.strings = "",
+    fileEncoding = fileEncoding,
+    ...
   )
 }
 
