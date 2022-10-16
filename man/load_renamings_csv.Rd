@@ -2,13 +2,18 @@
 % Please edit documentation in R/prepare_functions.R
 \name{load_renamings_csv}
 \alias{load_renamings_csv}
-\title{load renaming table from original excel file}
+\title{Load renaming table from CSV file}
 \usage{
-load_renamings_csv(infile, fileEncoding = "WINDOWS-1252")
+load_renamings_csv(infile, fileEncoding = "WINDOWS-1252", ...)
 }
 \arguments{
-\item{infile}{full path to excel file}
+\item{infile}{full path to CSV file}
+
+\item{fileEncoding}{Encoding in which the CSV file is given. Passed to
+\code{\link{read.table}}. Defaut: "WINDOWS-1252"}
+
+\item{\dots}{further arguments passed to \code{\link{read.table}}}
 }
 \description{
-load renaming table from original excel file
+Load renaming table from CSV file
 }
