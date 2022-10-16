@@ -101,7 +101,7 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/KWB-R/dwc.wells" class="external-link">dwc.wells</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Attaching packages</span> ────────────────────────────────────── tidymodels 1.0.0 ──</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">broom       </span> 1.0.1      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">recipes     </span> 1.0.1 </span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">broom       </span> 1.0.1      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">recipes     </span> 1.0.2 </span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dials       </span> 1.0.0      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">rsample     </span> 1.1.0 </span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr       </span> 1.0.10     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tibble      </span> 3.1.8 </span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2     </span> 3.3.6      <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tidyr       </span> 1.2.1 </span></span>
@@ -114,7 +114,7 @@
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">filter()</span>  masks <span style="color: #0000BB;">stats</span>::filter()</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">lag()</span>     masks <span style="color: #0000BB;">stats</span>::lag()</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">recipes</span>::<span style="color: #00BB00;">step()</span>  masks <span style="color: #0000BB;">stats</span>::step()</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">•</span> Search for functions across packages at <span style="color: #00BB00;">https://www.tidymodels.org/find/</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">•</span> Dig deeper into tidy modeling with R at <span style="color: #00BB00;">https://www.tmwr.org</span></span></span>
 <span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">dwc.wells</span><span class="fu">::</span><span class="va"><a href="../reference/model_data_reduced.html">model_data_reduced</a></span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 'data.frame':    6308 obs. of  27 variables:</span></span>
@@ -341,7 +341,7 @@
 <span><span class="co"># Train model</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">26</span><span class="op">)</span></span>
 <span><span class="va">xgb_fit</span> <span class="op">&lt;-</span> <span class="va">xgb_model</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">Qs_rel</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">df_training</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [12:26:22] WARNING: amalgamation/../src/learner.cc:627: </span></span>
+<span><span class="co">#&gt; [09:23:15] WARNING: amalgamation/../src/learner.cc:627: </span></span>
 <span><span class="co">#&gt; Parameters: { "nthreads" } might not be used.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   This could be a false alarm, with some parameters getting used by language bindings but</span></span>
