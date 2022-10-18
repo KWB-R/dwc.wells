@@ -1,6 +1,6 @@
 Package: dwc.wells
 Title: A Package for Condition Predictions for Drinking Water Wells
-Version: 0.2.0
+Version: 0.2.0.9000
 Authors@R: c(
     person("Mathias", "Riechel", , "mathias.riechel@kompetenz-wasser.de", role = "aut",
            comment = c(ORCID = "0000-0002-1191-5877")),
@@ -22,6 +22,7 @@ Imports:
     corrplot,
     dplyr,
     forcats,
+    ggforce,
     ggplot2,
     kwb.db,
     kwb.utils,
@@ -51,6 +52,7 @@ Suggests:
     knitr,
     parallel,
     plotly,
+    purrr,
     randomForest,
     rmarkdown,
     rpart.plot,

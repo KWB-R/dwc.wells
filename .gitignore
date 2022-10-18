@@ -4,3 +4,4 @@
 .Ruserdata
 docs
 inst/doc
+data/model_data.rda

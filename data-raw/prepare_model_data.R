@@ -13,37 +13,30 @@ anomynize_model_dataset <- TRUE
 
 # 1. well characteristics
 df_wells <- dwc.wells:::prepare_well_data(paths$data_wells, renamings)
-save_data(df_wells, paths$data_prep_out, "well_data")
 
 # 2. surface water information
 df_drilling <- dwc.wells:::prepare_drilling_data(paths$data_drilling, renamings)
-save_data(df_drilling, paths$data_prep_out, "drilling_data")
 
 # 3. drilling method information
 df_drilling_tech <- dwc.wells:::prepare_drilling_tech_data(
   paths$data_drilling_tech, renamings
   )
-save_data(df_drilling_tech, paths$data_prep_out, "drilling_tech_data")
 
 # 4. water quality data
 df_quality_agg <- dwc.wells:::prepare_quality_data(paths$db, renamings)
-save_data(df_quality_agg, paths$data_prep_out, "quality_data")
 
 # 5. abstraction volumes
 df_volumes_agg <- dwc.wells:::prepare_volume_data(paths$db, renamings, df_wells)
-save_data(df_volumes_agg, paths$data_prep_out, "volume_data")
 
 # 6. capacity measurements (virtual pump tests)
 df_Q_monitoring <- dwc.wells:::prepare_Q_monitoring_data(
   df_wells, paths$data_quantity, paths$data_W_static, renamings
   )
-save_data(df_Q_monitoring, paths$data_prep_out, "Q_monitoring_data")
 
 # 7. pump test and rehab data
 df_pump_tests_tidy <- dwc.wells::prepare_pump_test_data(
   paths$data_pump_tests, renamings, df_wells
   )
-save_data(df_pump_tests_tidy, paths$data_prep_out, "pump_test_data")
 
 # 8. get standard deviation in static water level measurements
 df_W_static_sd <- get_W_static_data(paths$data_W_static, renamings, df_wells) %>%
@@ -92,9 +85,37 @@ usethis::use_data(model_data, compress = "xz", overwrite = TRUE) # 180 kB
 ### 2. Make reduced model dataset (based on "data analysis" findings),
 ###    (with 27 columns)
 ################################################################################
-model_data_reduced <- reduce_model_dataset(model_data)
 
+## For ML-model development
+model_data_reduced <- reduce_model_dataset(model_data)
 usethis::use_data(model_data_reduced, compress = "xz", overwrite = TRUE) # 180 kB
+
+## Lookup (required for ML-model predictions)
+model_data_lookup <- model_data %>%
+  dplyr::select(well_id,
+                date,
+                key,
+                Qs_rel,
+                n_rehab) %>%
+  dplyr::rename(action_date = date,
+                action_type = key)
+
+operational_start <- model_data_lookup %>%
+  dplyr::filter(action_type == "operational_start") %>%
+  dplyr::select(well_id, action_date) %>%
+  dplyr::rename(operational_start.date = action_date)
+
+rehabs <- model_data_lookup %>%
+  dplyr::filter(n_rehab > 0) %>%
+  dplyr::group_by(well_id,
+                  n_rehab) %>%
+  dplyr::summarise(rehab_date = min(action_date))
+
+
+usethis::use_data(operational_start, compress = "xz", overwrite = TRUE)
+usethis::use_data(rehabs, compress = "xz", overwrite = TRUE)
+
+
 }
 
 

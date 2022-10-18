@@ -184,7 +184,7 @@ xgb_model <- parsnip::boost_tree(mtry = 6,
                                  learn_rate = 0.1,
                                  sample_size = 0.7) %>%
   parsnip::set_engine("xgboost", 
-                      nthreads = parallel::detectCores()) %>%
+                      nthread = parallel::detectCores()) %>%
   parsnip::set_mode("regression")
 
 
@@ -215,6 +215,154 @@ ggplot2::ggsave("scatterplot_xgb_numeric.png",
                 dpi = 600,
                 width = 3.5,
                 height = 3)
+```
+
+### Prediction 
+
+
+```{r regression_prediction}
+
+sim_data <- dwc.wells::prepare_simulation_donothing_df(
+  model_data = df,
+  rehabs = dwc.wells::rehabs, 
+  operational_start = dwc.wells::operational_start, 
+  sim_interval = 1L,
+  sim_period = 60L,
+  sim_reference_date = Sys.Date() # to fill 'type` with `past`/`future`
+  )
+
+str(sim_data)
+
+predictions <- dwc.wells::get_predictions(model = xgb_fit, 
+                                          sim_data = sim_data)
+
+### Number of wells used for prediction
+length(unique(predictions$well_id))
+
+
+if(FALSE) {
+
+# plot 1: all predictions as points, one plot per well
+pdff <- "predictions_do-nothing_points_per_well.pdf"
+kwb.utils::preparePdf(pdff)
+dwc.wells::plot_predictions_points_per_well(predictions = predictions)
+kwb.utils::finishAndShowPdf(pdff)
+
+
+# plot 2: all predictions as individual lines in one plot ----------------------
+
+p2 <- ggplot(predictions, aes(x = well_age_years, y = Qs_rel, col = type, group = well_id)) +
+  geom_line(alpha = 0.05) +
+  scale_x_continuous(limits = c(0, 40)) +
+  scale_y_continuous(limits = c(0, 100)) +
+  labs(x = "Well age [yrs]", y = "Specific capacity [%]") +
+  sema.berlin.utils::my_theme(legend.position = "none")
+
+p2
+getwd()
+
+ggsave("xgb_plot_multi_line_betriebsbereit_bis_40_past_future.png", dpi = 600, width = 4.5, height = 3)
+
+
+# plot mean prediction vs. confidence interval ---------------------------------
+
+p3 <- ggplot(predictions, aes(x = well_age_years, y = Qs_rel)) +
+  scale_x_continuous(limits = c(0, 40)) +
+  scale_y_continuous(limits = c(0, 100)) +
+  labs(x = "Well age [yrs]", y = "Specific capacity [%]") +
+  # stat_summary(geom = "ribbon", fun.data = mean_cl_normal,
+  #              fun.args = list(conf.int = 0.9999), fill = "lightblue") +
+  stat_summary(geom = "ribbon", fun.data = "median_hilow", fill = "lightblue") +
+  stat_summary(geom = "line", fun = mean) +
+  sema.berlin.utils::my_theme()
+
+p3
+
+ggsave("xgb_plot_mean_line_and_95_conf_int_betriebsbereit_bis_40.png", p3, dpi = 600, width = 4.5, height = 3)
+
+
+# plot 4: predictions for two selected wells with colors for past / future -----
+
+p4 <- ggplot(filter(predictions, well_id %in% c(1161, 5837)),
+             aes(x = well_age_years, y = Qs_rel, col = type)) +
+  geom_line(alpha = 0.5) +
+  scale_x_continuous(limits = c(0, 40)) +
+  scale_y_continuous(limits = c(NA, 100), breaks = scales::pretty_breaks(6)) +
+  facet_wrap(~well_id) +
+  labs(x = "Well age [yrs]", y = "Specific capacity [%]") +
+  sema.berlin.utils::my_theme(legend.position = "none")
+
+p4
+
+ggsave("xgb_plot_multi_line_betriebsbereit_bis_40_past_future_2wells.png",
+       dpi = 600, width = 6, height = 3)
+
+
+# plot predictions vs. observations for two selected wells ---------------------
+
+df <- model_data %>% filter(well_id %in% c(1161, 5837)) %>%
+  mutate(n_rehab = as.factor(n_rehab))
+df_pred <- predictions %>% filter(well_id %in% c(1161, 5837))
+
+p5 <- ggplot2::ggplot(df, ggplot2::aes(x = well_age_years,
+                                      y = Qs_rel, col = n_rehab)) +
+  ggplot2::geom_point() +
+  #ggplot2::geom_line(lty = 2) +
+  #ggplot2::geom_line(ggplot2::aes(group = "all")) +
+  ggplot2::geom_line(data = df_pred, aes(x = well_age_years,
+                                         y = Qs_rel,
+                                         col = NULL,
+                                         lty = 'unity line'
+  ), alpha = 0.5) +
+  scale_x_continuous(limits = c(0, 40)) +
+  scale_y_continuous(limits = c(NA, 120), breaks = scales::pretty_breaks(6), oob = scales::rescale_none) +
+  ggplot2::scale_color_manual(values = rev(RColorBrewer::brewer.pal(length(levels(df$n_rehab)), "RdYlGn"))) +
+  #ggplot2::scale_color_manual(values = rev(scales::hue_pal()(length(levels(df$n_rehab))))) +
+  sema.berlin.utils::my_theme(legend.position = "top") +
+  ggplot2::guides(color = ggplot2::guide_legend(nrow = 1)) +
+  ggplot2::labs(color = "observations (by number of rehabs):",
+                x = "Well age [yrs]",
+                y = "Specific capacity [%]",
+                linetype = "predictions") +
+  facet_wrap(~well_id, labeller = purrr::partial(label_both, sep = ": "))
+
+p5
+ggsave("plot_observations_vs_predictions_xgboost_v3.png", dpi = 600, width = 9, height = 4)
+
+
+# plot predictions vs. observations for one selected well ----------------------
+
+df <- model_data %>% filter(well_id %in% c(5837)) %>%
+  mutate(n_rehab = as.factor(n_rehab))
+df_pred <- predictions %>% filter(well_id %in% c(5837))
+
+p6 <- ggplot2::ggplot(df, ggplot2::aes(x = well_age_years,
+                                       y = Qs_rel, col = n_rehab)) +
+  ggplot2::geom_point() +
+  ggplot2::geom_line(ggplot2::aes(group = "all")) +
+  ggplot2::geom_line(data = df_pred, aes(x = well_age_years,
+                                         y = Qs_rel,
+                                         col = NULL,
+                                         lty = 'unity line'
+  ), alpha = 0.5) +
+  scale_x_continuous(limits = c(0, 40)) +
+  scale_y_continuous(limits = c(NA, 120), breaks = scales::pretty_breaks(6), oob = scales::rescale_none) +
+  ggplot2::scale_color_manual(values = rev(RColorBrewer::brewer.pal(length(levels(df$n_rehab)), "RdYlGn"))) +
+  #ggplot2::scale_color_manual(values = rev(scales::hue_pal()(length(levels(df$n_rehab))))) +
+  sema.berlin.utils::my_theme() +
+  #ggplot2::guides(color = ggplot2::guide_legend(nrow = 1)) +
+  ggplot2::labs(color = "observations\n(by number of rehabs):",
+                x = "Well age [yrs]",
+                y = "Specific capacity [%]",
+                linetype = "predictions") +
+  facet_wrap(~well_id, labeller = purrr::partial(label_both, sep = ": "))
+
+p6
+ggplot2::ggsave("plot_observations_vs_predictions_xgboost_v3b.png", 
+                dpi = 600, 
+                width = 6, 
+                height = 3.5)
+}
 ```
 
 ## Classification

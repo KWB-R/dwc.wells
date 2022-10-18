@@ -7,11 +7,8 @@
 \format{
 A data.frame with 6308 rows and 27 variables:
 \describe{
-\item{well_id}{well id, for info}
-\item{date}{date of capacity measurement, for info}
-\item{key}{measurement key, e.g. operational_start, pump_test_1, pump_test_2, for info}
 \item{Qs_rel}{specific capacity of well relative to operational start condition, output}
-\item{days_since_operational_start}{days since operational start, redundant}
+\item{well_id}{well id, for info}
 \item{well_age_years}{years since operationa start, input, numeric}
 \item{construction_year}{year of well construction}
 \item{screen_material}{screen material}
@@ -25,6 +22,7 @@ A data.frame with 6308 rows and 27 variables:
 \item{n_rehab}{number of well rehabilitations}
 \item{time_since_rehab_years}{time since last well rehabilitation in years}
 \item{volume_m3_d.mean}{mean daily abstraction volume (m3)}
+\item{volume_m3_d.cv}{coefficient of variation of daily abstraction volume (m3)}
 \item{quality.EC}{water quality: electical conductivity (us/cm)}
 \item{quality.D0}{water quality: dissolved oxygen (mg/l)}
 \item{quality.Temp}{water quality: temperature (C)}
@@ -43,6 +41,6 @@ model_data_reduced
 }
 \description{
 A reduced dataset for well capacity prediction created with R script in
-/data-raw/model_data.R
+/data-raw/prepare_model_data.R
 }
 \keyword{datasets}

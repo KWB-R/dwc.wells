@@ -31,7 +31,8 @@ reference:
       Datasets for statistical analysis and predicting well capacity
     contents:
       - model_data_reduced
-
+      - rehabs
+      - operational_start
 
   - title: Data preparation
     desc: >
@@ -64,7 +65,6 @@ reference:
       - chi2.CramersV.test
       - frequency_table
 
-
   - title: Data visualisation
     desc: >
       Functions for plotting
@@ -78,6 +78,13 @@ reference:
       Functions for exporting data
     contents:
       - save_data
+
+  - title: Modelling
+    desc: >
+      Functions for ML-modelling
+    contents:
+      - get_predictions
+      - prepare_simulation_donothing_df
 
 
   - title: Scripts
