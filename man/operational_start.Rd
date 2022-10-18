@@ -18,4 +18,7 @@ operational_start
 Operational start date for all wells (prepared with R script in
 /data-raw/prepare_model_data.R)
 }
+\examples{
+head(operational_start, n = 20)
+}
 \keyword{datasets}

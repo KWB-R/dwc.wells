@@ -8,4 +8,6 @@
 #'   \item{well_id}{well id, for info}
 #'   \item{operational_start.date}{date of capacity measurement, for info}
 #' }
+#' @examples
+#' head(operational_start, n = 20)
 "operational_start"

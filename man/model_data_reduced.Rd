@@ -43,4 +43,10 @@ model_data_reduced
 A reduced dataset for well capacity prediction created with R script in
 /data-raw/prepare_model_data.R
 }
+\examples{
+well_ids <- unique(rehabs$well_id[1:20])
+idx <- model_data_reduced$well_id \%in\% well_ids
+tibble::as_tibble(model_data_reduced[idx, ])
+
+}
 \keyword{datasets}

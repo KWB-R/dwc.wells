@@ -9,4 +9,7 @@
 #'   \item{n_rehab}{number of well rehabilitations}
 #'   \item{rehab_date}{date of well rehabilitation}
 #' }
+#' @examples
+#' head(rehabs, n = 20)
+#'
 "rehabs"

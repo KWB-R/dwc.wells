@@ -34,4 +34,9 @@
 #'   \item{quality.TSS}{water quality: Total Suspended Solids (mg/l)}
 #' }
 #' @import parsnip tibble rsample
+#' @examples
+#' well_ids <- unique(rehabs$well_id[1:20])
+#' idx <- model_data_reduced$well_id %in% well_ids
+#' tibble::as_tibble(model_data_reduced[idx, ])
+#'
 "model_data_reduced"

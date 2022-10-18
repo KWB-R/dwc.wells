@@ -19,4 +19,8 @@ rehabs
 Well rehabilitations for all wells (prepared with R script in
 /data-raw/prepare_model_data.R)
 }
+\examples{
+head(rehabs, n = 20)
+
+}
 \keyword{datasets}
