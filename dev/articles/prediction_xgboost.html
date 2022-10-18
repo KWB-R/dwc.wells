@@ -115,7 +115,7 @@
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">filter()</span>  masks <span style="color: #0000BB;">stats</span>::filter()</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">lag()</span>     masks <span style="color: #0000BB;">stats</span>::lag()</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">recipes</span>::<span style="color: #00BB00;">step()</span>  masks <span style="color: #0000BB;">stats</span>::step()</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">•</span> Use <span style="color: #00BB00;">tidymodels_prefer()</span> to resolve common conflicts.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">•</span> Search for functions across packages at <span style="color: #00BB00;">https://www.tidymodels.org/find/</span></span></span>
 <span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">dwc.wells</span><span class="fu">::</span><span class="va"><a href="../reference/model_data_reduced.html">model_data_reduced</a></span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 'data.frame':    6308 obs. of  27 variables:</span></span>
@@ -152,80 +152,16 @@
 </h2>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="va">resampling</span> <span class="op">&lt;-</span> <span class="st">"random"</span></span>
-<span><span class="co">#resampling &lt;- "by_well"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="va">resampling</span> <span class="op">==</span> <span class="st">"random"</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="va">resampled_dataset</span> <span class="op">&lt;-</span> <span class="fu">dwc.wells</span><span class="fu">::</span><span class="fu"><a href="../reference/resample_dataset.html">resample_dataset</a></span><span class="op">(</span></span>
+<span>  model_data <span class="op">=</span> <span class="va">df</span>, </span>
+<span>  method <span class="op">=</span> <span class="st">"random"</span>,</span>
+<span>  prop <span class="op">=</span> <span class="fl">0.8</span></span>
+<span>  <span class="op">)</span></span>
 <span></span>
-<span>  <span class="co"># for regression</span></span>
-<span>  <span class="va">data_split</span> <span class="op">&lt;-</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html" class="external-link">initial_split</a></span><span class="op">(</span><span class="va">df</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">well_id</span><span class="op">)</span>,</span>
-<span>                                       prop <span class="op">=</span> <span class="fl">0.8</span>,</span>
-<span>                                       strata <span class="op">=</span> <span class="va">Qs_rel</span><span class="op">)</span></span>
-<span>  <span class="va">df_training</span> <span class="op">&lt;-</span> <span class="va">data_split</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html" class="external-link">training</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="va">df_test</span> <span class="op">&lt;-</span> <span class="va">data_split</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html" class="external-link">testing</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span></span>
-<span><span class="co"># version 2: splitting per well ids</span></span>
-<span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="va">resampling</span> <span class="op">==</span> <span class="st">"by_well"</span><span class="op">)</span> <span class="op">{</span></span>
-<span></span>
-<span>  <span class="va">well_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">well_id</span><span class="op">)</span></span>
-<span>  <span class="va">train_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">well_ids</span>, <span class="fl">0.8</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">well_ids</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">test_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">well_ids</span>, <span class="va">train_ids</span><span class="op">)</span></span>
-<span>  <span class="va">df_training</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">well_id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">train_ids</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">well_id</span><span class="op">)</span></span>
-<span>  <span class="va">df_test</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">well_id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">test_ids</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">well_id</span><span class="op">)</span></span>
-<span>  </span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="va">df_training</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5,044 × 26</span></span></span>
-<span><span class="co">#&gt;    Qs_rel well_age_years const…¹ scree…² diame…³ drill…⁴ admis…⁵ opera…⁶ aquif…⁷</span></span>
-<span><span class="co">#&gt;     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   31.5           42.3    <span style="text-decoration: underline;">1</span>970 5bad81…     300 bbdca1…   176      39.1 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   20.7           44.2    <span style="text-decoration: underline;">1</span>970 5bad81…     300 bbdca1…   176      39.1 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   16.3           47.9    <span style="text-decoration: underline;">1</span>970 5bad81…     300 bbdca1…   176      39.1 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   22.4           47.9    <span style="text-decoration: underline;">1</span>970 5bad81…     300 bbdca1…   176      39.1 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   25.6           25.8    <span style="text-decoration: underline;">1</span>993 93242c…     393 bbdca1…    93.5    44.7 971dbb…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   19.0           16.2    <span style="text-decoration: underline;">1</span>993 93242c…     393 bbdca1…    42      24.8 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   28.9           16.3    <span style="text-decoration: underline;">1</span>993 93242c…     393 bbdca1…    42      24.8 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   37.5           15.9    <span style="text-decoration: underline;">1</span>993 93242c…     393 bbdca1…    40      21.3 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   35.1           24.4    <span style="text-decoration: underline;">1</span>993 93242c…     393 bbdca1…    40      21.3 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   30.4           20.7    <span style="text-decoration: underline;">1</span>993 93242c…     393 bbdca1…   119      28.5 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 5,034 more rows, 17 more variables: W_static.sd &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   surface_water.distance &lt;fct&gt;, n_rehab &lt;int&gt;, time_since_rehab_years &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   volume_m3_d.mean &lt;dbl&gt;, volume_m3_d.cv &lt;dbl&gt;, quality.EC &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   quality.DO &lt;dbl&gt;, quality.Temp &lt;dbl&gt;, quality.pH &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   quality.Redox &lt;dbl&gt;, quality.Fe_tot &lt;dbl&gt;, quality.Mn &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   quality.NO3 &lt;dbl&gt;, quality.PO4 &lt;dbl&gt;, quality.SO4 &lt;dbl&gt;, quality.TSS &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   and abbreviated variable names ¹​construction_year, ²​screen_material, …</span></span></span>
-<span><span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="va">df_test</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,264 × 26</span></span></span>
-<span><span class="co">#&gt;    Qs_rel well_age_years const…¹ scree…² diame…³ drill…⁴ admis…⁵ opera…⁶ aquif…⁷</span></span>
-<span><span class="co">#&gt;     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   97.8          23.2     <span style="text-decoration: underline;">1</span>970 5bad81…     300 bbdca1…   176      39.1 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   78.5          29.5     <span style="text-decoration: underline;">1</span>970 5bad81…     300 bbdca1…   176      39.1 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   52.2          35.0     <span style="text-decoration: underline;">1</span>970 5bad81…     300 bbdca1…   176      39.1 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   27.2          42.9     <span style="text-decoration: underline;">1</span>970 5bad81…     300 bbdca1…   176      39.1 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   35.1          20.9     <span style="text-decoration: underline;">1</span>993 93242c…     393 bbdca1…    93.5    44.7 971dbb…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   82.7           6.07    <span style="text-decoration: underline;">1</span>993 93242c…     393 bbdca1…    42      24.8 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   26.8          20.9     <span style="text-decoration: underline;">1</span>993 93242c…     393 bbdca1…    40      21.3 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   16.9          24.4     <span style="text-decoration: underline;">1</span>993 93242c…     393 bbdca1…    40      21.3 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   56.1          16.5     <span style="text-decoration: underline;">1</span>993 93242c…     393 bbdca1…   119      28.5 79316b…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   68.5           6.11    <span style="text-decoration: underline;">1</span>993 93242c…     393 bbdca1…    75      33.5 cd060b…</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 1,254 more rows, 17 more variables: W_static.sd &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   surface_water.distance &lt;fct&gt;, n_rehab &lt;int&gt;, time_since_rehab_years &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   volume_m3_d.mean &lt;dbl&gt;, volume_m3_d.cv &lt;dbl&gt;, quality.EC &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   quality.DO &lt;dbl&gt;, quality.Temp &lt;dbl&gt;, quality.pH &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   quality.Redox &lt;dbl&gt;, quality.Fe_tot &lt;dbl&gt;, quality.Mn &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   quality.NO3 &lt;dbl&gt;, quality.PO4 &lt;dbl&gt;, quality.SO4 &lt;dbl&gt;, quality.TSS &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   and abbreviated variable names ¹​construction_year, ²​screen_material, …</span></span></span></code></pre></div>
+<span><span class="va">df_training</span> <span class="op">&lt;-</span> <span class="va">resampled_dataset</span><span class="op">$</span><span class="va">training</span></span>
+<span><span class="va">df_test</span> <span class="op">&lt;-</span> <span class="va">resampled_dataset</span><span class="op">$</span><span class="va">testing</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="regression">Regression<a class="anchor" aria-label="anchor" href="#regression"></a>
