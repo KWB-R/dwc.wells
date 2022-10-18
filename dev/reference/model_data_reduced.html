@@ -150,6 +150,34 @@
 
 </dl></div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">well_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">rehabs</span><span class="op">$</span><span class="va">well_id</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">idx</span> <span class="op">&lt;-</span> <span class="va">model_data_reduced</span><span class="op">$</span><span class="va">well_id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">well_ids</span></span></span>
+<span class="r-in"><span><span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="va">model_data_reduced</span><span class="op">[</span><span class="va">idx</span>, <span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 43 × 27</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Qs_rel well_id well_age_years const…¹ scree…² diame…³ drill…⁴ admis…⁵ opera…⁶</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 100       <span style="text-decoration: underline;">9</span>690           0       <span style="text-decoration: underline;">1</span>991 d94670…     350 bbdca1…    50      50.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>  70.5     <span style="text-decoration: underline;">9</span>690           3.79    <span style="text-decoration: underline;">1</span>991 d94670…     350 bbdca1…    50      50.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>   9.68    <span style="text-decoration: underline;">9</span>690          13.2     <span style="text-decoration: underline;">1</span>991 d94670…     350 bbdca1…    50      50.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>  44.6     <span style="text-decoration: underline;">9</span>690          13.4     <span style="text-decoration: underline;">1</span>991 d94670…     350 bbdca1…    50      50.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 100       <span style="text-decoration: underline;">3</span>328           0       <span style="text-decoration: underline;">1</span>995 93242c…     400 bbdca1…    46.8    25.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>  76.7     <span style="text-decoration: underline;">3</span>328           5.92    <span style="text-decoration: underline;">1</span>995 93242c…     400 bbdca1…    46.8    25.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>  86.5     <span style="text-decoration: underline;">3</span>328           5.96    <span style="text-decoration: underline;">1</span>995 93242c…     400 bbdca1…    46.8    25.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>  39.4     <span style="text-decoration: underline;">3</span>328          14.5     <span style="text-decoration: underline;">1</span>995 93242c…     400 bbdca1…    46.8    25.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>  60.3     <span style="text-decoration: underline;">3</span>328          14.6     <span style="text-decoration: underline;">1</span>995 93242c…     400 bbdca1…    46.8    25.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>  19.9     <span style="text-decoration: underline;">3</span>328          17.2     <span style="text-decoration: underline;">1</span>995 93242c…     400 bbdca1…    46.8    25.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 33 more rows, 18 more variables: aquifer_coverage &lt;fct&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   W_static.sd &lt;dbl&gt;, surface_water.distance &lt;fct&gt;, n_rehab &lt;int&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   time_since_rehab_years &lt;dbl&gt;, volume_m3_d.mean &lt;dbl&gt;, volume_m3_d.cv &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   quality.EC &lt;dbl&gt;, quality.DO &lt;dbl&gt;, quality.Temp &lt;dbl&gt;, quality.pH &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   quality.Redox &lt;dbl&gt;, quality.Fe_tot &lt;dbl&gt;, quality.Mn &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   quality.NO3 &lt;dbl&gt;, quality.PO4 &lt;dbl&gt;, quality.SO4 &lt;dbl&gt;, quality.TSS &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   and abbreviated variable names ¹​construction_year, ²​screen_material, …</span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 
