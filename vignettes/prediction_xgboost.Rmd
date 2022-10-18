@@ -42,41 +42,16 @@ str(df)
 
 ```{r input_resampling}
 
-resampling <- "random"
-#resampling <- "by_well"
 set.seed(1)
 
-if (resampling == "random") {
+resampled_dataset <- dwc.wells::resample_dataset(
+  model_data = df, 
+  method = "random",
+  prop = 0.8
+  )
 
-  # for regression
-  data_split <- rsample::initial_split(df %>% dplyr::select(-well_id),
-                                       prop = 0.8,
-                                       strata = Qs_rel)
-  df_training <- data_split %>% rsample::training()
-  df_test <- data_split %>% rsample::testing()
-
-}
-
-
-# version 2: splitting per well ids
-
-if (resampling == "by_well") {
-
-  well_ids <- unique(df$well_id)
-  train_ids <- sample(well_ids, 0.8 * length(well_ids))
-  test_ids <- setdiff(well_ids, train_ids)
-  df_training <- df %>%
-    dplyr::filter(well_id %in% train_ids) %>%
-    dplyr::select(-well_id)
-  df_test <- df %>%
-    dplyr::filter(well_id %in% test_ids) %>%
-    dplyr::select(-well_id)
-  
-}
-
-tibble::as_tibble(df_training)
-tibble::as_tibble(df_test)
-
+df_training <- resampled_dataset$training
+df_test <- resampled_dataset$testing
 ```
 
 ## Regression

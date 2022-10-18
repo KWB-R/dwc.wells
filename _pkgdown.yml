@@ -84,6 +84,7 @@ reference:
       Functions for ML-modelling
     contents:
       - get_predictions
+      - resample_dataset
       - prepare_simulation_donothing_df
 
 
