@@ -1,13 +1,16 @@
 
 source("inst/extdata/scripts/global.R")
 source("inst/extdata/scripts/ml_resampling.R")
+source("inst/extdata/scripts/ml_xgboost.R")
+
+sim_reference_date <- as.Date("2021-05-01")
+#sim_reference_date <- Sys.Date()
 
 # filter only Betriebsbrunnen
 df <- well_feature_data %>% dplyr::filter(well_function == "Betriebsbrunnen" &
-                                            operational_state == "betriebsbereit")
+                                    operational_state == "betriebsbereit")
 
-# fill up NA values
-df <- fill_up_na_with_median_from_lookup(df, df)
+df <- dwc.wells:::fill_up_na_with_median_from_lookup(df, df)
 
 # drop unused factor levels
 df <- df %>% droplevels()
@@ -27,64 +30,70 @@ rehab_data <- prepare_pump_test_data_1(paths$data_pump_tests, renamings, df_well
   dplyr::ungroup()
 
 # get well id and operational start date
-well_start_dates <- df %>% select(well_id, operational_start.date) %>% unique()
+
+well_start_dates <- df %>%
+  dplyr::select(well_id, operational_start.date)  %>%
+  unique()
 
 # get well id and age combinations
-well_ages <- df %>% group_by(well_id) %>% tidyr::expand(well_age_years = seq.int(0, 60, 1))
+well_ages <- df %>%
+  dplyr::group_by(well_id) %>%
+  tidyr::expand(well_age_years = seq.int(0, 60, 1))
 
 # combine both and calculate sim dates
 library(lubridate)
 well_ages_dates <- well_start_dates %>%
-  left_join(well_ages) %>%
-  mutate(sim_date = operational_start.date %m+% years(well_age_years)) %>%
-  select(-operational_start.date)
+  dplyr::left_join(well_ages) %>%
+  dplyr::mutate(sim_date = operational_start.date %m+% years(well_age_years)) %>%
+  dplyr::select(-operational_start.date)
 
 # tmp data 1
 sim_data_tmp1 <- rehab_data %>%
-  rename(sim_date = action_date) %>%
-  mutate(well_age_years = NA) %>%
-  select(well_id, sim_date, well_age_years, n_rehab)
+  dplyr::rename(sim_date = action_date) %>%
+  dplyr::mutate(well_age_years = NA) %>%
+  dplyr::select(well_id, sim_date, well_age_years, n_rehab)
 
 # tmp data 2
 sim_data_tmp2 <- well_ages_dates %>%
-  mutate(n_rehab = NA) %>%
-  select(well_id, sim_date, well_age_years, n_rehab)
+  dplyr::mutate(n_rehab = as.factor(NA)) %>%
+  dplyr::select(well_id, sim_date, well_age_years, n_rehab)
 
 # create sim data
 sim_data_base <- rbind(sim_data_tmp1, sim_data_tmp2) %>%
-  arrange(well_id, sim_date) %>%
-  left_join(rehab_data %>% select(well_id, action_date, n_rehab)) %>%
-  group_by(well_id) %>%
+  dplyr::arrange(well_id, sim_date) %>%
+  dplyr::left_join(rehab_data %>%
+                     dplyr::select(well_id, action_date, n_rehab)) %>%
+  dplyr::group_by(well_id) %>%
   tidyr::fill(c(n_rehab, action_date), .direction = "down") %>%
-  mutate(time_since_rehab_years = lubridate::time_length(sim_date - action_date, "years")) %>%
-  mutate(n_rehab = ifelse(is.na(n_rehab), 0, n_rehab),
+  dplyr::mutate(time_since_rehab_years = lubridate::time_length(sim_date - action_date, "years")) %>%
+  dplyr::mutate(n_rehab = ifelse(is.na(n_rehab), 0, n_rehab),
          time_since_rehab_years = ifelse(is.na(time_since_rehab_years),
                                          well_age_years,
                                          time_since_rehab_years)) %>%
-  mutate(type = ifelse(sim_date < as.Date("2021-05-01"), "past", "future")) %>%
-  filter(!is.na(well_age_years)) %>%
-  select(-action_date) %>%
-  ungroup()
+  dplyr::mutate(type = ifelse(sim_date < sim_reference_date, "past", "future")) %>%
+  dplyr::filter(!is.na(well_age_years)) %>%
+  dplyr::select(-action_date) %>%
+  dplyr::ungroup()
 
 
 # create sim data
-sim_data <- sim_data_base %>%
-  left_join(df, by = "well_id") %>%
+sim_data_donothing <- sim_data_base %>%
+  dplyr::left_join(df, by = "well_id") %>%
   data.frame() %>%
-  select(well_id, all_of(model_features), type) %>%
+  dplyr::select(well_id, sim_date, type, all_of(model_features)) %>%
   # remove correlated variables
-  select(-c(well_depth, quality.DR, quality.P_tot,
+  dplyr::select(-c(well_depth, quality.DR, quality.P_tot,
             volume_m3_d.sd, waterworks, surface_water)) %>%
   # remove unimportant variables
-  select(-c(n_screens, filter_length, quality.Cu, inliner)) %>%
+  dplyr::select(-c(n_screens, filter_length, quality.Cu, inliner)) %>%
   # set inliner in screen_material to "Unbekannt
   dplyr::mutate(screen_material = replace(
     screen_material, screen_material == "Inliner", "Unbekannt"
   ) %>% forcats::fct_drop())
-
+usethis::use_data(sim_data_donothing)
 
 sim_data_pred <- predict(xgb_fit, sim_data) %>%
-  mutate(.pred = ifelse(.pred < 0, 0, .pred))
+  dplyr::mutate(.pred = ifelse(.pred < 0, 0, .pred))
 names(sim_data_pred) <- "Qs_rel"
 predictions <- cbind(sim_data, sim_data_pred)
 length(unique(predictions$well_id))
