@@ -1,4 +1,4 @@
-
+library(dwc.wells)
 wells <- dwc.wells::model_data %>%
   dplyr::select(.data$well_id,
                 .data$date,
@@ -72,7 +72,7 @@ obs_new <- obs_df %>%
 
 
 predictions <- dwc.wells::get_predictions(model = xgb_fit,
-                                          sim_data = dwc.wells::sim_data_donothing)
+                                          sim_data = sim_data_donothing)
 
 
 pred_new <- predictions %>%
@@ -102,6 +102,65 @@ tab <- pred_new %>%
                                              .data$observation),
                 both = .data$prediction + .data$observation)
 
+
+## Well observations without interpolations
+
+observations_no_interpolation <- function(method = "paired") {
+
+  wells_tmp <-  wells %>%
+    dplyr::mutate(sim_year = format(.data$date,
+                                format = "%Y") %>%
+                    as.integer())
+
+
+  if (method == "paired") {
+    return(lapply(unique(wells_tmp$sim_year), function(year) {
+      well_ids <- tab$well_id[tab$both == 2 & tab$sim_year == year]
+      wells_tmp  %>%
+        dplyr::filter(.data$sim_year == year,
+                      .data$well_id %in% well_ids) %>%
+        dplyr::count(.data$well_id, .data$sim_year) %>%
+        dplyr::select(-.data$n) %>%
+        dplyr::count(.data$sim_year) %>%
+        dplyr::rename(n_wells_observed_no_interpolation = .data$n)}
+    ) %>%
+      dplyr::bind_rows() %>%
+      dplyr::arrange(.data$sim_year))
+  }
+
+  wells_tmp %>%
+    dplyr::count(.data$well_id, .data$sim_year) %>%
+    dplyr::select(-.data$n) %>%
+    dplyr::count(.data$sim_year) %>%
+    dplyr::rename(n_wells_observed_no_interpolation = .data$n) %>%
+    dplyr::arrange(.data$sim_year)
+
+}
+
+obs_nointerpol_paired <- observations_no_interpolation("paired")
+obs_nointerpol_nonpaired <- observations_no_interpolation("non-paired")
+
+
+obs_nointerpol <- obs_nointerpol_paired  %>%
+  dplyr::rename(n_wells_observed_no_interpolation_paired = .data$n_wells_observed_no_interpolation) %>%
+  dplyr::full_join(obs_nointerpol_nonpaired  %>%
+                     dplyr::rename(n_wells_observed_no_interpolation_nonpaired = .data$n_wells_observed_no_interpolation)
+  )
+
+View(obs_nointerpol)
+
+gg0 <- obs_nointerpol %>%
+  tidyr::pivot_longer(cols = - .data$sim_year) %>%
+ggplot2::ggplot(ggplot2::aes(x = .data$sim_year,
+                             y = .data$value,
+                             col = .data$name)) +
+  #ggplot2::facet_wrap(~ .data$name, nrow = 4, ncol = 1, scales = "free_y") +
+  ggplot2::geom_line() +
+  ggplot2::geom_point() +
+  ggplot2::theme_bw()
+
+htmlwidgets::saveWidget(plotly::ggplotly(gg0),
+                        "observations_no-interpolation.html")
 
 ### Well in observation and prediction year
 pred_obs_wells <- tab[tab$both == 2,] %>%
