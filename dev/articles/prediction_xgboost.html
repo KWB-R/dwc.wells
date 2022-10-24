@@ -70,7 +70,8 @@
 
 
 
-<script src="prediction_xgboost_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+
+<div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>xgboost</h1>
                         <h4 data-toc-skip class="author">Mathias Riechel, Michael Rustler</h4>
@@ -115,7 +116,7 @@
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">filter()</span>  masks <span style="color: #0000BB;">stats</span>::filter()</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">lag()</span>     masks <span style="color: #0000BB;">stats</span>::lag()</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">recipes</span>::<span style="color: #00BB00;">step()</span>  masks <span style="color: #0000BB;">stats</span>::step()</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">•</span> Use <span style="color: #00BB00;">tidymodels_prefer()</span> to resolve common conflicts.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">•</span> Learn how to get started at <span style="color: #00BB00;">https://www.tidymodels.org/start/</span></span></span>
 <span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">dwc.wells</span><span class="fu">::</span><span class="va"><a href="../reference/model_data_reduced.html">model_data_reduced</a></span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 'data.frame':    6308 obs. of  27 variables:</span></span>
@@ -169,91 +170,91 @@
 <div class="section level3">
 <h3 id="hyperparameter-tuning">Hyperparameter Tuning<a class="anchor" aria-label="anchor" href="#hyperparameter-tuning"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># Hyperparameter tuning --------------------------------------------------------</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a></span>
-<span id="cb4-3"><a href="#cb4-3"></a> <span class="co"># specify model</span></span>
-<span id="cb4-4"><a href="#cb4-4"></a>  xgb_model &lt;-<span class="st"> </span>parsnip<span class="op">::</span><span class="kw">boost_tree</span>(</span>
-<span id="cb4-5"><a href="#cb4-5"></a>    <span class="dt">trees =</span> <span class="dv">500</span>,</span>
-<span id="cb4-6"><a href="#cb4-6"></a>    <span class="dt">tree_depth =</span> tune<span class="op">::</span><span class="kw">tune</span>(), <span class="co">## model complexity</span></span>
-<span id="cb4-7"><a href="#cb4-7"></a>    <span class="dt">min_n =</span> tune<span class="op">::</span><span class="kw">tune</span>(), <span class="co">## model complexity</span></span>
-<span id="cb4-8"><a href="#cb4-8"></a>    <span class="dt">loss_reduction =</span> tune<span class="op">::</span><span class="kw">tune</span>(), <span class="co">## model complexity</span></span>
-<span id="cb4-9"><a href="#cb4-9"></a>    <span class="dt">sample_size =</span> tune<span class="op">::</span><span class="kw">tune</span>(), <span class="co">## randomness</span></span>
-<span id="cb4-10"><a href="#cb4-10"></a>    <span class="dt">mtry =</span> tune<span class="op">::</span><span class="kw">tune</span>(), <span class="co">## randomness</span></span>
-<span id="cb4-11"><a href="#cb4-11"></a>    <span class="dt">learn_rate =</span> tune<span class="op">::</span><span class="kw">tune</span>(), <span class="co">## step size</span></span>
-<span id="cb4-12"><a href="#cb4-12"></a>  ) <span class="op">%&gt;%</span></span>
-<span id="cb4-13"><a href="#cb4-13"></a><span class="st">    </span>parsnip<span class="op">::</span><span class="kw">set_engine</span>(<span class="st">"xgboost"</span>) <span class="op">%&gt;%</span></span>
-<span id="cb4-14"><a href="#cb4-14"></a><span class="st">    </span>parsnip<span class="op">::</span><span class="kw">set_mode</span>(<span class="st">"regression"</span>)</span>
-<span id="cb4-15"><a href="#cb4-15"></a></span>
-<span id="cb4-16"><a href="#cb4-16"></a>  <span class="co"># set up workflow</span></span>
-<span id="cb4-17"><a href="#cb4-17"></a>  xgb_wf &lt;-<span class="st"> </span>workflows<span class="op">::</span><span class="kw">workflow</span>() <span class="op">%&gt;%</span></span>
-<span id="cb4-18"><a href="#cb4-18"></a><span class="st">    </span>workflows<span class="op">::</span><span class="kw">add_formula</span>(Qs_rel <span class="op">~</span><span class="st"> </span>.) <span class="op">%&gt;%</span></span>
-<span id="cb4-19"><a href="#cb4-19"></a><span class="st">    </span>workflows<span class="op">::</span><span class="kw">add_model</span>(xgb_model)</span>
-<span id="cb4-20"><a href="#cb4-20"></a></span>
-<span id="cb4-21"><a href="#cb4-21"></a>  <span class="co"># hyperparameter sampling v1</span></span>
-<span id="cb4-22"><a href="#cb4-22"></a>  <span class="co"># xgb_grid &lt;- dials::grid_random(dials::tree_depth(),</span></span>
-<span id="cb4-23"><a href="#cb4-23"></a>  <span class="co">#                                dials::min_n(),</span></span>
-<span id="cb4-24"><a href="#cb4-24"></a>  <span class="co">#                                dials::loss_reduction(),</span></span>
-<span id="cb4-25"><a href="#cb4-25"></a>  <span class="co">#                                sample_size = dials::sample_prop(),</span></span>
-<span id="cb4-26"><a href="#cb4-26"></a>  <span class="co">#                                dials::finalize(dials::mtry(), df_training),</span></span>
-<span id="cb4-27"><a href="#cb4-27"></a>  <span class="co">#                                dials::learn_rate(range = c(0.01, 0.1), </span></span>
-<span id="cb4-28"><a href="#cb4-28"></a>  <span class="co">#                                                  trans = NULL),</span></span>
-<span id="cb4-29"><a href="#cb4-29"></a>  <span class="co">#                                size = 1000)</span></span>
-<span id="cb4-30"><a href="#cb4-30"></a></span>
-<span id="cb4-31"><a href="#cb4-31"></a>    <span class="co"># hyperparameter sampling v2</span></span>
-<span id="cb4-32"><a href="#cb4-32"></a>  xgb_grid &lt;-<span class="st"> </span>dials<span class="op">::</span><span class="kw">grid_latin_hypercube</span>(</span>
-<span id="cb4-33"><a href="#cb4-33"></a>    dials<span class="op">::</span><span class="kw">tree_depth</span>(),</span>
-<span id="cb4-34"><a href="#cb4-34"></a>    dials<span class="op">::</span><span class="kw">min_n</span>(),</span>
-<span id="cb4-35"><a href="#cb4-35"></a>    dials<span class="op">::</span><span class="kw">loss_reduction</span>(),</span>
-<span id="cb4-36"><a href="#cb4-36"></a>    <span class="dt">sample_size =</span> dials<span class="op">::</span><span class="kw">sample_prop</span>(),</span>
-<span id="cb4-37"><a href="#cb4-37"></a>    dials<span class="op">::</span><span class="kw">finalize</span>(dials<span class="op">::</span><span class="kw">mtry</span>(), df_training),</span>
-<span id="cb4-38"><a href="#cb4-38"></a>    dials<span class="op">::</span><span class="kw">learn_rate</span>(),</span>
-<span id="cb4-39"><a href="#cb4-39"></a>    <span class="dt">size =</span> <span class="dv">500</span></span>
-<span id="cb4-40"><a href="#cb4-40"></a>  )</span>
-<span id="cb4-41"><a href="#cb4-41"></a></span>
-<span id="cb4-42"><a href="#cb4-42"></a>  <span class="co"># define cross validation procedure</span></span>
-<span id="cb4-43"><a href="#cb4-43"></a>  cv_folds &lt;-<span class="st"> </span>rsample<span class="op">::</span><span class="kw">vfold_cv</span>(df_training, <span class="dt">v =</span> <span class="dv">5</span>)</span>
-<span id="cb4-44"><a href="#cb4-44"></a></span>
-<span id="cb4-45"><a href="#cb4-45"></a>  <span class="co"># set up random grid with 20 combinations for first screening</span></span>
-<span id="cb4-46"><a href="#cb4-46"></a>  doParallel<span class="op">::</span><span class="kw">registerDoParallel</span>()</span>
-<span id="cb4-47"><a href="#cb4-47"></a></span>
-<span id="cb4-48"><a href="#cb4-48"></a>  <span class="co"># test different hyperparameters via cross validation on training data</span></span>
-<span id="cb4-49"><a href="#cb4-49"></a>  <span class="kw">set.seed</span>(<span class="dv">234</span>)</span>
-<span id="cb4-50"><a href="#cb4-50"></a>  xgb_tuning &lt;-<span class="st"> </span>tune<span class="op">::</span><span class="kw">tune_grid</span>(</span>
-<span id="cb4-51"><a href="#cb4-51"></a>    xgb_wf,</span>
-<span id="cb4-52"><a href="#cb4-52"></a>    <span class="dt">resamples =</span> cv_folds,</span>
-<span id="cb4-53"><a href="#cb4-53"></a>    <span class="dt">grid =</span> xgb_grid,</span>
-<span id="cb4-54"><a href="#cb4-54"></a>    <span class="dt">control =</span> tune<span class="op">::</span><span class="kw">control_grid</span>(<span class="dt">save_pred =</span> <span class="ot">TRUE</span>)</span>
-<span id="cb4-55"><a href="#cb4-55"></a>  )</span>
-<span id="cb4-56"><a href="#cb4-56"></a></span>
-<span id="cb4-57"><a href="#cb4-57"></a>  <span class="co"># get assessment metrics</span></span>
-<span id="cb4-58"><a href="#cb4-58"></a>  metrics &lt;-<span class="st"> </span>tune<span class="op">::</span><span class="kw">collect_metrics</span>(xgb_tuning)</span>
-<span id="cb4-59"><a href="#cb4-59"></a>  </span>
-<span id="cb4-60"><a href="#cb4-60"></a>  dwc.wells<span class="op">::</span><span class="kw">save_data</span>(metrics, </span>
-<span id="cb4-61"><a href="#cb4-61"></a>                       <span class="dt">path =</span> <span class="kw">getwd</span>(), </span>
-<span id="cb4-62"><a href="#cb4-62"></a>                       <span class="dt">filename =</span> <span class="st">"metrics_tuning_xgb_random_resampling"</span>)</span>
-<span id="cb4-63"><a href="#cb4-63"></a></span>
-<span id="cb4-64"><a href="#cb4-64"></a>  <span class="co"># visualise results</span></span>
-<span id="cb4-65"><a href="#cb4-65"></a>  metrics <span class="op">%&gt;%</span></span>
-<span id="cb4-66"><a href="#cb4-66"></a><span class="st">    </span><span class="co">#filter(learn_rate &gt; 0.01) %&gt;%</span></span>
-<span id="cb4-67"><a href="#cb4-67"></a><span class="st">    </span>dplyr<span class="op">::</span><span class="kw">filter</span>(.metric <span class="op">==</span><span class="st"> "rmse"</span>) <span class="op">%&gt;%</span></span>
-<span id="cb4-68"><a href="#cb4-68"></a><span class="st">    </span>dplyr<span class="op">::</span><span class="kw">select</span>(mean, min_n, mtry, tree_depth, learn_rate, loss_reduction, sample_size) <span class="op">%&gt;%</span></span>
-<span id="cb4-69"><a href="#cb4-69"></a><span class="st">    </span>tidyr<span class="op">::</span><span class="kw">pivot_longer</span>(<span class="kw">c</span>(min_n, mtry, tree_depth, learn_rate, loss_reduction, sample_size),</span>
-<span id="cb4-70"><a href="#cb4-70"></a>                        <span class="dt">values_to =</span> <span class="st">"value"</span>,</span>
-<span id="cb4-71"><a href="#cb4-71"></a>                        <span class="dt">names_to =</span> <span class="st">"parameter"</span>) <span class="op">%&gt;%</span></span>
-<span id="cb4-72"><a href="#cb4-72"></a><span class="st">    </span>ggplot2<span class="op">::</span><span class="kw">ggplot</span>(ggplot2<span class="op">::</span><span class="kw">aes</span>(value, mean, <span class="dt">color =</span> parameter)) <span class="op">+</span></span>
-<span id="cb4-73"><a href="#cb4-73"></a><span class="st">    </span>ggplot2<span class="op">::</span><span class="kw">geom_point</span>(<span class="dt">show.legend =</span> <span class="ot">FALSE</span>, <span class="dt">size =</span> <span class="fl">0.5</span>) <span class="op">+</span></span>
-<span id="cb4-74"><a href="#cb4-74"></a><span class="st">    </span>ggplot2<span class="op">::</span><span class="kw">facet_wrap</span>(<span class="op">~</span>parameter, <span class="dt">scales =</span> <span class="st">"free"</span>) <span class="op">+</span></span>
-<span id="cb4-75"><a href="#cb4-75"></a><span class="st">    </span>ggplot2<span class="op">::</span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="ot">NULL</span>, <span class="dt">y =</span> <span class="st">"RMSE [%]"</span>) <span class="op">+</span></span>
-<span id="cb4-76"><a href="#cb4-76"></a><span class="st">    </span>sema.berlin.utils<span class="op">::</span><span class="kw">my_theme</span>()</span>
-<span id="cb4-77"><a href="#cb4-77"></a></span>
-<span id="cb4-78"><a href="#cb4-78"></a>ggplot2<span class="op">::</span><span class="kw">ggsave</span>(<span class="st">"xgb_regression_hyperparameter_tuning_plot_random_resampling_1000_v2.png"</span>, </span>
-<span id="cb4-79"><a href="#cb4-79"></a>                <span class="dt">width =</span> <span class="dv">8</span>, </span>
-<span id="cb4-80"><a href="#cb4-80"></a>                <span class="dt">height =</span> <span class="dv">4</span>, </span>
-<span id="cb4-81"><a href="#cb4-81"></a>                <span class="dt">dpi =</span> <span class="dv">600</span>)</span>
-<span id="cb4-82"><a href="#cb4-82"></a></span>
-<span id="cb4-83"><a href="#cb4-83"></a>  <span class="co"># after example from https://juliasilge.com/blog/xgboost-tune-volleyball/</span></span>
-<span id="cb4-84"><a href="#cb4-84"></a></span>
-<span id="cb4-85"><a href="#cb4-85"></a><span class="er">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hyperparameter tuning --------------------------------------------------------</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a> <span class="co"># specify model</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  xgb_model <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">boost_tree</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">trees =</span> <span class="dv">500</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">tree_depth =</span> tune<span class="sc">::</span><span class="fu">tune</span>(), <span class="do">## model complexity</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">min_n =</span> tune<span class="sc">::</span><span class="fu">tune</span>(), <span class="do">## model complexity</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">loss_reduction =</span> tune<span class="sc">::</span><span class="fu">tune</span>(), <span class="do">## model complexity</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">sample_size =</span> tune<span class="sc">::</span><span class="fu">tune</span>(), <span class="do">## randomness</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">mtry =</span> tune<span class="sc">::</span><span class="fu">tune</span>(), <span class="do">## randomness</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">learn_rate =</span> tune<span class="sc">::</span><span class="fu">tune</span>(), <span class="do">## step size</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    parsnip<span class="sc">::</span><span class="fu">set_engine</span>(<span class="st">"xgboost"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    parsnip<span class="sc">::</span><span class="fu">set_mode</span>(<span class="st">"regression"</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># set up workflow</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  xgb_wf <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">workflow</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    workflows<span class="sc">::</span><span class="fu">add_formula</span>(Qs_rel <span class="sc">~</span> .) <span class="sc">%&gt;%</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    workflows<span class="sc">::</span><span class="fu">add_model</span>(xgb_model)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># hyperparameter sampling v1</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># xgb_grid &lt;- dials::grid_random(dials::tree_depth(),</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  <span class="co">#                                dials::min_n(),</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  <span class="co">#                                dials::loss_reduction(),</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>  <span class="co">#                                sample_size = dials::sample_prop(),</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>  <span class="co">#                                dials::finalize(dials::mtry(), df_training),</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="co">#                                dials::learn_rate(range = c(0.01, 0.1), </span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  <span class="co">#                                                  trans = NULL),</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  <span class="co">#                                size = 1000)</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># hyperparameter sampling v2</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>  xgb_grid <span class="ot">&lt;-</span> dials<span class="sc">::</span><span class="fu">grid_latin_hypercube</span>(</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    dials<span class="sc">::</span><span class="fu">tree_depth</span>(),</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    dials<span class="sc">::</span><span class="fu">min_n</span>(),</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    dials<span class="sc">::</span><span class="fu">loss_reduction</span>(),</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">sample_size =</span> dials<span class="sc">::</span><span class="fu">sample_prop</span>(),</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    dials<span class="sc">::</span><span class="fu">finalize</span>(dials<span class="sc">::</span><span class="fu">mtry</span>(), df_training),</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    dials<span class="sc">::</span><span class="fu">learn_rate</span>(),</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="dv">500</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>  <span class="co"># define cross validation procedure</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>  cv_folds <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">vfold_cv</span>(df_training, <span class="at">v =</span> <span class="dv">5</span>)</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>  <span class="co"># set up random grid with 20 combinations for first screening</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>  doParallel<span class="sc">::</span><span class="fu">registerDoParallel</span>()</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>  <span class="co"># test different hyperparameters via cross validation on training data</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">234</span>)</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>  xgb_tuning <span class="ot">&lt;-</span> tune<span class="sc">::</span><span class="fu">tune_grid</span>(</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    xgb_wf,</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">resamples =</span> cv_folds,</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    <span class="at">grid =</span> xgb_grid,</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    <span class="at">control =</span> tune<span class="sc">::</span><span class="fu">control_grid</span>(<span class="at">save_pred =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>  <span class="co"># get assessment metrics</span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>  metrics <span class="ot">&lt;-</span> tune<span class="sc">::</span><span class="fu">collect_metrics</span>(xgb_tuning)</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>  dwc.wells<span class="sc">::</span><span class="fu">save_data</span>(metrics, </span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>                       <span class="at">path =</span> <span class="fu">getwd</span>(), </span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>                       <span class="at">filename =</span> <span class="st">"metrics_tuning_xgb_random_resampling"</span>)</span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>  <span class="co"># visualise results</span></span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>  metrics <span class="sc">%&gt;%</span></span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>    <span class="co">#filter(learn_rate &gt; 0.01) %&gt;%</span></span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(.metric <span class="sc">==</span> <span class="st">"rmse"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(mean, min_n, mtry, tree_depth, learn_rate, loss_reduction, sample_size) <span class="sc">%&gt;%</span></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="fu">c</span>(min_n, mtry, tree_depth, learn_rate, loss_reduction, sample_size),</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>                        <span class="at">values_to =</span> <span class="st">"value"</span>,</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>                        <span class="at">names_to =</span> <span class="st">"parameter"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(ggplot2<span class="sc">::</span><span class="fu">aes</span>(value, mean, <span class="at">color =</span> parameter)) <span class="sc">+</span></span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_point</span>(<span class="at">show.legend =</span> <span class="cn">FALSE</span>, <span class="at">size =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">facet_wrap</span>(<span class="sc">~</span>parameter, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"RMSE [%]"</span>) <span class="sc">+</span></span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>    sema.berlin.utils<span class="sc">::</span><span class="fu">my_theme</span>()</span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggsave</span>(<span class="st">"xgb_regression_hyperparameter_tuning_plot_random_resampling_1000_v2.png"</span>, </span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>                <span class="at">width =</span> <span class="dv">8</span>, </span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>                <span class="at">height =</span> <span class="dv">4</span>, </span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>                <span class="at">dpi =</span> <span class="dv">600</span>)</span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>  <span class="co"># after example from https://juliasilge.com/blog/xgboost-tune-volleyball/</span></span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a><span class="er">}</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="best-fit-model">Best-Fit Model<a class="anchor" aria-label="anchor" href="#best-fit-model"></a>
