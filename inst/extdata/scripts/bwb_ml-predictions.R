@@ -34,6 +34,14 @@ obs_list <- lapply(obs, function(df) {
     dplyr::summarise(Qs_rel = mean(.data$Qs_rel, na.rm = TRUE))
 })
 
+tmp <- obs$`162`[, -1L] %>%
+  as.data.frame() %>%
+  dplyr::mutate(date = as.POSIXct(.data$date, tz = "UTC")) %>%
+kwb.base::hsFillUp(tsField = "date", step_s = 86400L)
+
+
+plot(tmp$date, tmp$Qs_rel)
+points(tmp$date, tmp$Qs_rel_orig, col = "red")
 
 obs_df <- kwb.utils::rbindAll(obs_list, nameColumn = "well_id", namesAsFactor = FALSE) %>%
   dplyr::mutate(well_id = as.integer(well_id)) %>%
@@ -72,7 +80,7 @@ obs_new <- obs_df %>%
 
 
 predictions <- dwc.wells::get_predictions(model = xgb_fit,
-                                          sim_data = sim_data_donothing)
+                                          sim_data = dwc.wells::sim_data_donothing)
 
 
 pred_new <- predictions %>%
@@ -168,6 +176,8 @@ pred_obs_wells <- tab[tab$both == 2,] %>%
 
 
 
+waterdemand_yearly <- 215000000
+
 prep_observation_summary <- function(method = "paired")  {
   if(method == "paired") {
     pred_new_summary_list <- lapply(unique(pred_obs_wells$sim_year),
@@ -181,7 +191,12 @@ prep_observation_summary <- function(method = "paired")  {
                                         dplyr::summarise(admissible_discharge = sum(admissible_discharge * volume_m3_d.mean)/sum(volume_m3_d.mean),
                                                          Qs_observed = sum(Qs_observed * volume_m3_d.mean)/sum(volume_m3_d.mean),
                                                          Qs_start = sum(operational_start.Qs * volume_m3_d.mean)/sum(volume_m3_d.mean),
-                                                         n_wells_observed = dplyr::n()) %>%
+                                                         Q_observed_m3h_drawdown.2.4m = 2.4 * Qs_observed,
+                                                         Q_observed_m3h_drawdown.2.8m = 2.8 * Qs_observed,
+                                                         n_wells_observed = dplyr::n(),
+                                                         observed_hourly_production_rate_drawdown.2.4m = Q_observed_m3h_drawdown.2.4m * n_wells_observed,
+                                                         observed_hourly_production_rate_drawdown.2.8m = Q_observed_m3h_drawdown.2.8m * n_wells_observed
+                                                         ) %>%
                                         dplyr::mutate(Qs_rel_observed = 100 * Qs_observed / Qs_start,
                                                       drawdown_qs_observed_at_admissible_discharge = admissible_discharge / Qs_observed,
                                                       admissible_max_hourly_production_rate = n_wells_observed * admissible_discharge)
@@ -197,7 +212,11 @@ prep_observation_summary <- function(method = "paired")  {
     dplyr::summarise(admissible_discharge = sum(admissible_discharge * volume_m3_d.mean)/sum(volume_m3_d.mean),
                      Qs_observed = sum(Qs_observed * volume_m3_d.mean)/sum(volume_m3_d.mean),
                      Qs_start = sum(operational_start.Qs * volume_m3_d.mean)/sum(volume_m3_d.mean),
-                     n_wells_observed = dplyr::n()) %>%
+                     Q_observed_m3h_drawdown.2.4m = 2.4 * Qs_observed,
+                     Q_observed_m3h_drawdown.2.8m = 2.8 * Qs_observed,
+                     n_wells_observed = dplyr::n(),
+                     observed_hourly_production_rate_drawdown.2.4m = Q_observed_m3h_drawdown.2.4m * n_wells_observed,
+                     observed_hourly_production_rate_drawdown.2.8m = Q_observed_m3h_drawdown.2.8m * n_wells_observed) %>%
     dplyr::mutate(Qs_rel_observed = 100 * Qs_observed / Qs_start,
                   drawdown_qs_observed_at_admissible_discharge = admissible_discharge / Qs_observed,
                   admissible_max_hourly_production_rate = n_wells_observed * admissible_discharge)
@@ -221,6 +240,8 @@ pred_new_summary_list <- lapply(unique(pred_obs_wells$sim_year),
     admissible_discharge = sum(admissible_discharge * volume_m3_d.mean)/sum(volume_m3_d.mean),
     Qs_start = sum(Qs_start * volume_m3_d.mean)/sum(volume_m3_d.mean),
     Qs_prediction = sum(Qs_prediction * volume_m3_d.mean)/sum(volume_m3_d.mean),
+    Q_prediction_m3h_drawdown.2.4m = 2.4 * Qs_prediction,
+    Q_prediction_m3h_drawdown.2.8m = 2.8 * Qs_prediction,
     n_wells = dplyr::n()
     ) %>%
   dplyr::mutate(
@@ -242,7 +263,11 @@ return(dplyr::bind_rows(pred_new_summary_list))
       admissible_discharge = sum(admissible_discharge * volume_m3_d.mean)/sum(volume_m3_d.mean),
       Qs_start = sum(Qs_start * volume_m3_d.mean)/sum(volume_m3_d.mean),
       Qs_prediction = sum(Qs_prediction * volume_m3_d.mean)/sum(volume_m3_d.mean),
-      n_wells = dplyr::n()
+      Q_prediction_m3h_drawdown.2.4m = 2.4 * Qs_prediction,
+      Q_prediction_m3h_drawdown.2.8m = 2.8 * Qs_prediction,
+      n_wells = dplyr::n(),
+      predicted_hourly_production_rate_drawdown.2.4m = Q_prediction_m3h_drawdown.2.4m * n_wells,
+      predicted_hourly_production_rate_drawdown.2.8m = Q_prediction_m3h_drawdown.2.8m * n_wells,
     ) %>%
     dplyr::mutate(
       waterdemand_hourly = waterdemand_yearly/ 365/24,
@@ -265,11 +290,24 @@ obs_new_summary[,c("sim_year", "n_wells_observed")] %>%
 gg1 <- pred_new_summary  %>%
   dplyr::select(tidyselect::all_of(c("sim_year",
                                      "admissible_max_hourly_production_rate",
-                                     "Qs_rel_prediction", "Qs_prediction", "Qs_start", "n_wells"))) %>%
-  tidyr::pivot_longer(cols = c("admissible_max_hourly_production_rate", "Qs_rel_prediction", "Qs_prediction", "Qs_start", "n_wells")) %>%
+                                     "predicted_hourly_production_rate_drawdown.2.4m",
+                                     "predicted_hourly_production_rate_drawdown.2.8m",
+                                     "Qs_rel_prediction", "Qs_prediction",
+                                     "Q_prediction_m3h_drawdown.2.4m",
+                                     "Q_prediction_m3h_drawdown.2.8m",
+                                     "Qs_start", "n_wells"))) %>%
+  tidyr::pivot_longer(cols = c("admissible_max_hourly_production_rate",
+                               "predicted_hourly_production_rate_drawdown.2.4m",
+                               "predicted_hourly_production_rate_drawdown.2.8m",
+                               "Qs_rel_prediction",
+                               "Qs_prediction",
+                               "Q_prediction_m3h_drawdown.2.4m",
+                               "Q_prediction_m3h_drawdown.2.8m",
+                               "Qs_start",
+                               "n_wells")) %>%
 ggplot2::ggplot(ggplot2::aes(x = .data$sim_year,
                              y = .data$value)) +
-  ggplot2::facet_wrap(~ .data$name, nrow = 5, ncol = 1, scales = "free_y") +
+  ggplot2::facet_wrap(~ .data$name, nrow = 9, ncol = 1, scales = "free_y") +
   ggplot2::geom_line() +
   ggplot2::geom_point() +
   ggplot2::theme_bw()
@@ -282,11 +320,20 @@ htmlwidgets::saveWidget(plotly::ggplotly(gg1),
 gg11 <- obs_new_summary  %>%
   dplyr::select(tidyselect::all_of(c("sim_year",
                                      "admissible_max_hourly_production_rate",
+                                     "observed_hourly_production_rate_drawdown.2.4m",
+                                     "observed_hourly_production_rate_drawdown.2.8m",
+                                     "Q_observed_m3h_drawdown.2.4m",
+                                     "Q_observed_m3h_drawdown.2.8m",
                                      "Qs_rel_observed", "Qs_observed", "Qs_start", "n_wells_observed"))) %>%
-  tidyr::pivot_longer(cols = c("admissible_max_hourly_production_rate", "Qs_rel_observed", "Qs_observed", "Qs_start", "n_wells_observed")) %>%
+  tidyr::pivot_longer(cols = c("admissible_max_hourly_production_rate",
+                               "observed_hourly_production_rate_drawdown.2.4m",
+                               "observed_hourly_production_rate_drawdown.2.8m",
+                               "Q_observed_m3h_drawdown.2.4m",
+                               "Q_observed_m3h_drawdown.2.8m",
+                               "Qs_rel_observed", "Qs_observed", "Qs_start", "n_wells_observed")) %>%
   ggplot2::ggplot(ggplot2::aes(x = .data$sim_year,
                                y = .data$value)) +
-  ggplot2::facet_wrap(~ .data$name, nrow = 5, ncol = 1, scales = "free_y") +
+  ggplot2::facet_wrap(~ .data$name, nrow = 9, ncol = 1, scales = "free_y") +
   ggplot2::geom_line() +
   ggplot2::geom_point() +
   ggplot2::theme_bw()
