@@ -1,8 +1,8 @@
-pandoc: 2.14.2
+pandoc: 2.19.2
 pkgdown: 2.0.6
 pkgdown_sha: ~
 articles:
   prediction_random-forest: prediction_random-forest.html
   prediction_xgboost: prediction_xgboost.html
-last_built: 2022-10-24T10:54Z
+last_built: 2022-10-28T11:29Z
 
